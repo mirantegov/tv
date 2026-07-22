@@ -171,6 +171,16 @@ export const NAV_GROUPS = [
 // quando a Visão Geral está desativada, então fica sempre disponível)
 export const LOCKED_PATHS = new Set(["/panorama"]);
 
+// Ícones dos submenus de Configurações (um path por seção, cor herda do botão).
+const SECTION_ICON_PATHS = {
+	display:
+		"M3 4h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z M8 21h8 M12 17v4",
+	aparencia: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z",
+	modulos: "M3 3h7v7H3Z M14 3h7v7h-7Z M3 14h7v7H3Z M14 14h7v7h-7Z",
+	extras:
+		"M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0",
+} as const;
+
 function Shell({
 	onLogout,
 	isAdmin,
@@ -367,6 +377,20 @@ function Shell({
 				textAlign: "left",
 			}}
 		>
+			<svg
+				aria-hidden="true"
+				width="15"
+				height="15"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="2"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				style={{ flexShrink: 0, opacity: 0.8 }}
+			>
+				<path d={SECTION_ICON_PATHS[id]} />
+			</svg>
 			<span style={{ flex: 1 }}>{label}</span>
 			{disabled ? (
 				<svg
@@ -549,7 +573,8 @@ function Shell({
 					className="p-3 flex flex-col gap-2"
 					style={{ borderTop: `1px solid ${t.border}`, flexShrink: 0 }}
 				>
-					<div style={{ position: "relative" }}>
+					{/* order: 1 → Configurações fica após Recolher (último item) */}
+					<div style={{ position: "relative", order: 1 }}>
 						<button
 							type="button"
 							onClick={() => {
