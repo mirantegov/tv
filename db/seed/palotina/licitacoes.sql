@@ -1,4 +1,4 @@
--- Seed Licitações — Município de Palotina (IBGE 4118402), exercício 2026 (até Jun).
+-- Seed Licitações — Município de Palotina (IBGE 4117909), exercício 2026 (até Jun).
 -- Extraído de src/data.ts (export LIC). Fonte única = data.ts. Valores em R$ milhões.
 SET search_path TO licitacoes;
 

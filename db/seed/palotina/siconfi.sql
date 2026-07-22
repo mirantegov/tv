@@ -1,4 +1,4 @@
--- Seed SICONFI — Município de Palotina (IBGE 4118402), exercício 2026.
+-- Seed SICONFI — Município de Palotina (IBGE 4117909), exercício 2026.
 -- Extraído de src/data.ts (PC.siconfi). Fonte única = data.ts.
 SET search_path TO siconfi;
 
