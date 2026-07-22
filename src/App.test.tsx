@@ -6,7 +6,10 @@ beforeEach(() => {
 	localStorage.clear();
 });
 
-const login = () => localStorage.setItem("mg_auth", "1");
+const login = (role = "admin") => {
+	localStorage.setItem("mg_auth", "1");
+	localStorage.setItem("mg_role", role);
+};
 
 describe("invariantes de rotas e sidebar", () => {
 	it("rotas têm paths únicos", () => {
@@ -83,6 +86,16 @@ describe("menu Configurações", () => {
 		expect(rotulos.length).toBe(
 			NAV_GROUPS.flatMap((g) => g.items).length - LOCKED_PATHS.size,
 		);
+	});
+
+	it("não-admin: Módulos aparece desativado e não abre switches", () => {
+		login("suporte");
+		render(<App />);
+		fireEvent.click(screen.getByRole("button", { name: "Configurações" }));
+		const modulos = screen.getByRole("button", { name: /Módulos/ });
+		expect(modulos).toBeDisabled();
+		fireEvent.click(modulos);
+		expect(screen.queryAllByRole("switch")).toHaveLength(0);
 	});
 
 	it("Display contém o switch de Scroll Automático desligado", () => {

@@ -18,6 +18,7 @@ import TributacaoModule from "./modules/TributacaoModule";
 import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
 import { ThemePanel, ThemeProvider, useTheme } from "./theme";
+import type { Role } from "./users";
 
 export const ROUTES = [
 	{ path: "/", title: "Visão Geral", el: VisaoGeralModule },
@@ -169,7 +170,13 @@ export const NAV_GROUPS = [
 // quando a Visão Geral está desativada, então fica sempre disponível)
 export const LOCKED_PATHS = new Set(["/panorama"]);
 
-function Shell({ onLogout }: { onLogout: () => void }) {
+function Shell({
+	onLogout,
+	isAdmin,
+}: {
+	onLogout: () => void;
+	isAdmin: boolean;
+}) {
 	const { t } = useTheme();
 	const { path, push } = useRouter();
 	const [navOpen, setNavOpen] = useState(false);
@@ -335,39 +342,61 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 	const SectionBtn = ({
 		id,
 		label,
+		disabled = false,
+		hint,
 	}: {
 		id: "display" | "aparencia" | "modulos" | "extras";
 		label: string;
+		disabled?: boolean;
+		hint?: string;
 	}) => (
 		<button
 			type="button"
-			onClick={() => setCfgSection((s) => (s === id ? null : id))}
+			disabled={disabled}
+			title={disabled ? hint : undefined}
+			onClick={() => !disabled && setCfgSection((s) => (s === id ? null : id))}
 			className="w-full rounded-md flex items-center gap-2 text-sm"
 			style={{
 				padding: "8px 10px",
 				background: "transparent",
 				border: "none",
-				color: t.foreground,
-				cursor: "pointer",
+				color: disabled ? t.mutedFg : t.foreground,
+				opacity: disabled ? 0.55 : 1,
+				cursor: disabled ? "not-allowed" : "pointer",
 				textAlign: "left",
 			}}
 		>
 			<span style={{ flex: 1 }}>{label}</span>
-			<svg
-				aria-hidden="true"
-				width="13"
-				height="13"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke={t.mutedFg}
-				strokeWidth="2"
-				style={{
-					transform: cfgSection === id ? "rotate(180deg)" : "none",
-					transition: "transform 0.15s",
-				}}
-			>
-				<path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-			</svg>
+			{disabled ? (
+				<svg
+					aria-hidden="true"
+					width="12"
+					height="12"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke={t.mutedFg}
+					strokeWidth="2"
+				>
+					<rect x="3" y="11" width="18" height="11" rx="2" />
+					<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+				</svg>
+			) : (
+				<svg
+					aria-hidden="true"
+					width="13"
+					height="13"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke={t.mutedFg}
+					strokeWidth="2"
+					style={{
+						transform: cfgSection === id ? "rotate(180deg)" : "none",
+						transition: "transform 0.15s",
+					}}
+				>
+					<path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+				</svg>
+			)}
 		</button>
 	);
 	return (
@@ -603,8 +632,13 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 								)}
 								<SectionBtn id="aparencia" label="Aparência" />
 								{cfgSection === "aparencia" && <ThemePanel />}
-								<SectionBtn id="modulos" label="Módulos" />
-								{cfgSection === "modulos" && (
+								<SectionBtn
+									id="modulos"
+									label="Módulos"
+									disabled={!isAdmin}
+									hint="Apenas o Administrador pode ativar/desativar módulos."
+								/>
+								{cfgSection === "modulos" && isAdmin && (
 									<div style={{ padding: "0 0 4px" }}>
 										{NAV_GROUPS.flatMap((g) => g.items)
 											.filter((m) => !LOCKED_PATHS.has(m.path))
@@ -801,6 +835,8 @@ function Shell({ onLogout }: { onLogout: () => void }) {
    ============================================================================ */
 const AUTH_KEY = "mg_auth";
 
+const ROLE_KEY = "mg_role";
+
 function AuthGate() {
 	const [authed, setAuthed] = useState(() => {
 		try {
@@ -809,10 +845,20 @@ function AuthGate() {
 			return false;
 		}
 	});
-	const login = (keep: boolean) => {
+	// Papel persistido apenas para sessões "manter conectado". Sem valor → não-admin.
+	const [role, setRole] = useState<Role | null>(() => {
+		try {
+			return (localStorage.getItem(ROLE_KEY) as Role | null) ?? null;
+		} catch {
+			return null;
+		}
+	});
+	const login = (keep: boolean, r: Role) => {
+		setRole(r);
 		if (keep) {
 			try {
 				localStorage.setItem(AUTH_KEY, "1");
+				localStorage.setItem(ROLE_KEY, r);
 			} catch {
 				// localStorage indisponível (ex.: modo privado) — segue sem persistir
 			}
@@ -822,13 +868,15 @@ function AuthGate() {
 	const logout = () => {
 		try {
 			localStorage.removeItem(AUTH_KEY);
+			localStorage.removeItem(ROLE_KEY);
 		} catch {
 			// localStorage indisponível — nada a limpar
 		}
+		setRole(null);
 		setAuthed(false);
 	};
 	if (!authed) return <LoginScreen onLogin={login} />;
-	return <Shell onLogout={logout} />;
+	return <Shell onLogout={logout} isAdmin={role === "admin"} />;
 }
 
 export default function App() {

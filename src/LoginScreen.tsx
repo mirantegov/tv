@@ -1,7 +1,7 @@
 import type React from "react";
 import { useState } from "react";
 import { useTheme } from "./theme";
-import { authenticate } from "./users";
+import { authenticate, type Role } from "./users";
 
 /* ============================================================================
    LOGIN — mesma identidade visual (Ocean Breeze / Monokai)
@@ -29,7 +29,7 @@ function maskCpf(v: string): string {
 export default function LoginScreen({
 	onLogin,
 }: {
-	onLogin?: (keep: boolean) => void;
+	onLogin?: (keep: boolean, role: Role) => void;
 }) {
 	const { t, mode, familyLabel, toggle } = useTheme();
 	const [cpf, setCpf] = useState("");
@@ -42,9 +42,10 @@ export default function LoginScreen({
 	// Portão real: autentica contra o cadastro (users.ts). Formato do CPF é só UX.
 	const entrar = () => {
 		setTentou(true);
-		if (!authenticate(cpf, senha)) return setErro("CPF ou senha inválidos.");
+		const user = authenticate(cpf, senha);
+		if (!user) return setErro("CPF ou senha inválidos.");
 		setErro(null);
-		onLogin?.(keep);
+		onLogin?.(keep, user.role);
 	};
 
 	const field = (invalid: boolean) =>
