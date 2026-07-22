@@ -174,6 +174,7 @@ export default function PlanejamentoModule() {
 						<button
 							key={k}
 							type="button"
+							data-autoscroll-tab
 							onClick={() => setAba(k)}
 							className="text-xs sm:text-sm font-medium"
 							style={{
