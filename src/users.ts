@@ -4,16 +4,22 @@
 export type Role = "admin";
 
 export interface User {
-  cpf: string; // 11 dígitos, sem máscara
-  nome: string;
-  role: Role;
-  senha: string; // 8 caracteres alfanuméricos
+	cpf: string; // 11 dígitos, sem máscara
+	nome: string;
+	role: Role;
+	senha: string; // 8 caracteres alfanuméricos
 }
 
 export const USERS: User[] = [
-  { cpf: "00000000000", nome: "Administrador", role: "admin", senha: "R1JmYp5U" },
+	{
+		cpf: "00000000000",
+		nome: "Administrador",
+		role: "admin",
+		senha: "R1JmYp5U",
+	},
 ];
 
 // Autentica por CPF (ignorando máscara) + senha exata. Retorna o usuário ou null.
 export const authenticate = (cpf: string, senha: string): User | null =>
-  USERS.find((u) => u.cpf === cpf.replace(/\D/g, "") && u.senha === senha) ?? null;
+	USERS.find((u) => u.cpf === cpf.replace(/\D/g, "") && u.senha === senha) ??
+	null;
