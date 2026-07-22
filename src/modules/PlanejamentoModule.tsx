@@ -5,7 +5,7 @@ import { brl, fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function PlanejamentoModule() {
-	const { t, cats } = useTheme();
+	const { t } = useTheme();
 	const [aba, setAba] = useState("integral");
 	const abas = [
 		["integral", "Orçamento Integral"],
@@ -173,6 +173,7 @@ export default function PlanejamentoModule() {
 					{abas.map(([k, l]) => (
 						<button
 							key={k}
+							type="button"
 							onClick={() => setAba(k)}
 							className="text-xs sm:text-sm font-medium"
 							style={{

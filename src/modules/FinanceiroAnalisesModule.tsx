@@ -13,7 +13,7 @@ import { brl, fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function FinanceiroAnalisesModule() {
-	const { t, cats } = useTheme();
+	const { t } = useTheme();
 	const th = { padding: "8px 10px", fontWeight: 600 };
 	const td = { padding: "9px 10px" };
 	const Bar = ({ pctVal, color }) => (

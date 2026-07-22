@@ -15,7 +15,7 @@ import { brl, dP, fmt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function TributacaoModule() {
-	const { t, cats, prev, cur } = useTheme();
+	const { t, cats } = useTheme();
 	const adimpColor = (p) => (p >= 85 ? t.ok : p >= 60 ? t.primary : t.warn);
 	// totais DA
 	const daRows = TB.da.map(([n, si, ins, rec, can, aj]) => {

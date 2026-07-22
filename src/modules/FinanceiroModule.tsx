@@ -17,7 +17,7 @@ import { brl, dR, fmt } from "../format";
 import { useTheme } from "../theme";
 
 export default function FinanceiroModule() {
-	const { t, cats, prev, cur } = useTheme();
+	const { t, cats, cur } = useTheme();
 	const insuf = F.fontes
 		.map(([n, , b, o, rp]) => ({ nome: n, liquida: b - o, suf: b - o - rp }))
 		.filter((x) => x.suf < 0);
@@ -83,6 +83,7 @@ export default function FinanceiroModule() {
 					}}
 				>
 					<svg
+						aria-hidden="true"
 						width="20"
 						height="20"
 						viewBox="0 0 24 24"

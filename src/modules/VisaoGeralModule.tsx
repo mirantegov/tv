@@ -5,7 +5,7 @@ import { Link } from "../router";
 import { useTheme } from "../theme";
 
 export default function VisaoGeralModule() {
-	const { t, cats } = useTheme();
+	const { t } = useTheme();
 	const alertas = [
 		[
 			"danger",

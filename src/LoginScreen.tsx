@@ -66,6 +66,7 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 		>
 			{/* Alternador de modo (canto superior direito) */}
 			<button
+				type="button"
 				onClick={toggle}
 				aria-label="Alternar tema"
 				className="rounded-md flex items-center gap-2 text-xs font-medium"
@@ -90,7 +91,13 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 						className="rounded-lg flex items-center justify-center"
 						style={{ width: 42, height: 42, background: t.primary }}
 					>
-						<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+						<svg
+							aria-hidden="true"
+							width="22"
+							height="22"
+							viewBox="0 0 24 24"
+							fill="none"
+						>
 							<path d="M12 2 3 7v2h18V7L12 2Z" fill={t.primaryFg} />
 							<path
 								d="M5 10v8M9 10v8M15 10v8M19 10v8"
@@ -134,12 +141,14 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 
 					{/* CPF */}
 					<label
+						htmlFor="cpf"
 						className="text-xs font-semibold"
 						style={{ color: t.foreground }}
 					>
 						CPF
 					</label>
 					<input
+						id="cpf"
 						value={cpf}
 						inputMode="numeric"
 						autoComplete="username"
@@ -154,6 +163,7 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 
 					{/* Senha */}
 					<label
+						htmlFor="senha"
 						className="text-xs font-semibold"
 						style={{ color: t.foreground, display: "block", marginTop: 16 }}
 					>
@@ -161,6 +171,7 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 					</label>
 					<div style={{ position: "relative", marginTop: 6 }}>
 						<input
+							id="senha"
 							value={senha}
 							type={showSenha ? "text" : "password"}
 							autoComplete="current-password"
@@ -214,6 +225,7 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 
 					{/* Botão */}
 					<button
+						type="button"
 						onClick={entrar}
 						className="w-full rounded-lg text-sm font-semibold mt-5"
 						style={{

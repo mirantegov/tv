@@ -160,6 +160,7 @@ export default function ReceitaModule() {
 					{subs.map(([k, l]) => (
 						<button
 							key={k}
+							type="button"
 							onClick={() => setSub(k)}
 							className="text-xs sm:text-sm font-medium"
 							style={{

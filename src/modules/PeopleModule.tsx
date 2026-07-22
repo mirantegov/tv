@@ -16,7 +16,7 @@ import { fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function PeopleModule() {
-	const { t, cats, prev, cur } = useTheme();
+	const { t, cats, prev } = useTheme();
 	const totDias = PA.absent.reduce((s, a) => s + a[1], 0);
 	return (
 		<>
@@ -29,6 +29,7 @@ export default function PeopleModule() {
 				}}
 			>
 				<svg
+					aria-hidden="true"
 					width="16"
 					height="16"
 					viewBox="0 0 24 24"

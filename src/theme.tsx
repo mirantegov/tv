@@ -153,6 +153,7 @@ export function ThemeConfig() {
 	const [open, setOpen] = useState(false);
 	const Opt = ({ active, onClick, children }) => (
 		<button
+			type="button"
 			onClick={onClick}
 			className="text-xs rounded-md text-center"
 			style={{
@@ -219,6 +220,7 @@ export function ThemeConfig() {
 				</div>
 			)}
 			<button
+				type="button"
 				onClick={() => setOpen((o) => !o)}
 				aria-label="Configurar tema"
 				className="w-full rounded-md flex items-center gap-2 text-xs font-medium"
@@ -231,6 +233,7 @@ export function ThemeConfig() {
 				}}
 			>
 				<svg
+					aria-hidden="true"
 					width="15"
 					height="15"
 					viewBox="0 0 24 24"
@@ -246,6 +249,7 @@ export function ThemeConfig() {
 					{familyLabel} · {mode === "dark" ? "Dark" : "Light"}
 				</span>
 				<svg
+					aria-hidden="true"
 					width="13"
 					height="13"
 					viewBox="0 0 24 24"

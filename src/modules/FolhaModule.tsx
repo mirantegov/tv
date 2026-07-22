@@ -22,7 +22,7 @@ import { brl, fmt, fmtInt, pct, vari } from "../format";
 import { useTheme } from "../theme";
 
 export default function FolhaModule() {
-	const { t, cats, prev, cur } = useTheme();
+	const { t, cats } = useTheme();
 	const L = FP.lrf;
 	const lrfStatus =
 		L.pct >= L.prudencial ? t.danger : L.pct >= L.alerta ? t.warn : t.ok;

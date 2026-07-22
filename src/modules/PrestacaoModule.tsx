@@ -108,6 +108,7 @@ export default function PrestacaoModule() {
 					{abas.map(([k, l]) => (
 						<button
 							key={k}
+							type="button"
 							onClick={() => setAba(k)}
 							className="text-xs sm:text-sm font-medium"
 							style={{
@@ -234,6 +235,7 @@ export default function PrestacaoModule() {
 														style={{ color: t.foreground, fontWeight: 500 }}
 													>
 														<svg
+															aria-hidden="true"
 															width="15"
 															height="15"
 															viewBox="0 0 24 24"
@@ -267,6 +269,7 @@ export default function PrestacaoModule() {
 						<Card className="p-5">
 							<div className="flex items-center gap-2 mb-1">
 								<svg
+									aria-hidden="true"
 									width="16"
 									height="16"
 									viewBox="0 0 24 24"

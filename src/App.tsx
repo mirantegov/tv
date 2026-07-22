@@ -150,7 +150,13 @@ function Shell() {
 						className="rounded-lg flex items-center justify-center"
 						style={{ width: 34, height: 34, background: t.primary }}
 					>
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+						<svg
+							aria-hidden="true"
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+						>
 							<path d="M12 2 3 7v2h18V7L12 2Z" fill={t.primaryFg} />
 							<path
 								d="M5 10v8M9 10v8M15 10v8M19 10v8"
@@ -233,7 +239,9 @@ function Shell() {
 				>
 					<div className="flex items-center gap-3">
 						<button
+							type="button"
 							onClick={() => setNavOpen((v) => !v)}
+							aria-label="Alternar menu"
 							className="lg:hidden rounded-md"
 							style={{
 								padding: "6px 9px",
@@ -244,6 +252,7 @@ function Shell() {
 							}}
 						>
 							<svg
+								aria-hidden="true"
 								width="16"
 								height="16"
 								viewBox="0 0 24 24"
