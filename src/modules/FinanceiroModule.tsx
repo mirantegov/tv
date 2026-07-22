@@ -12,11 +12,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, Donut, HBar, Kpi, LegendDot, Tip, Title } from "../components";
-import { F } from "../data";
+import { useData } from "../DataProvider";
 import { brl, dR, fmt } from "../format";
 import { useTheme } from "../theme";
 
 export default function FinanceiroModule() {
+	const { F } = useData();
 	const { t, cats, cur } = useTheme();
 	const insuf = F.fontes
 		.map(([n, , b, o, rp]) => ({ nome: n, liquida: b - o, suf: b - o - rp }))

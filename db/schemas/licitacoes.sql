@@ -29,6 +29,7 @@ CREATE TABLE licitacoes.resumo (
 -- LIC.meepp — destino do valor homologado (ME/EPP local / externa / demais)
 CREATE TABLE licitacoes.meepp (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,              -- ordem de exibição (mock não é value-sortable)
 	destino   text NOT NULL,                  -- ex.: 'ME/EPP do município'
 	valor     numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, destino)
@@ -37,6 +38,7 @@ CREATE TABLE licitacoes.meepp (
 -- LIC.atas — atas de registro de preços (SRP)
 CREATE TABLE licitacoes.atas (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição
 	objeto     text NOT NULL,
 	registrado numeric(14,2) NOT NULL,
 	consumido  numeric(14,2) NOT NULL,
@@ -56,6 +58,7 @@ CREATE TABLE licitacoes.mensal (
 -- LIC.modalidade — desempenho por modalidade
 CREATE TABLE licitacoes.modalidades (
 	exercicio        smallint NOT NULL,
+	ord              smallint NOT NULL,       -- ordem de exibição
 	modalidade       text NOT NULL,
 	processos        integer NOT NULL,
 	estimado         numeric(14,2) NOT NULL,
@@ -95,6 +98,7 @@ CREATE TABLE licitacoes.objetos (
 CREATE TABLE licitacoes.pipeline (
 	processo   text PRIMARY KEY,              -- ex.: 'PE-2026/0188'
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição
 	objeto     text NOT NULL,
 	modalidade text NOT NULL,
 	orgao      text NOT NULL,
@@ -106,6 +110,7 @@ CREATE TABLE licitacoes.pipeline (
 -- LIC.diretas — contratações diretas (dispensa/inexigibilidade)
 CREATE TABLE licitacoes.contratacao_direta (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição
 	base_legal text NOT NULL,                 -- ex.: 'Art. 75, II'
 	objeto     text NOT NULL,
 	fornecedor text NOT NULL,
@@ -116,6 +121,7 @@ CREATE TABLE licitacoes.contratacao_direta (
 -- LIC.desertos — certames desertos/fracassados e motivo
 CREATE TABLE licitacoes.desertos_fracassados (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição
 	objeto     text NOT NULL,
 	modalidade text NOT NULL,
 	motivo     text NOT NULL,

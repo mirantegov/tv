@@ -8,11 +8,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, Donut, HBar, Kpi, LegendDot, Tip, Title } from "../components";
-import { LIC } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function LicitacoesModule() {
+	const { LIC } = useData();
 	const { t, cats } = useTheme();
 	const diasColor = (d) => (d >= 60 ? t.warn : d >= 30 ? t.primary : t.mutedFg);
 	return (

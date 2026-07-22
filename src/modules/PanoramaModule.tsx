@@ -1,9 +1,10 @@
 import type React from "react";
 import { Card } from "../components";
-import { PAN } from "../data";
+import { useData } from "../DataProvider";
 import { useTheme } from "../theme";
 
 export default function PanoramaModule() {
+	const { PAN } = useData();
 	const { t } = useTheme();
 	const P = PAN;
 	const Sec = ({ icon, title, children }) => (

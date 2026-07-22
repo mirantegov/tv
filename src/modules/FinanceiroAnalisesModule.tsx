@@ -8,11 +8,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, Donut, HBar, Kpi, Tip, Title } from "../components";
-import { FA } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function FinanceiroAnalisesModule() {
+	const { FA } = useData();
 	const { t } = useTheme();
 	const th = { padding: "8px 10px", fontWeight: 600 };
 	const td = { padding: "9px 10px" };

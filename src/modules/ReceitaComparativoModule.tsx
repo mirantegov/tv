@@ -18,11 +18,12 @@ import {
 	Title,
 	TreeCmp,
 } from "../components";
-import { CR } from "../data";
+import { useData } from "../DataProvider";
 import { dP, vari } from "../format";
 import { useTheme } from "../theme";
 
 export default function ReceitaComparativoModule() {
+	const { CR } = useData();
 	const { t, prev, cur } = useTheme();
 	const ov = CR.origem
 		.map(([n, a, b]) => ({ nome: n, ...vari(a, b) }))

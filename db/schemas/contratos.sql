@@ -32,8 +32,10 @@ CREATE TABLE contratos.tipos (
 );
 
 -- CON.fornecedores — carteira por fornecedor
+-- ord: "Demais" tem o maior valor mas vai por último → não ordenável por valor.
 CREATE TABLE contratos.fornecedores (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,
 	fornecedor text NOT NULL,
 	valor      numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, fornecedor)

@@ -10,11 +10,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, Donut, HBar, Kpi, LegendDot, Tip, Title } from "../components";
-import { CON } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function ContratosModule() {
+	const { CON } = useData();
 	const { t, cats } = useTheme();
 	const venceColor = (d) => (d <= 30 ? t.danger : d <= 90 ? t.warn : t.ok);
 	return (

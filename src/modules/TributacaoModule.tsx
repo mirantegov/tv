@@ -10,11 +10,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, HBar, Kpi, LegendDot, Tip, Title } from "../components";
-import { TB } from "../data";
+import { useData } from "../DataProvider";
 import { brl, dP, fmt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function TributacaoModule() {
+	const { TB } = useData();
 	const { t, cats } = useTheme();
 	const adimpColor = (p) => (p >= 85 ? t.ok : p >= 60 ? t.primary : t.warn);
 	// totais DA

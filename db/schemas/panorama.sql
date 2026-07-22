@@ -25,3 +25,14 @@ CREATE TABLE panorama.indicadores (
 	complemento text,                         -- ex.: ranking ('72º de 399'), faixa ('Alto')
 	PRIMARY KEY (codigo_ibge, grupo, indicador)
 );
+
+-- Escalares de grupo sem home no modelo chave-valor: rankings + território.
+-- Ancora a view api.panorama (1 linha por exercício).
+CREATE TABLE panorama.resumo (
+	exercicio       smallint PRIMARY KEY,      -- ano de referência do painel
+	codigo_ibge     text NOT NULL REFERENCES panorama.municipio (codigo_ibge),
+	pop_rank_uf     text NOT NULL,             -- PAN.populacao.rankUf
+	eco_rank_pib_uf text NOT NULL,             -- PAN.economia.rankPibUf
+	ter_bioma       text NOT NULL,             -- PAN.territorio.bioma
+	ter_hierarquia  text NOT NULL              -- PAN.territorio.hierarquia
+);

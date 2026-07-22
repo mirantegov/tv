@@ -17,11 +17,12 @@ import {
 	Tip,
 	Title,
 } from "../components";
-import { FP } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, fmtInt, pct, vari } from "../format";
 import { useTheme } from "../theme";
 
 export default function FolhaModule() {
+	const { FP } = useData();
 	const { t, cats } = useTheme();
 	const L = FP.lrf;
 	const lrfStatus =

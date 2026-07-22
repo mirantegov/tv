@@ -27,6 +27,7 @@ CREATE TABLE tributacao.resumo (
 -- TB.tributos — lançado × arrecadado × inadimplência por tributo
 CREATE TABLE tributacao.tributos (
 	exercicio               smallint NOT NULL,
+	ord                     smallint NOT NULL,
 	tributo                 text NOT NULL,
 	lancado                 numeric(14,2) NOT NULL,
 	arrecadado              numeric(14,2) NOT NULL,
@@ -38,6 +39,7 @@ CREATE TABLE tributacao.tributos (
 -- TB.da — movimentação da dívida ativa por tributo
 CREATE TABLE tributacao.divida_ativa (
 	exercicio     smallint NOT NULL,
+	ord           smallint NOT NULL,
 	tributo       text NOT NULL,
 	saldo_inicial numeric(14,2) NOT NULL,
 	inscricoes    numeric(14,2) NOT NULL,
@@ -60,6 +62,7 @@ CREATE TABLE tributacao.mensal (
 -- TB.setores — ISS por setor econômico
 CREATE TABLE tributacao.setores_iss (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,
 	setor      text NOT NULL,
 	arrecadado numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, setor)
@@ -78,6 +81,7 @@ CREATE TABLE tributacao.bairros (
 -- LGPD: em produção, anonimizar/restringir por perfil de acesso.
 CREATE TABLE tributacao.devedores (
 	exercicio    smallint NOT NULL,
+	ord          smallint NOT NULL,  -- ordem do ranking (valor tem empate em 0.6)
 	contribuinte text NOT NULL,
 	tributo      text NOT NULL,
 	situacao     text NOT NULL,               -- ex.: 'Ajuizado', 'Em cobrança'

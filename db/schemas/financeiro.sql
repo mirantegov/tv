@@ -22,6 +22,7 @@ CREATE TABLE financeiro.resumo (
 -- F.fontes — disponibilidade por fonte de recursos
 CREATE TABLE financeiro.fontes (
 	exercicio     smallint NOT NULL,
+	ord           smallint NOT NULL,          -- preserva a ordem do mock
 	fonte         text NOT NULL,              -- ex.: 'Saúde (600–659 · 15%)'
 	vinculada     boolean NOT NULL,
 	bruta         numeric(14,2) NOT NULL,
@@ -51,6 +52,7 @@ CREATE TABLE financeiro.evolucao_mensal (
 -- F.bancos — saldos por instituição bancária
 CREATE TABLE financeiro.bancos (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	banco     text NOT NULL,
 	saldo     numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, banco)
@@ -59,6 +61,7 @@ CREATE TABLE financeiro.bancos (
 -- F.obrigacoes — composição das obrigações a pagar
 CREATE TABLE financeiro.obrigacoes (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	tipo      text NOT NULL,                  -- ex.: 'RP Processados a pagar'
 	valor     numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, tipo)
@@ -67,6 +70,7 @@ CREATE TABLE financeiro.obrigacoes (
 -- F.pagamentos — desembolsos por categoria
 CREATE TABLE financeiro.pagamentos (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	categoria text NOT NULL,                  -- ex.: 'Folha de Pessoal'
 	valor     numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, categoria)
@@ -75,6 +79,7 @@ CREATE TABLE financeiro.pagamentos (
 -- F.extra — extraorçamentário: retido × recolhido (INSS, IRRF, FGTS…)
 CREATE TABLE financeiro.extraorcamentario (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	tipo      text NOT NULL,
 	retido    numeric(14,2) NOT NULL,
 	recolhido numeric(14,2) NOT NULL,
