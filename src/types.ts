@@ -80,6 +80,8 @@ export interface Receita {
 	liq: number;
 	propria: number;
 	transf: number;
+	outras: number;
+	capital: number;
 	divida: number;
 	mensal: [
 		mes: string,

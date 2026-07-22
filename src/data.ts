@@ -166,6 +166,8 @@ export const R: Receita = {
 	liq: 424.4,
 	propria: 176.4,
 	transf: 286,
+	outras: 19.5,
+	capital: 3,
 	divida: 7.8,
 	mensal: [
 		["Jan", 75.4, 82, 76, 82],

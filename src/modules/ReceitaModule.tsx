@@ -180,7 +180,7 @@ export default function ReceitaModule() {
 
 			{sub === "geral" && (
 				<>
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mb-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
 						<Kpi
 							label="Previsão Atualizada"
 							value={brl(R.prev)}
@@ -202,6 +202,16 @@ export default function ReceitaModule() {
 							label="Transferências"
 							value={brl(R.transf)}
 							sub={`${pct((R.transf / R.bruta) * 100)} do total`}
+						/>
+						<Kpi
+							label="Outras Receitas"
+							value={brl(R.outras)}
+							sub={`${pct((R.outras / R.bruta) * 100)} da arrecadação`}
+						/>
+						<Kpi
+							label="Receita Capital"
+							value={brl(R.capital)}
+							sub={`${pct((R.capital / R.bruta) * 100)} da arrecadação`}
 						/>
 						<Kpi
 							label="Receita Líquida"
