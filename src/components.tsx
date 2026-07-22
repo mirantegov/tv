@@ -3,11 +3,11 @@ import { ResponsiveContainer, AreaChart, Area, LineChart, Line, ComposedChart, B
 import { useTheme } from "./theme";
 import { fmt, brl, pct, fmtInt, sg, dR, dP, vari } from "./format";
 
-export function Card({ children, className = "", style = {} }) {
+export function Card({ children, className = "", style = {} }: { children?: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   const { t } = useTheme();
   return <div className={`rounded-xl ${className}`} style={{ background: t.card, border: `1px solid ${t.border}`, ...style }}>{children}</div>;
 }
-export function Title({ children, right }) {
+export function Title({ children, right }: { children?: React.ReactNode; right?: React.ReactNode }) {
   const { t } = useTheme();
   return (
     <div className="flex items-center justify-between mb-3 gap-2">
@@ -16,11 +16,11 @@ export function Title({ children, right }) {
     </div>
   );
 }
-export function Delta({ d, p, up, money }) {
+export function Delta({ d, p, up, money }: { d: number; p: number; up: boolean; money?: boolean }) {
   const { t } = useTheme();
   return <span className="tabular-nums" style={{ color: up ? t.primary : t.warn, fontWeight: 600 }}>{up ? "▲" : "▼"} {money ? dR(d) : dP(p)}</span>;
 }
-export function Tip({ active, payload, label }) {
+export function Tip({ active, payload, label }: { active?: boolean; payload?: any[]; label?: React.ReactNode }) {
   const { t } = useTheme();
   if (!active || !payload || !payload.length) return null;
   return (
@@ -36,7 +36,7 @@ export function Tip({ active, payload, label }) {
     </div>
   );
 }
-export function TipNum({ active, payload, label, suffix }) {
+export function TipNum({ active, payload, label, suffix }: { active?: boolean; payload?: any[]; label?: React.ReactNode; suffix?: string }) {
   const { t } = useTheme();
   if (!active || !payload || !payload.length) return null;
   return (
@@ -52,7 +52,7 @@ export function TipNum({ active, payload, label, suffix }) {
     </div>
   );
 }
-export function Kpi({ label, value, sub, accent, progress }) {
+export function Kpi({ label, value, sub, accent, progress }: { label: React.ReactNode; value: React.ReactNode; sub?: React.ReactNode; accent?: string; progress?: number }) {
   const { t } = useTheme();
   return (
     <Card className="p-4">
@@ -63,7 +63,7 @@ export function Kpi({ label, value, sub, accent, progress }) {
     </Card>
   );
 }
-export function KpiCmp({ label, a, b, accent }) {
+export function KpiCmp({ label, a, b, accent }: { label: React.ReactNode; a: number; b: number; accent?: string }) {
   const { t } = useTheme();
   const v = vari(a, b);
   return (
@@ -75,7 +75,7 @@ export function KpiCmp({ label, a, b, accent }) {
     </Card>
   );
 }
-export function Donut({ data, height = 230, numeric }) {
+export function Donut({ data, height = 230, numeric }: { data: any[]; height?: number; numeric?: boolean }) {
   const { t, cats } = useTheme();
   const total = data.reduce((s, d) => s + d.valor, 0);
   return (
@@ -102,7 +102,7 @@ export function Donut({ data, height = 230, numeric }) {
     </>
   );
 }
-export function HBar({ data, height = 250, ylabel = 110, highlightFirst, numeric }) {
+export function HBar({ data, height = 250, ylabel = 110, highlightFirst, numeric }: { data: any[]; height?: number; ylabel?: number; highlightFirst?: boolean; numeric?: boolean }) {
   const { t, cats } = useTheme();
   return (
     <div style={{ height }}>
@@ -120,7 +120,7 @@ export function HBar({ data, height = 250, ylabel = 110, highlightFirst, numeric
     </div>
   );
 }
-export function GroupedBars({ data, height = 250 }) {
+export function GroupedBars({ data, height = 250 }: { data: any[]; height?: number }) {
   const { t, prev, cur } = useTheme();
   return (
     <div style={{ height }}>
@@ -137,7 +137,7 @@ export function GroupedBars({ data, height = 250 }) {
     </div>
   );
 }
-export function Diverging({ data, height = 250, ylabel = 110 }) {
+export function Diverging({ data, height = 250, ylabel = 110 }: { data: any[]; height?: number; ylabel?: number }) {
   const { t } = useTheme();
   return (
     <div style={{ height }}>
@@ -146,7 +146,7 @@ export function Diverging({ data, height = 250, ylabel = 110 }) {
           <CartesianGrid strokeDasharray="3 3" stroke={t.border} horizontal={false} />
           <XAxis type="number" tick={{ fontSize: 11, fill: t.mutedFg }} axisLine={false} tickLine={false} tickFormatter={(v) => v + "%"} />
           <YAxis type="category" dataKey="nome" tick={{ fontSize: 9.5, fill: t.foreground }} axisLine={false} tickLine={false} width={ylabel} />
-          <Tooltip cursor={{ fill: t.muted }} content={({ active, payload }) => active && payload && payload.length ? (
+          <Tooltip cursor={{ fill: t.muted }} content={({ active, payload }: any) => active && payload && payload.length ? (
             <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, color: t.foreground }}>
               <b>{payload[0].payload.nome}</b>: {dP(payload[0].payload.p)} ({dR(payload[0].payload.d)} mi)
             </div>) : null} />
@@ -159,19 +159,19 @@ export function Diverging({ data, height = 250, ylabel = 110 }) {
     </div>
   );
 }
-export function LegendDot({ color, children }) {
+export function LegendDot({ color, children }: { color: string; children?: React.ReactNode }) {
   const { t } = useTheme();
   return <span className="flex items-center gap-1.5" style={{ color: t.mutedFg }}><span style={{ width: 11, height: 11, borderRadius: 2, background: color }} />{children}</span>;
 }
 
 /* árvore expansível genérica (comparativo: v25/v26) */
-function flatten(nodes, exp, depth, acc) {
+function flatten(nodes: any[], exp: Record<string, boolean>, depth: number, acc: any[]) {
   for (const n of nodes) { acc.push({ node: n, depth }); if (n.children && exp[n.id]) flatten(n.children, exp, depth + 1, acc); }
   return acc;
 }
-export function TreeCmp({ nodes, level0, totalLabel, tot25, tot26 }) {
+export function TreeCmp({ nodes, level0, totalLabel, tot25, tot26 }: { nodes: any[]; level0: React.ReactNode; totalLabel: React.ReactNode; tot25: number; tot26: number }) {
   const { t } = useTheme();
-  const [exp, setExp] = useState(() => ({ [nodes[0].id]: true }));
+  const [exp, setExp] = useState<Record<string, boolean>>(() => ({ [nodes[0].id]: true }));
   const rows = flatten(nodes, exp, 0, []);
   return (
     <div className="overflow-x-auto">
@@ -216,11 +216,11 @@ export function TreeCmp({ nodes, level0, totalLabel, tot25, tot26 }) {
   );
 }
 /* árvore receita (prev/real) */
-export function TreeReceita({ nodes }) {
+export function TreeReceita({ nodes }: { nodes: any[] }) {
   const { t } = useTheme();
-  const [exp, setExp] = useState({ rc: true });
+  const [exp, setExp] = useState<Record<string, boolean>>({ rc: true });
   const rows = flatten(nodes, exp, 0, []);
-  const colC = (p) => (p >= 50 ? t.ok : p >= 35 ? t.primary : t.warn);
+  const colC = (p: number) => (p >= 50 ? t.ok : p >= 35 ? t.primary : t.warn);
   return (
     <div className="overflow-x-auto">
       <table className="w-full" style={{ borderCollapse: "collapse", fontSize: 13 }}>

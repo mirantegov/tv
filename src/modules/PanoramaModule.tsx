@@ -15,7 +15,7 @@ export default function PanoramaModule() {
       {children}
     </Card>
   );
-  const Ind = ({ label, value, unit, meta }) => (
+  const Ind = ({ label, value, unit, meta }: { label?: React.ReactNode; value?: React.ReactNode; unit?: React.ReactNode; meta?: React.ReactNode }) => (
     <div className="rounded-lg" style={{ background: t.muted, padding: "13px 14px" }}>
       <div className="text-xs mb-1" style={{ color: t.mutedFg }}>{label}</div>
       <div className="flex items-baseline gap-1.5">

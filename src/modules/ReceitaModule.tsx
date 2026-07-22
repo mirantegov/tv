@@ -9,7 +9,7 @@ export default function ReceitaModule() {
   const { t, cats } = useTheme();
   const [sub, setSub] = useState("geral");
   const subs = [["geral", "Visão Geral"], ["saude", "Fontes — Saúde"], ["educacao", "Fontes — Educação"]];
-  const Apend = ({ dados, faixa, nota, extra }) => {
+  const Apend = ({ dados, faixa, nota, extra }: { dados: any; faixa?: React.ReactNode; nota?: React.ReactNode; extra?: React.ReactNode }) => {
     const tot = dados.reduce((s, d) => s + d[2], 0);
     return (
       <Card className="p-5">

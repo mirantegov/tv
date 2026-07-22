@@ -26,7 +26,7 @@ export default function DespesaModule() {
               <div key={i}>
                 <div className="flex items-baseline justify-between mb-1"><span className="text-xs font-medium" style={{ color: t.foreground }}>{s[0]}</span><span className="text-sm font-bold tabular-nums" style={{ color: t.foreground }}>{brl(s[1])}</span></div>
                 <div className="flex items-center gap-3">
-                  <div className="rounded-md overflow-hidden" style={{ flex: 1, height: 24, background: t.secondary }}><div style={{ height: "100%", width: `${(s[1] / D.dotacao) * 100}%`, background: `linear-gradient(90deg, ${t.primary}, ${cats[3]})`, borderRadius: 6 }} /></div>
+                  <div className="rounded-md overflow-hidden" style={{ flex: 1, height: 24, background: t.secondary }}><div style={{ height: "100%", width: `${(Number(s[1]) / D.dotacao) * 100}%`, background: `linear-gradient(90deg, ${t.primary}, ${cats[3]})`, borderRadius: 6 }} /></div>
                   <div className="tabular-nums text-right text-xs" style={{ width: 128, color: t.mutedFg }}>{s[2] ? <><b style={{ color: t.primary }}>{pct(s[2][0])}</b> {s[2][1]}</> : "base 100%"}</div>
                 </div>
               </div>

@@ -69,7 +69,7 @@ export default function TributacaoModule() {
             {funil.map(([label, val], i) => (
               <div key={i}>
                 <div className="flex items-baseline justify-between mb-1"><span className="text-xs font-medium" style={{ color: t.foreground }}>{label}</span><span className="text-sm font-bold tabular-nums" style={{ color: t.foreground }}>{brl(val)}</span></div>
-                <div className="rounded-md overflow-hidden" style={{ height: 24, background: t.secondary }}><div style={{ height: "100%", width: `${(val / funil[0][1]) * 100}%`, background: `linear-gradient(90deg, ${t.primary}, ${cats[3]})`, borderRadius: 6 }} /></div>
+                <div className="rounded-md overflow-hidden" style={{ height: 24, background: t.secondary }}><div style={{ height: "100%", width: `${(Number(val) / Number(funil[0][1])) * 100}%`, background: `linear-gradient(90deg, ${t.primary}, ${cats[3]})`, borderRadius: 6 }} /></div>
               </div>
             ))}
           </div>
