@@ -13,11 +13,12 @@ playwright-report/
 .env.*
 !.env.example
 !.env.<tenant>.example
+!.env.warehouse.example
 
 # Caddyfile gerado pelo deploy.sh (não versionar)
 deploy/Caddyfile
 
 # OpenTofu / Terraform
-infra/.terraform/
+**/.terraform/
 *.tfstate
 *.tfstate.*

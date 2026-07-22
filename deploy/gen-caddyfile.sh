@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Gera o Caddyfile a partir de deploy/tenants.txt: um bloco por tenant roteando
+# Gera o Caddyfile com TODOS os tenants ativos (stage + production), lendo todos
+# os arquivos tenants.*.txt. Assim o proxy sempre serve todas as rotas, mesmo
+# quando o deploy atualiza só um grupo. Um bloco por tenant:
 #   https://<slug>.<BASE_DOMAIN>/       -> web-<slug>:80
 #   https://<slug>.<BASE_DOMAIN>/api/*  -> api-<slug>:3000  (strip /api)
-# BASE_DOMAIN e ACME_EMAIL vêm de cada .env.<slug> (assumidos iguais entre tenants).
+# BASE_DOMAIN e ACME_EMAIL vêm de cada .env.<slug>.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-tenants_file="${TENANTS_FILE:-tenants.txt}"
 acme_email=""
 
 emit_block() {
@@ -22,18 +23,22 @@ EOF
 }
 
 blocks=""
-while IFS= read -r slug; do
-	slug="${slug%%#*}"; slug="$(echo "$slug" | xargs)"   # tira comentário/espaços
-	[ -z "$slug" ] && continue
-	envfile="../.env.${slug}"
-	[ -f "$envfile" ] || { echo "ERRO: $envfile não encontrado" >&2; exit 1; }
-	# lê só as chaves que precisamos, sem executar o arquivo
-	base="$(grep -E '^BASE_DOMAIN=' "$envfile" | tail -1 | cut -d= -f2-)"
-	[ -z "$acme_email" ] && acme_email="$(grep -E '^ACME_EMAIL=' "$envfile" | tail -1 | cut -d= -f2-)"
-	blocks+="$(emit_block "$slug" "${base:-tv.mirantegov.cloud}")"$'\n\n'
-done < "$tenants_file"
+seen=""
+for tf in tenants.*.txt; do
+	[ -f "$tf" ] || continue
+	while IFS= read -r slug; do
+		slug="${slug%%#*}"; slug="$(echo "$slug" | xargs)"
+		[ -z "$slug" ] && continue
+		case " $seen " in *" $slug "*) continue ;; esac   # dedupe
+		seen+=" $slug"
+		envfile="../.env.${slug}"
+		[ -f "$envfile" ] || { echo "ERRO: $envfile não encontrado" >&2; exit 1; }
+		base="$(grep -E '^BASE_DOMAIN=' "$envfile" | tail -1 | cut -d= -f2-)"
+		[ -z "$acme_email" ] && acme_email="$(grep -E '^ACME_EMAIL=' "$envfile" | tail -1 | cut -d= -f2-)"
+		blocks+="$(emit_block "$slug" "${base:-tv.mirantegov.cloud}")"$'\n\n'
+	done < "$tf"
+done
 
-# Bloco global: e-mail p/ Let's Encrypt (se vazio, Caddy usa conta anônima)
 if [ -n "$acme_email" ]; then
 	printf '{\n\temail %s\n}\n\n' "$acme_email"
 fi

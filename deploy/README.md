@@ -16,9 +16,10 @@ https://<slug>.tv.mirantegov.cloud/api/*  -> api-<slug>   (PostgREST)
 |---|---|
 | `docker-compose.proxy.yml` | Caddy (80/443, TLS automático) na rede `edge` |
 | `docker-compose.tenant.yml` | stack de 1 tenant (web/db/api), parametrizado por `.env.<slug>` |
-| `tenants.txt` | lista de slugs ativos (1 por linha) |
-| `gen-caddyfile.sh` | gera o `Caddyfile` a partir de `tenants.txt` + `.env.<slug>` |
-| `deploy.sh` | sobe/atualiza proxy + todos os tenants |
+| `tenants.stage.txt` | grupo **stage** (recebe deploy da `main`) |
+| `tenants.production.txt` | grupo **production** (recebe deploy da branch `production`) |
+| `gen-caddyfile.sh` | gera o `Caddyfile` com **todos** os grupos (`tenants.*.txt`) |
+| `deploy.sh` | `./deploy.sh <stage\|production\|all>` — atualiza o grupo + regenera o Caddyfile |
 | `ingest/ingest.sh` | job noturno TRUNCATE+COPY do ClickHouse (esqueleto) |
 
 Imagem `web` vem do **GHCR** (`ghcr.io/<repo>:<IMAGE_TAG>`), publicada pela
@@ -38,19 +39,49 @@ usam imagens públicas e montam `../db` (schemas + seed + views) do checkout.
 
 O DNS já resolve porque o OpenTofu cria o wildcard `*.tv.mirantegov.cloud`.
 
+## Ambientes: stage → production
+
+- **stage** — base de desenvolvimento/homologação online (`stage.tv.mirantegov.cloud`,
+  dados de Palotina). É o **primeiro** a atualizar.
+- **production** — os tenants reais (`palotina`, …).
+
+Fluxo: `main` → deploy **stage**; depois promove-se a `main` para a branch
+**`production`** (fast-forward) → deploy em **todos os outros tenants**.
+
 ## Deploy manual
 
 ```sh
 cd /opt/mirante && git pull --ff-only
-cd deploy && ./deploy.sh
+cd deploy && ./deploy.sh stage        # ou: ./deploy.sh production  |  ./deploy.sh all
 ```
 
 ## Deploy por CI
 
-O workflow `build-and-deploy` builda a imagem arm64, publica no GHCR e (se a
-variável de repositório `DEPLOY_ENABLED=true`) faz SSH na VPS e roda `deploy.sh`.
-Segredos necessários no GitHub: `DEPLOY_HOST`, `DEPLOY_USER` (`ec2-user`),
-`DEPLOY_SSH_KEY`, `GHCR_TOKEN` (read:packages, p/ o host puxar a imagem).
+Dois workflows (ambos gated na variável de repositório `DEPLOY_ENABLED=true`):
+
+| Workflow | Gatilho | Ação |
+|---|---|---|
+| `deploy-stage` | push na `main` | build arm64 → GHCR → `./deploy.sh stage` |
+| `deploy-production` | push na `production` | `guard` (commit tem de estar na `main`) → build → `./deploy.sh production` |
+
+Promoção para produção (só a partir da main, fast-forward):
+
+```sh
+git checkout production && git merge --ff-only origin/main && git push
+```
+
+Reforce com **branch protection** exigindo PR a partir da `main` para a `production`.
+
+Segredos no GitHub: `DEPLOY_HOST`, `DEPLOY_USER` (`ec2-user`), `DEPLOY_SSH_KEY`,
+`GHCR_TOKEN` (read:packages).
+
+## Data warehouse (máquina separada)
+
+ClickHouse + Postgres rodam numa **VPS separada** (`m7i.2xlarge`), provisionada por
+[`../infra/warehouse`](../infra/warehouse) e subida por
+[`warehouse/docker-compose.yml`](warehouse/docker-compose.yml) com `.env.warehouse`.
+O `ingest/ingest.sh` (job noturno) lê do ClickHouse e recria os dados de cada
+tenant via `TRUNCATE`+`COPY`.
 
 ## Ingestão noturna (ClickHouse)
 

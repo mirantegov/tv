@@ -1,0 +1,3 @@
+# Grupo PRODUCTION — recebe deploy da branch production (só via merge da main).
+# Um slug por linha; exige ../.env.<slug> no host.
+palotina
