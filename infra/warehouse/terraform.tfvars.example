@@ -2,9 +2,12 @@
 # (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION), NOT here.
 
 # --- Must fill in ---
-ssh_public_key       = "ssh-ed25519 AAAA... you@host"   # contents of your .pub
-cloudflare_api_token = "cf-token-with-dns-edit"          # sensitive
+cloudflare_api_token = "cf-token-with-dns-edit"          # sensitive; só a-z A-Z 0-9 - _
 cloudflare_zone_id   = "your-cloudflare-zone-id"
+
+# Chave SSH — escolha UMA das duas:
+existing_key_name    = "minha-chave-aws"                 # (a) key pair já na AWS
+# ssh_public_key     = "ssh-ed25519 AAAA... you@host"    # (b) OU cria nova do seu .pub
 
 # --- Recommended (lock down access) ---
 # admin_cidr = "your.ip/32"        # SSH + DB admin access

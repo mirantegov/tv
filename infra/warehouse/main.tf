@@ -18,7 +18,9 @@ data "aws_ami" "al2023_x86_64" {
   }
 }
 
+# Cria um key pair a partir de ssh_public_key APENAS se existing_key_name vazio.
 resource "aws_key_pair" "warehouse" {
+  count      = var.existing_key_name == "" ? 1 : 0
   key_name   = "mirante-dw"
   public_key = var.ssh_public_key
 }
@@ -79,8 +81,15 @@ resource "aws_security_group" "warehouse" {
 resource "aws_instance" "warehouse" {
   ami                    = data.aws_ami.al2023_x86_64.id
   instance_type          = var.instance_type
-  key_name               = aws_key_pair.warehouse.key_name
+  key_name               = var.existing_key_name != "" ? var.existing_key_name : aws_key_pair.warehouse[0].key_name
   vpc_security_group_ids = [aws_security_group.warehouse.id]
+
+  lifecycle {
+    precondition {
+      condition     = var.existing_key_name != "" || var.ssh_public_key != ""
+      error_message = "Defina existing_key_name (chave já na AWS) OU ssh_public_key (cria uma nova)."
+    }
+  }
 
   user_data = templatefile("${path.module}/user_data.sh", {
     github_repository = var.github_repository
