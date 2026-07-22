@@ -161,6 +161,7 @@ export default function ReceitaModule() {
 						<button
 							key={k}
 							type="button"
+							data-autoscroll-tab
 							onClick={() => setSub(k)}
 							className="text-xs sm:text-sm font-medium"
 							style={{

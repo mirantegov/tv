@@ -17,17 +17,20 @@ export function Link({
 	className,
 	style,
 	onNav,
+	title,
 }: {
 	href: string;
 	children?: React.ReactNode;
 	className?: string;
 	style?: React.CSSProperties;
 	onNav?: () => void;
+	title?: string;
 }) {
 	const { push } = useRouter();
 	return (
 		<a
 			href={href}
+			title={title}
 			className={className}
 			style={style}
 			onClick={(e) => {

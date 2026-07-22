@@ -392,7 +392,7 @@ export function ThemeProvider({ children }) {
 }
 export const useTheme = () => useContext(ThemeCtx);
 
-export function ThemeConfig() {
+export function ThemeConfig({ collapsed }: { collapsed?: boolean }) {
 	const { t, family, mode, familyLabel, setFamily, setMode } = useTheme();
 	const [open, setOpen] = useState(false);
 	const Opt = ({ active, onClick, children }) => (
@@ -422,7 +422,8 @@ export function ThemeConfig() {
 						position: "absolute",
 						bottom: "calc(100% + 8px)",
 						left: 0,
-						right: 0,
+						right: collapsed ? "auto" : 0,
+						minWidth: collapsed ? 220 : undefined,
 						background: t.card,
 						border: `1px solid ${t.border}`,
 						boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
@@ -467,47 +468,54 @@ export function ThemeConfig() {
 				type="button"
 				onClick={() => setOpen((o) => !o)}
 				aria-label="Configurar tema"
-				className="w-full rounded-md flex items-center gap-2 text-xs font-medium"
+				className={`w-full rounded-md flex items-center gap-2 text-xs font-medium ${
+					collapsed ? "justify-center" : ""
+				}`}
 				style={{
 					background: t.muted,
 					border: `1px solid ${t.border}`,
 					color: t.foreground,
-					padding: "9px 11px",
+					padding: collapsed ? "9px" : "9px 11px",
 					cursor: "pointer",
 				}}
 			>
 				<svg
 					aria-hidden="true"
-					width="15"
-					height="15"
+					width="18"
+					height="18"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke={t.foreground}
 					strokeWidth="2"
 					style={{ flexShrink: 0 }}
 				>
-					<circle cx="12" cy="12" r="3" />
-					<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+					<circle cx="12" cy="8.5" r="4" />
+					<circle cx="8" cy="15" r="4" />
+					<circle cx="16" cy="15" r="4" />
 				</svg>
-				<span style={{ flex: 1, textAlign: "left" }}>
-					{familyLabel} · {mode === "dark" ? "Dark" : "Light"}
-				</span>
-				<svg
-					aria-hidden="true"
-					width="13"
-					height="13"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke={t.mutedFg}
-					strokeWidth="2"
-					style={{ transform: open ? "rotate(180deg)" : "none" }}
-				>
-					<path
-						d="m18 15-6-6-6 6"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					/>
-				</svg>
+				{!collapsed && (
+					<>
+						<span style={{ flex: 1, textAlign: "left" }}>
+							{familyLabel} · {mode === "dark" ? "Dark" : "Light"}
+						</span>
+						<svg
+							aria-hidden="true"
+							width="13"
+							height="13"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke={t.mutedFg}
+							strokeWidth="2"
+							style={{ transform: open ? "rotate(180deg)" : "none" }}
+						>
+							<path
+								d="m18 15-6-6-6 6"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							/>
+						</svg>
+					</>
+				)}
 			</button>
 		</div>
 	);

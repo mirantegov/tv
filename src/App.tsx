@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LoginScreen from "./LoginScreen";
 import ContratosModule from "./modules/ContratosModule";
 import DespesaComparativoModule from "./modules/DespesaComparativoModule";
@@ -64,40 +64,176 @@ const NAV_GROUPS = [
 	{
 		label: null,
 		items: [
-			{ path: "/", label: "Visão Geral" },
-			{ path: "/panorama", label: "Panorama" },
+			{
+				path: "/",
+				label: "Visão Geral",
+				icon: "M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z",
+			},
+			{
+				path: "/panorama",
+				label: "Panorama",
+				icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M2 12h20M12 2c2.5 3 2.5 17 0 20M12 2c-2.5 3-2.5 17 0 20",
+			},
 		],
 	},
 	{
 		label: "Movimento",
 		items: [
-			{ path: "/despesa", label: "Despesa" },
-			{ path: "/receita", label: "Receita" },
-			{ path: "/tributacao", label: "Tributação" },
-			{ path: "/financeiro", label: "Financeiro" },
-			{ path: "/planejamento", label: "Planejamento" },
-			{ path: "/licitacoes", label: "Licitações" },
-			{ path: "/contratos", label: "Contratos" },
-			{ path: "/folha", label: "Folha de Pagamento" },
-			{ path: "/people", label: "People Analytics" },
+			{
+				path: "/despesa",
+				label: "Despesa",
+				icon: "M22 17 13.5 8.5 8.5 13.5 2 7M16 17h6v-6",
+			},
+			{
+				path: "/receita",
+				label: "Receita",
+				icon: "M22 7 13.5 15.5 8.5 10.5 2 17M16 7h6v6",
+			},
+			{
+				path: "/tributacao",
+				label: "Tributação",
+				icon: "M19 5 5 19M9 6.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0M20 17.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0",
+			},
+			{
+				path: "/financeiro",
+				label: "Financeiro",
+				icon: "M2 8h20v11a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zM2 8l3-4h11l3 4M16 13h2",
+			},
+			{
+				path: "/planejamento",
+				label: "Planejamento",
+				icon: "M3 4h18v18H3zM16 2v4M8 2v4M3 10h18",
+			},
+			{
+				path: "/licitacoes",
+				label: "Licitações",
+				icon: "M14 3v4a1 1 0 0 0 1 1h4M5 3h9l5 5v13H5zM9 15l2 2 4-4",
+			},
+			{
+				path: "/contratos",
+				label: "Contratos",
+				icon: "M14 3v4a1 1 0 0 0 1 1h4M5 3h9l5 5v13H5zM9 13h6M9 17h4",
+			},
+			{
+				path: "/folha",
+				label: "Folha de Pagamento",
+				icon: "M2 6h20v12H2zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M6 10h.01M18 14h.01",
+			},
+			{
+				path: "/people",
+				label: "People Analytics",
+				icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+			},
 		],
 	},
 	{
 		label: "Análises",
 		items: [
-			{ path: "/despesa-comp", label: "Despesa · Comparativo" },
-			{ path: "/receita-comp", label: "Receita · Comparativo" },
-			{ path: "/financeiro-analises", label: "Financeiro · Análises" },
-			{ path: "/prestacao", label: "Prestação de Contas" },
+			{
+				path: "/despesa-comp",
+				label: "Despesa · Comparativo",
+				icon: "M3 3v18h18M8 17V9M13 17V5M18 17v-6",
+			},
+			{
+				path: "/receita-comp",
+				label: "Receita · Comparativo",
+				icon: "M3 3v18h18M7 15l3-4 3 2 5-7",
+			},
+			{
+				path: "/financeiro-analises",
+				label: "Financeiro · Análises",
+				icon: "M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z",
+			},
+			{
+				path: "/prestacao",
+				label: "Prestação de Contas",
+				icon: "M9 2h6a1 1 0 0 1 1 1v1H8V3a1 1 0 0 1 1-1M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2M9 14l2 2 4-4",
+			},
 		],
 	},
 ];
 
 function Shell({ onLogout }: { onLogout: () => void }) {
 	const { t, familyLabel } = useTheme();
-	const { path } = useRouter();
+	const { path, push } = useRouter();
 	const [navOpen, setNavOpen] = useState(false);
 	const [cfgOpen, setCfgOpen] = useState(false);
+	const [autoScroll, setAutoScroll] = useState(false);
+	const pathRef = useRef(path);
+	pathRef.current = path;
+
+	// Scroll Automático (modo TV): aguarda 5s, percorre o módulo atual bem
+	// devagar até o fim, avança para o próximo (aba por aba quando houver
+	// [data-autoscroll-tab]) e recomeça pela Visão Geral ao terminar.
+	useEffect(() => {
+		if (!autoScroll) return;
+		let cancelled = false;
+		const timers = new Set<number>();
+		const wait = (ms: number) =>
+			new Promise<void>((resolve) => {
+				const id = window.setTimeout(() => {
+					timers.delete(id);
+					resolve();
+				}, ms);
+				timers.add(id);
+			});
+		const ORDER = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.path));
+		const scrollPage = async () => {
+			window.scrollTo(0, 0);
+			await wait(1200);
+			while (!cancelled) {
+				const max = document.documentElement.scrollHeight - window.innerHeight;
+				if (window.scrollY >= max - 1) break;
+				window.scrollBy(0, 1);
+				await wait(20);
+			}
+			await wait(1500);
+		};
+		const run = async () => {
+			await wait(5000);
+			let idx = Math.max(0, ORDER.indexOf(pathRef.current));
+			while (!cancelled) {
+				push(ORDER[idx]);
+				await wait(800);
+				const tabs = Array.from(
+					document.querySelectorAll<HTMLElement>("[data-autoscroll-tab]"),
+				);
+				if (tabs.length) {
+					for (const tab of tabs) {
+						if (cancelled) break;
+						tab.click();
+						await wait(600);
+						await scrollPage();
+					}
+				} else {
+					await scrollPage();
+				}
+				idx = (idx + 1) % ORDER.length;
+			}
+		};
+		run();
+		return () => {
+			cancelled = true;
+			for (const id of timers) clearTimeout(id);
+		};
+	}, [autoScroll, push]);
+	const [collapsed, setCollapsed] = useState(() => {
+		try {
+			return localStorage.getItem("mg_sidebar") === "1";
+		} catch {
+			return false;
+		}
+	});
+	const toggleCollapsed = () =>
+		setCollapsed((c) => {
+			const next = !c;
+			try {
+				localStorage.setItem("mg_sidebar", next ? "1" : "0");
+			} catch {
+				// localStorage indisponível — segue sem persistir
+			}
+			return next;
+		});
 	const route = ROUTES.find((r) => r.path === path) || ROUTES[0];
 	const Page = route.el;
 	return (
@@ -129,7 +265,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 			<aside
 				className={`${navOpen ? "flex" : "hidden"} lg:flex`}
 				style={{
-					width: 232,
+					width: collapsed ? 72 : 232,
 					flexShrink: 0,
 					background: t.card,
 					borderRight: `1px solid ${t.border}`,
@@ -137,19 +273,27 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 					top: 0,
 					height: "100vh",
 					flexDirection: "column",
+					transition: "width 0.15s ease",
 				}}
 			>
 				<div
-					className="flex items-center gap-3 px-5"
+					className="flex items-center gap-3"
 					style={{
 						height: 64,
 						borderBottom: `1px solid ${t.border}`,
 						flexShrink: 0,
+						padding: collapsed ? "0 12px" : "0 20px",
+						justifyContent: collapsed ? "center" : "flex-start",
 					}}
 				>
 					<div
 						className="rounded-lg flex items-center justify-center"
-						style={{ width: 34, height: 34, background: t.primary }}
+						style={{
+							width: 34,
+							height: 34,
+							background: t.primary,
+							flexShrink: 0,
+						}}
 					>
 						<svg
 							aria-hidden="true"
@@ -167,17 +311,22 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 							<path d="M3 20h18v2H3z" fill={t.primaryFg} />
 						</svg>
 					</div>
-					<div>
-						<div
-							className="text-xs uppercase tracking-wider"
-							style={{ color: t.mutedFg }}
-						>
-							Prefeitura
+					{!collapsed && (
+						<div>
+							<div
+								className="text-xs uppercase tracking-wider"
+								style={{ color: t.mutedFg }}
+							>
+								Prefeitura
+							</div>
+							<div
+								className="text-sm font-bold"
+								style={{ color: t.foreground }}
+							>
+								Palotina
+							</div>
 						</div>
-						<div className="text-sm font-bold" style={{ color: t.foreground }}>
-							Mirante Gov
-						</div>
-					</div>
+					)}
 				</div>
 				<nav
 					className="p-3 flex flex-col gap-1"
@@ -185,7 +334,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 				>
 					{NAV_GROUPS.map((g, gi) => (
 						<div key={gi} className={gi ? "mt-3" : ""}>
-							{g.label && (
+							{g.label && !collapsed && (
 								<div
 									className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider"
 									style={{ color: t.mutedFg, opacity: 0.7 }}
@@ -199,18 +348,33 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 									<Link
 										key={n.path}
 										href={n.path}
+										title={collapsed ? n.label : undefined}
 										onNav={() => setNavOpen(false)}
-										className="text-sm rounded-md"
+										className="text-sm rounded-md flex items-center gap-3"
 										style={{
-											display: "block",
-											padding: "9px 12px",
+											padding: collapsed ? "10px" : "9px 12px",
+											justifyContent: collapsed ? "center" : "flex-start",
 											textDecoration: "none",
 											fontWeight: active ? 600 : 500,
 											background: active ? t.primary : "transparent",
 											color: active ? t.primaryFg : t.mutedFg,
 										}}
 									>
-										{n.label}
+										<svg
+											aria-hidden="true"
+											width="18"
+											height="18"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											style={{ flexShrink: 0 }}
+										>
+											<path d={n.icon} />
+										</svg>
+										{!collapsed && <span>{n.label}</span>}
 									</Link>
 								);
 							})}
@@ -218,10 +382,47 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 					))}
 				</nav>
 				<div
-					className="p-3"
+					className="p-3 flex flex-col gap-2"
 					style={{ borderTop: `1px solid ${t.border}`, flexShrink: 0 }}
 				>
-					<ThemeConfig />
+					<ThemeConfig collapsed={collapsed} />
+					<button
+						type="button"
+						onClick={toggleCollapsed}
+						aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+						title={collapsed ? "Expandir" : "Recolher"}
+						className={`w-full rounded-md flex items-center gap-2 text-xs font-medium ${
+							collapsed ? "justify-center" : ""
+						}`}
+						style={{
+							background: t.muted,
+							border: `1px solid ${t.border}`,
+							color: t.mutedFg,
+							padding: collapsed ? "9px" : "9px 11px",
+							cursor: "pointer",
+						}}
+					>
+						<svg
+							aria-hidden="true"
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke={t.mutedFg}
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							style={{
+								flexShrink: 0,
+								transform: collapsed ? "rotate(180deg)" : "none",
+							}}
+						>
+							<path d="m11 17-5-5 5-5M18 17l-5-5 5-5" />
+						</svg>
+						{!collapsed && (
+							<span style={{ flex: 1, textAlign: "left" }}>Recolher</span>
+						)}
+					</button>
 				</div>
 			</aside>
 
@@ -321,6 +522,51 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 										zIndex: 30,
 									}}
 								>
+									<div
+										className="text-xs font-semibold uppercase tracking-wider"
+										style={{ color: t.mutedFg, padding: "6px 10px 4px" }}
+									>
+										Configurações
+									</div>
+									<button
+										type="button"
+										onClick={() => {
+											setAutoScroll((v) => !v);
+											setCfgOpen(false);
+										}}
+										className="w-full rounded-md flex items-center gap-2 text-sm"
+										style={{
+											padding: "8px 10px",
+											background: "transparent",
+											border: "none",
+											color: t.foreground,
+											cursor: "pointer",
+											textAlign: "left",
+										}}
+									>
+										<svg
+											aria-hidden="true"
+											width="15"
+											height="15"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke={autoScroll ? t.primary : t.foreground}
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											style={{ flexShrink: 0 }}
+										>
+											<path d="m7 6 5 5 5-5" />
+											<path d="m7 13 5 5 5-5" />
+										</svg>
+										<span style={{ flex: 1 }}>Scroll Automático</span>
+										<span
+											className="text-xs font-semibold"
+											style={{ color: autoScroll ? t.primary : t.mutedFg }}
+										>
+											{autoScroll ? "Ligado" : "Desligado"}
+										</span>
+									</button>
 									<button
 										type="button"
 										onClick={() => {
