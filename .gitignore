@@ -7,3 +7,8 @@ dist/
 # Playwright
 test-results/
 playwright-report/
+
+# Env por tenant (contém senha) — versionar só o .env.example
+.env
+.env.*
+!.env.example
