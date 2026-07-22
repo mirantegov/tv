@@ -1,4 +1,4 @@
--- Seed Receita — Município de Palotina (IBGE 4118402), exercício 2026.
+-- Seed Receita — Município de Palotina (IBGE 4117909), exercício 2026.
 -- Extraído de src/data.ts (export R). Fonte única = data.ts.
 SET search_path TO receita;
 

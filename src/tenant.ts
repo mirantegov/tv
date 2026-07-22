@@ -16,7 +16,7 @@ declare global {
 
 // ponytail: fallback embutido p/ dev sem config.js (ex.: testes jsdom)
 export const TENANT: TenantConfig = window.__TENANT__ ?? {
-	id: "4118402",
+	id: "4117909",
 	slug: "palotina",
 	nome: "Município de Palotina",
 	uf: "PR",
