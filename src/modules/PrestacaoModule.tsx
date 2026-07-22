@@ -1,16 +1,10 @@
-import { useState } from "react";
 import { Card, Kpi, Title } from "../components";
 import { PC } from "../data";
 import { fmtInt } from "../format";
 import { useTheme } from "../theme";
 
-export default function PrestacaoModule() {
+function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 	const { t } = useTheme();
-	const [aba, setAba] = useState("tce");
-	const abas = [
-		["tce", "TCE/PR"],
-		["siconfi", "SICONFI"],
-	];
 	const C = PC;
 	const tones = {
 		ok: t.ok,
@@ -100,32 +94,6 @@ export default function PrestacaoModule() {
 
 	return (
 		<>
-			<div className="mb-5">
-				<div
-					className="flex rounded-lg overflow-hidden"
-					style={{ border: `1px solid ${t.border}`, width: "fit-content" }}
-				>
-					{abas.map(([k, l]) => (
-						<button
-							key={k}
-							type="button"
-							data-autoscroll-tab
-							onClick={() => setAba(k)}
-							className="text-xs sm:text-sm font-medium"
-							style={{
-								padding: "8px 16px",
-								background: aba === k ? t.primary : t.card,
-								color: aba === k ? t.primaryFg : t.mutedFg,
-								border: "none",
-								cursor: "pointer",
-							}}
-						>
-							{l}
-						</button>
-					))}
-				</div>
-			</div>
-
 			{/* ===================== TCE/PR ===================== */}
 			{aba === "tce" && (
 				<>
@@ -710,4 +678,12 @@ export default function PrestacaoModule() {
 			)}
 		</>
 	);
+}
+
+export function TcePrModule() {
+	return <Prestacao aba="tce" />;
+}
+
+export function SiconfiModule() {
+	return <Prestacao aba="siconfi" />;
 }

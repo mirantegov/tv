@@ -10,7 +10,7 @@ import LicitacoesModule from "./modules/LicitacoesModule";
 import PanoramaModule from "./modules/PanoramaModule";
 import PeopleModule from "./modules/PeopleModule";
 import PlanejamentoModule from "./modules/PlanejamentoModule";
-import PrestacaoModule from "./modules/PrestacaoModule";
+import { SiconfiModule, TcePrModule } from "./modules/PrestacaoModule";
 import ReceitaComparativoModule from "./modules/ReceitaComparativoModule";
 import ReceitaModule from "./modules/ReceitaModule";
 import TributacaoModule from "./modules/TributacaoModule";
@@ -52,7 +52,8 @@ const ROUTES = [
 	{ path: "/people", title: "People Analytics", el: PeopleModule },
 	{ path: "/licitacoes", title: "Licitações", el: LicitacoesModule },
 	{ path: "/contratos", title: "Contratos Municipais", el: ContratosModule },
-	{ path: "/prestacao", title: "Prestação de Contas", el: PrestacaoModule },
+	{ path: "/tce", title: "TCE/PR", el: TcePrModule },
+	{ path: "/siconfi", title: "SICONFI", el: SiconfiModule },
 	{
 		path: "/financeiro-analises",
 		title: "Financeiro — Análises",
@@ -131,23 +132,33 @@ const NAV_GROUPS = [
 		items: [
 			{
 				path: "/despesa-comp",
-				label: "Despesa · Comparativo",
+				label: "Despesas",
 				icon: "M3 3v18h18M8 17V9M13 17V5M18 17v-6",
 			},
 			{
 				path: "/receita-comp",
-				label: "Receita · Comparativo",
+				label: "Receitas",
 				icon: "M3 3v18h18M7 15l3-4 3 2 5-7",
 			},
 			{
 				path: "/financeiro-analises",
-				label: "Financeiro · Análises",
+				label: "Finanças",
 				icon: "M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z",
 			},
+		],
+	},
+	{
+		label: "Contas Públicas",
+		items: [
 			{
-				path: "/prestacao",
-				label: "Prestação de Contas",
+				path: "/tce",
+				label: "TCE/PR",
 				icon: "M9 2h6a1 1 0 0 1 1 1v1H8V3a1 1 0 0 1 1-1M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2M9 14l2 2 4-4",
+			},
+			{
+				path: "/siconfi",
+				label: "SICONFI",
+				icon: "M12 2 3 7v2h18V7zM5 11v7M9.5 11v7M14.5 11v7M19 11v7M3 20h18v2H3z",
 			},
 		],
 	},
@@ -185,7 +196,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 				const max = document.documentElement.scrollHeight - window.innerHeight;
 				if (window.scrollY >= max - 1) break;
 				window.scrollBy(0, 1);
-				await wait(20);
+				await wait(40);
 			}
 			await wait(1500);
 		};
@@ -386,6 +397,141 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 					style={{ borderTop: `1px solid ${t.border}`, flexShrink: 0 }}
 				>
 					<ThemeConfig collapsed={collapsed} />
+					<div style={{ position: "relative" }}>
+						<button
+							type="button"
+							onClick={() => setCfgOpen((o) => !o)}
+							aria-label="Configurações"
+							title={collapsed ? "Configurações" : undefined}
+							className={`w-full rounded-md flex items-center gap-2 text-xs font-medium ${
+								collapsed ? "justify-center" : ""
+							}`}
+							style={{
+								background: t.muted,
+								border: `1px solid ${t.border}`,
+								color: t.mutedFg,
+								padding: collapsed ? "9px" : "9px 11px",
+								cursor: "pointer",
+							}}
+						>
+							<svg
+								aria-hidden="true"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke={t.mutedFg}
+								strokeWidth="2"
+								style={{ flexShrink: 0 }}
+							>
+								<circle cx="12" cy="12" r="3" />
+								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+							</svg>
+							{!collapsed && <span>Configurações</span>}
+						</button>
+						{cfgOpen && (
+							<div
+								className="rounded-lg"
+								style={{
+									position: "absolute",
+									bottom: "calc(100% + 8px)",
+									left: 0,
+									right: collapsed ? "auto" : 0,
+									minWidth: 210,
+									background: t.card,
+									border: `1px solid ${t.border}`,
+									boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+									padding: 6,
+									zIndex: 30,
+								}}
+							>
+								<div
+									className="text-xs font-semibold uppercase tracking-wider"
+									style={{ color: t.mutedFg, padding: "6px 10px 4px" }}
+								>
+									Configurações
+								</div>
+								<button
+									type="button"
+									role="switch"
+									aria-checked={autoScroll}
+									onClick={() => setAutoScroll((v) => !v)}
+									className="w-full rounded-md flex items-center gap-2 text-sm"
+									style={{
+										padding: "8px 10px",
+										background: "transparent",
+										border: "none",
+										color: t.foreground,
+										cursor: "pointer",
+										textAlign: "left",
+									}}
+								>
+									<span
+										aria-hidden="true"
+										className="rounded-full"
+										style={{
+											width: 34,
+											height: 20,
+											padding: 2,
+											background: autoScroll ? t.primary : t.muted,
+											border: `1px solid ${autoScroll ? t.primary : t.border}`,
+											display: "inline-flex",
+											flexShrink: 0,
+											transition: "background 0.15s",
+										}}
+									>
+										<span
+											className="rounded-full"
+											style={{
+												width: 14,
+												height: 14,
+												background: autoScroll ? t.primaryFg : t.mutedFg,
+												transform: autoScroll
+													? "translateX(14px)"
+													: "translateX(0)",
+												transition: "transform 0.15s",
+											}}
+										/>
+									</span>
+									<span style={{ flex: 1 }}>Scroll Automático</span>
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setCfgOpen(false);
+										onLogout();
+									}}
+									className="w-full rounded-md flex items-center gap-2 text-sm"
+									style={{
+										padding: "8px 10px",
+										background: "transparent",
+										border: "none",
+										color: t.foreground,
+										cursor: "pointer",
+										textAlign: "left",
+									}}
+								>
+									<svg
+										aria-hidden="true"
+										width="15"
+										height="15"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke={t.danger}
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										style={{ flexShrink: 0 }}
+									>
+										<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+										<path d="m16 17 5-5-5-5" />
+										<path d="M21 12H9" />
+									</svg>
+									Sair
+								</button>
+							</div>
+						)}
+					</div>
 					<button
 						type="button"
 						onClick={toggleCollapsed}
@@ -480,130 +626,6 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 						>
 							Exercício 2026 · Jun
 						</span>
-						<div style={{ position: "relative" }}>
-							<button
-								type="button"
-								onClick={() => setCfgOpen((o) => !o)}
-								aria-label="Configurações"
-								className="rounded-md flex items-center"
-								style={{
-									padding: "7px 9px",
-									background: t.card,
-									border: `1px solid ${t.border}`,
-									color: t.foreground,
-									cursor: "pointer",
-								}}
-							>
-								<svg
-									aria-hidden="true"
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke={t.foreground}
-									strokeWidth="2"
-								>
-									<circle cx="12" cy="12" r="3" />
-									<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-								</svg>
-							</button>
-							{cfgOpen && (
-								<div
-									className="rounded-lg"
-									style={{
-										position: "absolute",
-										top: "calc(100% + 8px)",
-										right: 0,
-										minWidth: 160,
-										background: t.card,
-										border: `1px solid ${t.border}`,
-										boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
-										padding: 6,
-										zIndex: 30,
-									}}
-								>
-									<div
-										className="text-xs font-semibold uppercase tracking-wider"
-										style={{ color: t.mutedFg, padding: "6px 10px 4px" }}
-									>
-										Configurações
-									</div>
-									<button
-										type="button"
-										onClick={() => {
-											setAutoScroll((v) => !v);
-											setCfgOpen(false);
-										}}
-										className="w-full rounded-md flex items-center gap-2 text-sm"
-										style={{
-											padding: "8px 10px",
-											background: "transparent",
-											border: "none",
-											color: t.foreground,
-											cursor: "pointer",
-											textAlign: "left",
-										}}
-									>
-										<svg
-											aria-hidden="true"
-											width="15"
-											height="15"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke={autoScroll ? t.primary : t.foreground}
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											style={{ flexShrink: 0 }}
-										>
-											<path d="m7 6 5 5 5-5" />
-											<path d="m7 13 5 5 5-5" />
-										</svg>
-										<span style={{ flex: 1 }}>Scroll Automático</span>
-										<span
-											className="text-xs font-semibold"
-											style={{ color: autoScroll ? t.primary : t.mutedFg }}
-										>
-											{autoScroll ? "Ligado" : "Desligado"}
-										</span>
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											setCfgOpen(false);
-											onLogout();
-										}}
-										className="w-full rounded-md flex items-center gap-2 text-sm"
-										style={{
-											padding: "8px 10px",
-											background: "transparent",
-											border: "none",
-											color: t.foreground,
-											cursor: "pointer",
-											textAlign: "left",
-										}}
-									>
-										<svg
-											aria-hidden="true"
-											width="15"
-											height="15"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke={t.danger}
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											style={{ flexShrink: 0 }}
-										>
-											<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-											<path d="m16 17 5-5-5-5" />
-											<path d="M21 12H9" />
-										</svg>
-										Sair
-									</button>
-								</div>
-							)}
-						</div>
 					</div>
 				</header>
 				<main className="px-4 sm:px-6 py-5 max-w-7xl mx-auto">
