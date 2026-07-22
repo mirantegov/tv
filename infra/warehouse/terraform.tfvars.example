@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars and fill in. AWS creds come from env vars
+# (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION), NOT here.
+
+# --- Must fill in ---
+ssh_public_key       = "ssh-ed25519 AAAA... you@host"   # contents of your .pub
+cloudflare_api_token = "cf-token-with-dns-edit"          # sensitive
+cloudflare_zone_id   = "your-cloudflare-zone-id"
+
+# --- Recommended (lock down access) ---
+# admin_cidr = "your.ip/32"        # SSH + DB admin access
+# app_cidr   = "app.eip/32"        # app VPS allowed to reach ClickHouse/Postgres
+
+# --- Optional (defaults shown) ---
+# aws_region        = "us-east-1"
+# instance_type     = "m7i.2xlarge"
+# root_volume_gb    = 200
+# base_domain       = "tv.mirantegov.cloud"
+# github_repository = "mirantegov/tv"
+# repo_branch       = "main"

@@ -1,3 +1,0 @@
-# Um slug de tenant por linha. Exige um ../.env.<slug> correspondente no host.
-# Comentários com # e linhas em branco são ignorados.
-palotina

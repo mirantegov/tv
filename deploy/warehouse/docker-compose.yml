@@ -1,0 +1,41 @@
+# Data warehouse stack (ClickHouse + Postgres) for the Mirante Gov warehouse VPS.
+# Runs on the warehouse host via:
+#   docker compose --env-file ../../.env.warehouse -f docker-compose.yml up -d
+# (infra/warehouse/user_data.sh does this on first boot). Ports are published so
+# the EC2 security group controls who can reach them (admin_cidr / app_cidr).
+name: mirante-warehouse
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - chdata:/var/lib/clickhouse
+    ports:
+      - "8123:8123" # HTTP
+      - "9000:9000" # native
+      # - "8443:8443" # HTTPS (optional; enable with TLS config if needed)
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PGWH_USER}
+      POSTGRES_PASSWORD: ${PGWH_PASSWORD}
+      POSTGRES_DB: ${PGWH_DB}
+    volumes:
+      - pgwhdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  chdata:
+  pgwhdata:

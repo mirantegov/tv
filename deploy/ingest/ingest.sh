@@ -11,19 +11,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."   # deploy/
 
-TENANTS_FILE="${TENANTS_FILE:-tenants.txt}"
-
-while IFS= read -r slug; do
-	slug="${slug%%#*}"; slug="$(echo "$slug" | xargs)"
-	[ -z "$slug" ] && continue
-	envfile="../.env.${slug}"
+ingest_tenant() {
+	local slug="$1" envfile="../.env.$1"
 	[ -f "$envfile" ] || { echo "ERRO: $envfile ausente" >&2; exit 1; }
 	# shellcheck disable=SC1090
 	set -a; . "$envfile"; set +a
 
 	if [ -z "${CLICKHOUSE_HOST:-}" ]; then
 		echo "[ingest] ${slug}: CLICKHOUSE_HOST vazio — mantém seed, pulando"
-		continue
+		return 0
 	fi
 
 	echo "[ingest] ${slug}: recriando dados do warehouse"
@@ -41,4 +37,14 @@ while IFS= read -r slug; do
 	# Fazer tudo numa transação por tenant para não deixar o painel meio vazio.
 	# ---------------------------------------------------------------------
 	echo "[ingest] ${slug}: (extração ainda não implementada — ver TODO)"
-done < "$TENANTS_FILE"
+}
+
+# Percorre todos os grupos (stage + production). Stage normalmente pula (sem CH).
+for tf in tenants.*.txt; do
+	[ -f "$tf" ] || continue
+	while IFS= read -r slug; do
+		slug="${slug%%#*}"; slug="$(echo "$slug" | xargs)"
+		[ -z "$slug" ] && continue
+		ingest_tenant "$slug"
+	done < "$tf"
+done
