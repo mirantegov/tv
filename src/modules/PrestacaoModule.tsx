@@ -3,6 +3,11 @@ import { PC } from "../data";
 import { fmtInt } from "../format";
 import { useTheme } from "../theme";
 
+// MSC temporariamente desativado — alterações no portal do Tesouro Nacional
+// (SICONFI) impedem a extração dos dados. Volte para `true` quando conseguir
+// coletar as informações novamente; a seção completa continua abaixo intacta.
+const MSC_ATIVO = false;
+
 function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 	const { t } = useTheme();
 	const C = PC;
@@ -12,6 +17,7 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 		danger: t.danger,
 		info: t.primary,
 		muted: t.mutedFg,
+		off: t.mutedFg,
 	};
 	const Badge = ({ tone, children }) => (
 		<span
@@ -75,7 +81,12 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 			Atrasada: "danger",
 		})[s] || "muted";
 	const caucTone = (s) =>
-		({ ok: "Regular", warn: "Atenção", danger: "Irregular" })[s] || s;
+		({
+			ok: "Comprovado",
+			warn: "Atenção",
+			danger: "Irregular",
+			off: "Desativado",
+		})[s] || s;
 	const note = (txt) => (
 		<div
 			className="rounded-xl mb-5 text-xs leading-relaxed"
@@ -417,10 +428,10 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 												Exercício
 											</th>
 											<th className="text-left" style={th}>
-												Entrega
+												Trânsito em Julgado
 											</th>
 											<th className="text-left" style={th}>
-												Parecer Prévio (TCE)
+												Encaminhamento Parecer
 											</th>
 											<th className="text-left" style={th}>
 												Julgamento (Câmara)
@@ -507,8 +518,8 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 							<Kpi
 								label="Situação Geral"
 								value={C.siconfi.cauc.kpis.situacao}
-								accent={t.warn}
-								sub="qualquer pendência impede repasse"
+								accent={t.ok}
+								sub="apto a transferências voluntárias"
 							/>
 							<Kpi
 								label="Última Verificação"
@@ -530,7 +541,7 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 										<span
 											style={{ color: tones[to], fontWeight: 700, width: 14 }}
 										>
-											{to === "ok" ? "✓" : "!"}
+											{to === "ok" ? "✓" : to === "off" ? "⊘" : "!"}
 										</span>
 										<span
 											className="text-xs"
@@ -543,137 +554,168 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 								))}
 							</div>
 							<div className="text-xs mt-3" style={{ color: t.mutedFg }}>
-								Pendências em destaque:{" "}
-								<b style={{ color: t.danger }}>CRP previdenciário</b>{" "}
-								(regularizar junto ao RPPS/Ministério) e{" "}
-								<b style={{ color: t.warn }}>envio do RGF</b>. Enquanto houver
-								pendência, o município fica impedido de receber transferências
-								voluntárias.
+								<b style={{ color: t.ok }}>Situação regular</b> — sem pendências
+								que impeçam transferências voluntárias. Os itens{" "}
+								<b style={{ color: t.foreground }}>FGTS (CAIXA)</b> e{" "}
+								<b style={{ color: t.foreground }}>Anexo 12 do RREO ao SIOPS</b>{" "}
+								constam como <b>Desativados</b> no CAUC (indisponíveis por
+								decisão do próprio serviço, não caracterizam inadimplência do
+								ente).
 							</div>
 						</Card>
 					</Section>
 
-					<Section
-						num="2"
-						title="MSC"
-						desc="Matriz de Saldos Contábeis — remessas mensais e declarações derivadas."
-					>
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-							<Kpi
-								label="Competência Atual"
-								value={C.siconfi.msc.kpis.competencia}
-								accent={t.primary}
-								sub="último encerramento"
-							/>
-							<Kpi
-								label="Status de Envio"
-								value={C.siconfi.msc.kpis.status}
-								accent={t.ok}
-								sub="remessas mensais"
-							/>
-							<Kpi
-								label="Consistência"
-								value={C.siconfi.msc.kpis.consistencia}
-								sub="validação SICONFI"
-							/>
-							<Kpi
-								label="Declarações Geradas"
-								value={C.siconfi.msc.kpis.derivadas}
-								sub="a partir da MSC"
-							/>
-						</div>
-						<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-							<Card className="p-5 lg:col-span-2">
-								<Title>Remessas Mensais (MSC)</Title>
-								<div className="overflow-x-auto">
-									<table
-										className="w-full"
-										style={{ borderCollapse: "collapse", fontSize: 12.5 }}
-									>
-										<thead>
-											<tr style={{ color: t.mutedFg }}>
-												<th className="text-left" style={th}>
-													Competência
-												</th>
-												<th className="text-left" style={th}>
-													Envio
-												</th>
-												<th className="text-left" style={th}>
-													Status
-												</th>
-												<th className="text-right" style={th}>
-													Consistência
-												</th>
-											</tr>
-										</thead>
-										<tbody>
-											{C.siconfi.msc.remessas.map(([co, en, st, cs, to], i) => (
-												<tr
-													key={i}
-													style={{ borderTop: `1px solid ${t.border}` }}
-												>
-													<td
-														style={{
-															...td,
-															color: t.foreground,
-															fontWeight: 600,
-														}}
-													>
-														{co}
-													</td>
-													<td
-														className="tabular-nums"
-														style={{ ...td, color: t.mutedFg }}
-													>
-														{en}
-													</td>
-													<td style={td}>
-														<Badge tone={to}>{st}</Badge>
-													</td>
-													<td
-														className="text-right tabular-nums"
-														style={{
-															...td,
-															color: to === "warn" ? t.warn : t.foreground,
-														}}
-													>
-														{cs}
-													</td>
+					{MSC_ATIVO ? (
+						<Section
+							num="2"
+							title="MSC"
+							desc="Matriz de Saldos Contábeis — remessas mensais e declarações derivadas."
+						>
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+								<Kpi
+									label="Competência Atual"
+									value={C.siconfi.msc.kpis.competencia}
+									accent={t.primary}
+									sub="último encerramento"
+								/>
+								<Kpi
+									label="Status de Envio"
+									value={C.siconfi.msc.kpis.status}
+									accent={t.ok}
+									sub="remessas mensais"
+								/>
+								<Kpi
+									label="Consistência"
+									value={C.siconfi.msc.kpis.consistencia}
+									sub="validação SICONFI"
+								/>
+								<Kpi
+									label="Declarações Geradas"
+									value={C.siconfi.msc.kpis.derivadas}
+									sub="a partir da MSC"
+								/>
+							</div>
+							<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+								<Card className="p-5 lg:col-span-2">
+									<Title>Remessas Mensais (MSC)</Title>
+									<div className="overflow-x-auto">
+										<table
+											className="w-full"
+											style={{ borderCollapse: "collapse", fontSize: 12.5 }}
+										>
+											<thead>
+												<tr style={{ color: t.mutedFg }}>
+													<th className="text-left" style={th}>
+														Competência
+													</th>
+													<th className="text-left" style={th}>
+														Envio
+													</th>
+													<th className="text-left" style={th}>
+														Status
+													</th>
+													<th className="text-right" style={th}>
+														Consistência
+													</th>
 												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
-							</Card>
-							<Card className="p-5">
-								<Title>Declarações Derivadas</Title>
-								{C.siconfi.msc.declaracoes.map(([de, si, to], i) => (
-									<div
-										key={i}
-										className="rounded-lg mb-2"
-										style={{ background: t.muted, padding: "10px 12px" }}
-									>
-										<div className="flex items-center justify-between mb-1">
-											<span
-												className="text-xs font-semibold"
-												style={{ color: t.foreground }}
-											>
-												{de}
-											</span>
-											<Badge tone={to}>{to === "ok" ? "OK" : "Pendente"}</Badge>
-										</div>
-										<div className="text-xs" style={{ color: t.mutedFg }}>
-											{si}
-										</div>
+											</thead>
+											<tbody>
+												{C.siconfi.msc.remessas.map(
+													([co, en, st, cs, to], i) => (
+														<tr
+															key={i}
+															style={{ borderTop: `1px solid ${t.border}` }}
+														>
+															<td
+																style={{
+																	...td,
+																	color: t.foreground,
+																	fontWeight: 600,
+																}}
+															>
+																{co}
+															</td>
+															<td
+																className="tabular-nums"
+																style={{ ...td, color: t.mutedFg }}
+															>
+																{en}
+															</td>
+															<td style={td}>
+																<Badge tone={to}>{st}</Badge>
+															</td>
+															<td
+																className="text-right tabular-nums"
+																style={{
+																	...td,
+																	color: to === "warn" ? t.warn : t.foreground,
+																}}
+															>
+																{cs}
+															</td>
+														</tr>
+													),
+												)}
+											</tbody>
+										</table>
 									</div>
-								))}
-								<div className="text-xs mt-1" style={{ color: t.mutedFg }}>
-									RREO, RGF e DCA são gerados automaticamente a partir da MSC
-									homologada.
+								</Card>
+								<Card className="p-5">
+									<Title>Declarações Derivadas</Title>
+									{C.siconfi.msc.declaracoes.map(([de, si, to], i) => (
+										<div
+											key={i}
+											className="rounded-lg mb-2"
+											style={{ background: t.muted, padding: "10px 12px" }}
+										>
+											<div className="flex items-center justify-between mb-1">
+												<span
+													className="text-xs font-semibold"
+													style={{ color: t.foreground }}
+												>
+													{de}
+												</span>
+												<Badge tone={to}>
+													{to === "ok" ? "OK" : "Pendente"}
+												</Badge>
+											</div>
+											<div className="text-xs" style={{ color: t.mutedFg }}>
+												{si}
+											</div>
+										</div>
+									))}
+									<div className="text-xs mt-1" style={{ color: t.mutedFg }}>
+										RREO, RGF e DCA são gerados automaticamente a partir da MSC
+										homologada.
+									</div>
+								</Card>
+							</div>
+						</Section>
+					) : (
+						<Section
+							num="2"
+							title="MSC"
+							desc="Matriz de Saldos Contábeis — temporariamente indisponível."
+						>
+							<Card className="p-5">
+								<h4
+									className="text-sm font-semibold"
+									style={{ color: t.foreground }}
+								>
+									Item temporariamente desativado
+								</h4>
+								<div
+									className="text-xs mt-2 leading-relaxed"
+									style={{ color: t.mutedFg }}
+								>
+									A Matriz de Saldos Contábeis está indisponível no momento
+									devido a alterações no portal do Tesouro Nacional (SICONFI)
+									que impedem a extração das últimas informações. O item será
+									reativado assim que os dados voltarem a ser coletados.
 								</div>
 							</Card>
-						</div>
-					</Section>
+						</Section>
+					)}
 				</>
 			)}
 		</>
