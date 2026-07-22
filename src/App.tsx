@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AnalisesAlertas } from "./AnalisesAlertas";
 import LoginScreen from "./LoginScreen";
 import ContratosModule from "./modules/ContratosModule";
 import DespesaComparativoModule from "./modules/DespesaComparativoModule";
@@ -176,14 +177,32 @@ const LOCKED_PATHS = new Set([
 ]);
 
 function Shell({ onLogout }: { onLogout: () => void }) {
-	const { t, familyLabel } = useTheme();
+	const { t } = useTheme();
 	const { path, push } = useRouter();
 	const [navOpen, setNavOpen] = useState(false);
 	const [cfgOpen, setCfgOpen] = useState(false);
-	const [cfgSection, setCfgSection] = useState<"aparencia" | "modulos" | null>(
-		null,
-	);
+	const [cfgSection, setCfgSection] = useState<
+		"aparencia" | "modulos" | "extras" | null
+	>(null);
 	const [autoScroll, setAutoScroll] = useState(false);
+	// Extras · Análises e Alertas — ligado por padrão (mg_extras === "0" desliga)
+	const [extras, setExtras] = useState(() => {
+		try {
+			return localStorage.getItem("mg_extras") !== "0";
+		} catch {
+			return true;
+		}
+	});
+	const toggleExtras = () =>
+		setExtras((v) => {
+			const next = !v;
+			try {
+				localStorage.setItem("mg_extras", next ? "1" : "0");
+			} catch {
+				// localStorage indisponível — segue sem persistir
+			}
+			return next;
+		});
 	const [hidden, setHidden] = useState<Set<string>>(() => {
 		try {
 			return new Set(JSON.parse(localStorage.getItem("mg_modules") || "[]"));
@@ -320,7 +339,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 		id,
 		label,
 	}: {
-		id: "aparencia" | "modulos";
+		id: "aparencia" | "modulos" | "extras";
 		label: string;
 	}) => (
 		<button
@@ -592,6 +611,29 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 											))}
 									</div>
 								)}
+								<SectionBtn id="extras" label="Extras" />
+								{cfgSection === "extras" && (
+									<div style={{ padding: "0 0 4px" }}>
+										<button
+											type="button"
+											role="switch"
+											aria-checked={extras}
+											onClick={toggleExtras}
+											className="w-full rounded-md flex items-center gap-2 text-sm"
+											style={{
+												padding: "6px 10px 6px 18px",
+												background: "transparent",
+												border: "none",
+												color: t.foreground,
+												cursor: "pointer",
+												textAlign: "left",
+											}}
+										>
+											<Sw on={extras} />
+											<span style={{ flex: 1 }}>Análises e Alertas</span>
+										</button>
+									</div>
+								)}
 								<button
 									type="button"
 									role="switch"
@@ -745,10 +787,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 				</header>
 				<main className="px-4 sm:px-6 py-5 max-w-7xl mx-auto">
 					<Page />
-					<div className="text-xs mt-4" style={{ color: t.mutedFg }}>
-						Modelo de estrutura · dados fictícios · tema {familyLabel} · valores
-						em R$ milhões.
-					</div>
+					{extras && <AnalisesAlertas path={route.path} />}
 				</main>
 			</div>
 		</div>
