@@ -222,9 +222,6 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 					style={{ borderTop: `1px solid ${t.border}`, flexShrink: 0 }}
 				>
 					<ThemeConfig />
-					<div className="px-1 mt-2 text-xs" style={{ color: t.mutedFg }}>
-						Exercício 2026 · Jun
-					</div>
 				</div>
 			</aside>
 

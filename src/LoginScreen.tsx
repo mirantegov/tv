@@ -250,9 +250,6 @@ export default function LoginScreen({
 							>
 								Manter conectado neste dispositivo
 							</span>
-							<span className="text-xs" style={{ color: t.mutedFg }}>
-								Use apenas em equipamentos dedicados (ex.: painel em TV/kiosk).
-							</span>
 						</span>
 					</label>
 
