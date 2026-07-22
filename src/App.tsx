@@ -173,6 +173,10 @@ export const NAV_GROUPS = [
 // quando a Visão Geral está desativada, então fica sempre disponível)
 export const LOCKED_PATHS = new Set(["/panorama"]);
 
+// Chave sentinela em api.modulo_estado p/ ligar/desligar os Extras (Análises e
+// Alertas). Começa com "#" p/ nunca colidir com um path de navegação real.
+export const EXTRAS_KEY = "#extras";
+
 // Ícones dos submenus de Configurações (um path por seção, cor herda do botão).
 const SECTION_ICON_PATHS = {
 	display:
@@ -198,24 +202,6 @@ function Shell({
 		"display" | "aparencia" | "modulos" | "extras" | null
 	>(null);
 	const [autoScroll, setAutoScroll] = useState(false);
-	// Extras · Análises e Alertas — ligado por padrão (mg_extras === "0" desliga)
-	const [extras, setExtras] = useState(() => {
-		try {
-			return localStorage.getItem("mg_extras") !== "0";
-		} catch {
-			return true;
-		}
-	});
-	const toggleExtras = () =>
-		setExtras((v) => {
-			const next = !v;
-			try {
-				localStorage.setItem("mg_extras", next ? "1" : "0");
-			} catch {
-				// localStorage indisponível — segue sem persistir
-			}
-			return next;
-		});
 	const [hidden, setHidden] = useState<Set<string>>(() => {
 		try {
 			return new Set(JSON.parse(localStorage.getItem("mg_modules") || "[]"));
@@ -264,6 +250,11 @@ function Shell({
 			);
 			return next;
 		});
+	// Extras (Análises e Alertas) reusa o mecanismo dos módulos: estado no banco
+	// do tenant (api.modulo_estado, chave EXTRAS_KEY), só o admin altera e vale
+	// p/ todos. Ligado por padrão (ausência da chave = on).
+	const extras = !hidden.has(EXTRAS_KEY);
+	const toggleExtras = () => toggleModule(EXTRAS_KEY);
 	const visibleGroups = NAV_GROUPS.map((g) => ({
 		...g,
 		items: g.items.filter((i) => !hidden.has(i.path)),
@@ -719,8 +710,13 @@ function Shell({
 											))}
 									</div>
 								)}
-								<SectionBtn id="extras" label="Extras" />
-								{cfgSection === "extras" && (
+								<SectionBtn
+									id="extras"
+									label="Extras"
+									disabled={!isAdmin}
+									hint="Apenas o Administrador pode ativar/desativar os Extras."
+								/>
+								{cfgSection === "extras" && isAdmin && (
 									<div style={{ padding: "0 0 4px" }}>
 										<button
 											type="button"

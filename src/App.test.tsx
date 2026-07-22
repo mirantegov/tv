@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import App, { LOCKED_PATHS, NAV_GROUPS, ROUTES } from "./App";
+import App, { EXTRAS_KEY, LOCKED_PATHS, NAV_GROUPS, ROUTES } from "./App";
 
 beforeEach(() => {
 	localStorage.clear();
@@ -117,10 +117,17 @@ describe("Extras · Análises e Alertas", () => {
 		expect(screen.getByText("Análises e Alertas")).toBeInTheDocument();
 	});
 
-	it("mg_extras=0 esconde a seção", () => {
+	it("Extras desligado (chave no cache dos módulos) esconde a seção", () => {
 		login();
-		localStorage.setItem("mg_extras", "0");
+		localStorage.setItem("mg_modules", JSON.stringify([EXTRAS_KEY]));
 		render(<App />);
 		expect(screen.queryByText("Análises e Alertas")).not.toBeInTheDocument();
+	});
+
+	it("não-admin: Extras aparece desativado", () => {
+		login("suporte");
+		render(<App />);
+		fireEvent.click(screen.getByRole("button", { name: "Configurações" }));
+		expect(screen.getByRole("button", { name: /Extras/ })).toBeDisabled();
 	});
 });
