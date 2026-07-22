@@ -20,6 +20,24 @@ esac
 cd "$(dirname "$0")/$module"
 echo "==> módulo: $(pwd)"
 
+# 0) OPCIONAL: ENV_FILE=<path> carrega chaves de um .env (ex.: o seu .env.palotina)
+#    e as mapeia para as variáveis do OpenTofu. Assim você não precisa de
+#    terraform.tfvars. Cuidado: NÃO deixe chaves de nuvem no env do tenant que
+#    é montado no host de produção — prefira um arquivo só de provisionamento.
+if [ -n "${ENV_FILE:-}" ]; then
+	echo "==> carregando variáveis de ${ENV_FILE}"
+	[ -f "$ENV_FILE" ] || { echo "ERRO: $ENV_FILE não encontrado" >&2; exit 1; }
+	set -a; . "$ENV_FILE"; set +a
+	# AWS_* já têm o nome nativo (exportados pelo source acima). Mapeia o resto:
+	[ -n "${SSH_PUBLIC_KEY:-}" ]       && export TF_VAR_ssh_public_key="$SSH_PUBLIC_KEY"
+	[ -n "${AWS_SSH_KEY_NAME:-}" ]     && export TF_VAR_existing_key_name="$AWS_SSH_KEY_NAME"
+	[ -n "${CLOUDFLARE_API_TOKEN:-}" ] && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN"
+	[ -n "${CLOUDFLARE_ZONE_ID:-}" ]   && export TF_VAR_cloudflare_zone_id="$CLOUDFLARE_ZONE_ID"
+	[ -n "${ADMIN_CIDR:-}" ]           && export TF_VAR_admin_cidr="$ADMIN_CIDR"
+	[ -n "${APP_CIDR:-}" ]             && export TF_VAR_app_cidr="$APP_CIDR"
+	[ -n "${BASE_DOMAIN:-}" ]          && export TF_VAR_base_domain="$BASE_DOMAIN"
+fi
+
 # 1) Credenciais AWS só do ambiente (nunca de arquivo)
 missing=""
 for v in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION; do

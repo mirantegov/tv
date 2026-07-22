@@ -18,7 +18,10 @@ data "aws_ami" "al2023_arm64" {
   }
 }
 
+# Cria um key pair a partir de ssh_public_key APENAS se existing_key_name vazio.
+# Se você já tem uma chave na AWS, informe existing_key_name e deixe este de fora.
 resource "aws_key_pair" "mirante" {
+  count      = var.existing_key_name == "" ? 1 : 0
   key_name   = "mirante-tv"
   public_key = var.ssh_public_key
 }
@@ -28,7 +31,7 @@ resource "aws_security_group" "mirante" {
   description = "Mirante Gov multi-tenant VPS: HTTP/HTTPS public, SSH restricted."
 
   ingress {
-    description = "HTTP (Caddy / Let's Encrypt HTTP-01)"
+    description = "HTTP (Caddy / Lets Encrypt HTTP-01)"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -63,8 +66,15 @@ resource "aws_security_group" "mirante" {
 resource "aws_instance" "mirante" {
   ami                    = data.aws_ami.al2023_arm64.id
   instance_type          = var.instance_type
-  key_name               = aws_key_pair.mirante.key_name
+  key_name               = var.existing_key_name != "" ? var.existing_key_name : aws_key_pair.mirante[0].key_name
   vpc_security_group_ids = [aws_security_group.mirante.id]
+
+  lifecycle {
+    precondition {
+      condition     = var.existing_key_name != "" || var.ssh_public_key != ""
+      error_message = "Defina existing_key_name (chave já na AWS) OU ssh_public_key (cria uma nova)."
+    }
+  }
 
   user_data = templatefile("${path.module}/user_data.sh", {
     github_repository = var.github_repository
