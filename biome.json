@@ -15,8 +15,15 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
+			"preset": "recommended",
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noArrayIndexKey": "off"
+			}
 		}
+	},
+	"css": {
+		"linter": { "enabled": false }
 	},
 	"javascript": {
 		"formatter": {
