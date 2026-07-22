@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnalisesAlertas } from "./AnalisesAlertas";
+import { fetchHiddenModules, saveModuleHidden } from "./api";
 import { DataProvider } from "./DataProvider";
 import LoginScreen from "./LoginScreen";
 import ContratosModule from "./modules/ContratosModule";
@@ -18,6 +19,7 @@ import ReceitaModule from "./modules/ReceitaModule";
 import TributacaoModule from "./modules/TributacaoModule";
 import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
+import { API_URL } from "./tenant";
 import { ThemePanel, ThemeProvider, useTheme } from "./theme";
 import type { Role } from "./users";
 
@@ -221,19 +223,45 @@ function Shell({
 			return new Set();
 		}
 	});
+	// Estado dos módulos: o banco do tenant é a fonte da verdade (persiste no
+	// volume do Postgres → sobrevive a reinício do tenant e vale p/ todos os
+	// usuários); localStorage é só cache p/ pintar rápido e funcionar offline.
+	useEffect(() => {
+		if (!API_URL) return;
+		let cancel = false;
+		fetchHiddenModules()
+			.then((paths) => {
+				if (cancel) return;
+				setHidden(new Set(paths));
+				try {
+					localStorage.setItem("mg_modules", JSON.stringify(paths));
+				} catch {
+					// localStorage indisponível — ok, o banco é a fonte da verdade
+				}
+			})
+			.catch((e) => console.error("[modulos] falha ao carregar do banco:", e));
+		return () => {
+			cancel = true;
+		};
+	}, []);
 	const toggleModule = (p: string) =>
 		setHidden((prev) => {
 			const next = new Set(prev);
-			if (next.has(p)) {
-				next.delete(p);
-			} else {
+			const ocultar = !next.has(p);
+			if (ocultar) {
 				next.add(p);
+			} else {
+				next.delete(p);
 			}
 			try {
 				localStorage.setItem("mg_modules", JSON.stringify([...next]));
 			} catch {
-				// localStorage indisponível — segue sem persistir
+				// localStorage indisponível — segue sem persistir o cache
 			}
+			// Persiste no banco do tenant (upsert idempotente); no-op sem API_URL.
+			saveModuleHidden(p, ocultar).catch((e) =>
+				console.error("[modulos] falha ao salvar no banco:", e),
+			);
 			return next;
 		});
 	const visibleGroups = NAV_GROUPS.map((g) => ({
