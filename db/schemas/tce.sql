@@ -19,6 +19,7 @@ CREATE TABLE tce.agenda_resumo (
 -- PC.tce.agenda.colunas — catálogo das obrigações (AUD, RREO, RGF…)
 CREATE TABLE tce.obrigacoes (
 	sigla     text PRIMARY KEY,
+	ord       smallint NOT NULL,              -- ordem das colunas
 	descricao text NOT NULL
 );
 
@@ -46,16 +47,26 @@ CREATE TABLE tce.certidao (
 -- PC.tce.certidao.itens — requisitos avaliados na certidão
 CREATE TABLE tce.certidao_itens (
 	numero    text NOT NULL REFERENCES tce.certidao (numero),
+	ord       smallint NOT NULL,              -- ordem de exibição
 	descricao text NOT NULL,
 	status    text NOT NULL CHECK (status IN ('ok','warn','danger')),
 	PRIMARY KEY (numero, descricao)
 );
 
--- PC.tce.contas — prestação de contas anual (histórico)
+-- PC.tce.contas.kpis — resumo do exercício corrente em prestação
+CREATE TABLE tce.contas_resumo (
+	exercicio      smallint PRIMARY KEY,
+	parecer        text NOT NULL,             -- ex.: 'Em análise'
+	entrega        text NOT NULL,             -- data de entrega (exibida)
+	tempestividade text NOT NULL              -- ex.: '100%'
+);
+
+-- PC.tce.contas.historico — prestação de contas anual (histórico)
+-- Datas guardadas como texto (strings de exibição, ex.: '—', '29/01/2025').
 CREATE TABLE tce.contas (
-	exercicio         smallint PRIMARY KEY,
-	entrega           date,                   -- data de entrega ao TCE
-	parecer_tce       text NOT NULL,          -- ex.: 'Regular', 'Em análise'
-	julgamento_camara text,                   -- ex.: 'Aprovada'
-	situacao          text NOT NULL CHECK (situacao IN ('ok','warn','danger','info'))
+	exercicio           smallint PRIMARY KEY,
+	transito_em_julgado text NOT NULL,
+	encaminhamento_parecer text NOT NULL,
+	julgamento_camara   text NOT NULL,
+	tone                text NOT NULL CHECK (tone IN ('ok','warn','danger','info'))
 );

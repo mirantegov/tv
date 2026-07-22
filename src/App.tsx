@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnalisesAlertas } from "./AnalisesAlertas";
+import { DataProvider } from "./DataProvider";
 import LoginScreen from "./LoginScreen";
 import ContratosModule from "./modules/ContratosModule";
 import DespesaComparativoModule from "./modules/DespesaComparativoModule";
@@ -876,7 +877,11 @@ function AuthGate() {
 		setAuthed(false);
 	};
 	if (!authed) return <LoginScreen onLogin={login} />;
-	return <Shell onLogout={logout} isAdmin={role === "admin"} />;
+	return (
+		<DataProvider>
+			<Shell onLogout={logout} isAdmin={role === "admin"} />
+		</DataProvider>
+	);
 }
 
 export default function App() {

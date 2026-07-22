@@ -16,11 +16,13 @@ CREATE TABLE siconfi.cauc_resumo (
 );
 
 -- PC.siconfi.cauc.itens — exigências do CAUC e situação
+-- 'off' = exigência desativada pelo próprio serviço (não é inadimplência)
 CREATE TABLE siconfi.cauc_itens (
 	exercicio   smallint NOT NULL,
 	verificacao date NOT NULL,
+	ord         smallint NOT NULL,            -- ordem de exibição
 	exigencia   text NOT NULL,                -- ex.: 'Regularidade previdenciária — RPPS (CRP)'
-	status      text NOT NULL CHECK (status IN ('ok','warn','danger')),
+	status      text NOT NULL CHECK (status IN ('ok','warn','danger','off')),
 	PRIMARY KEY (exercicio, verificacao, exigencia)
 );
 
@@ -38,6 +40,7 @@ CREATE TABLE siconfi.msc_remessas (
 -- PC.siconfi.msc.declaracoes — declarações derivadas (RREO, RGF, DCA)
 CREATE TABLE siconfi.declaracoes (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição
 	declaracao text NOT NULL,                 -- ex.: 'RREO — 2º bimestre'
 	situacao   text NOT NULL,                 -- ex.: 'Gerado e homologado'
 	status     text NOT NULL CHECK (status IN ('ok','warn','danger')),

@@ -24,6 +24,7 @@ CREATE TABLE despesa.resumo (
 -- D.funcoes — execução por função de governo
 CREATE TABLE despesa.funcoes (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	funcao    text NOT NULL,
 	empenhado numeric(14,2) NOT NULL,
 	liquidado numeric(14,2) NOT NULL,
@@ -34,6 +35,7 @@ CREATE TABLE despesa.funcoes (
 -- D.gnd — grupos de natureza da despesa
 CREATE TABLE despesa.gnd (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	grupo     text NOT NULL,
 	empenhado numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, grupo)
@@ -52,6 +54,7 @@ CREATE TABLE despesa.mensal (
 -- D.orgaos — execução por órgão/secretaria
 CREATE TABLE despesa.orgaos (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,
 	orgao     text NOT NULL,
 	dotacao   numeric(14,2) NOT NULL,
 	empenhado numeric(14,2) NOT NULL,
@@ -62,6 +65,7 @@ CREATE TABLE despesa.orgaos (
 -- D.gov — limites constitucionais/legais (ASPS, MDE, Pessoal/RCL)
 CREATE TABLE despesa.limites (
 	exercicio    smallint NOT NULL,
+	ord          smallint NOT NULL,
 	indicador    text NOT NULL,               -- ex.: 'Saúde (ASPS)'
 	aplicado_pct numeric(6,2) NOT NULL,
 	escala_pct   numeric(6,2) NOT NULL,       -- fundo de escala do gauge
