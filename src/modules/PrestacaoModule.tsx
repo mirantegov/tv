@@ -1,5 +1,5 @@
 import { Card, Kpi, Title } from "../components";
-import { PC } from "../data";
+import { useData } from "../DataProvider";
 import { fmtInt } from "../format";
 import { useTheme } from "../theme";
 
@@ -10,6 +10,7 @@ const MSC_ATIVO = false;
 
 function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 	const { t } = useTheme();
+	const { PC } = useData();
 	const C = PC;
 	const tones = {
 		ok: t.ok,

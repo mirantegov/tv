@@ -8,11 +8,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, Donut, HBar, Kpi, LegendDot, Tip, Title } from "../components";
-import { D } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function DespesaModule() {
+	const { D } = useData();
 	const { t, cats } = useTheme();
 	const stages = [
 		["Dotação Atualizada", D.dotacao, null],
