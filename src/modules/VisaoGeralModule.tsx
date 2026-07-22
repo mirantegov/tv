@@ -1,4 +1,4 @@
-import { Card, Delta, Kpi, Title } from "../components";
+import { Delta, Kpi } from "../components";
 import { CON, D, F, FP, LIC, PLAN as P, PA, R, TB } from "../data";
 import { brl, dP, fmt, fmtInt, pct, vari } from "../format";
 import { Link } from "../router";
@@ -6,66 +6,6 @@ import { useTheme } from "../theme";
 
 export default function VisaoGeralModule() {
 	const { t } = useTheme();
-	const alertas = [
-		[
-			"danger",
-			"CAUC com pendência — CRP previdenciário irregular",
-			"Bloqueia transferências voluntárias e convênios com a União.",
-			"/prestacao",
-			"Regularizar",
-		],
-		[
-			"danger",
-			"Fonte vinculada com saldo negativo — Royalties (− R$ 0,8 mi)",
-			"Indica uso de recurso de outra destinação; recompor antes do fechamento.",
-			"/financeiro-analises",
-			"Ver fontes",
-		],
-		[
-			"danger",
-			"Obrigação TCE-PR não atendida — RREO (Município)",
-			"Publicidade do RREO pendente no período; sujeita a apontamento.",
-			"/prestacao",
-			"Ver agenda",
-		],
-		[
-			"warn",
-			"Pessoal/RCL em 49,2% — acima do limite de alerta (48,6%)",
-			"Ainda abaixo do prudencial (51,3%); monitorar reajustes e nomeações.",
-			"/folha",
-			"Ver LRF",
-		],
-		[
-			"warn",
-			"18 contratos vencem em 90 dias (R$ 42,0 mi)",
-			"Iniciar renovações/licitações para evitar contratação emergencial.",
-			"/contratos",
-			"Ver vigências",
-		],
-		[
-			"warn",
-			"Certidão Liberatória vence em 27 dias",
-			"Renovar junto ao TCE-PR para não travar repasses estaduais.",
-			"/prestacao",
-			"Ver certidão",
-		],
-		[
-			"warn",
-			"MSC pendente — competência 06/2026 (SICONFI)",
-			"Remessa mensal da Matriz de Saldos Contábeis em atraso; regularizar no SICONFI.",
-			"/prestacao",
-			"Ver SICONFI",
-		],
-	];
-	const emDia = [
-		["Saúde 18,4%", "mín. 15% ✓"],
-		["Educação 27,5%", "mín. 25% ✓"],
-		["Duodécimo 5,8%", "teto 6% ✓"],
-		["Taxa adm. RPPS 0,52%", "teto 2% ✓"],
-		["Conciliação 87,5%", "42/48 contas"],
-		["Art. 29-A (Câmara)", "dentro do teto ✓"],
-	];
-	const tone = { danger: t.danger, warn: t.warn };
 	const L = FP.lrf;
 	const lrfStatus =
 		L.pct >= L.prudencial ? t.danger : L.pct >= L.alerta ? t.warn : t.ok;
@@ -564,75 +504,6 @@ export default function VisaoGeralModule() {
 					/>
 				</div>
 			</Section>
-
-			{/* espaço duplo antes do quadro de alertas */}
-			<div className="h-10" />
-			<Card className="p-5">
-				<Title
-					right={
-						<span className="text-xs" style={{ color: t.mutedFg }}>
-							3 críticos · 4 atenção
-						</span>
-					}
-				>
-					Alertas do Gestor
-				</Title>
-				<div className="flex flex-col gap-2">
-					{alertas.map(([tn, titulo, det, href, acao], i) => (
-						<div
-							key={i}
-							className="rounded-lg flex flex-col sm:flex-row sm:items-center gap-2"
-							style={{
-								background: t.muted,
-								padding: "11px 13px",
-								borderLeft: `3px solid ${tone[tn]}`,
-							}}
-						>
-							<div style={{ flex: 1 }}>
-								<div
-									className="text-xs font-semibold"
-									style={{ color: t.foreground }}
-								>
-									{titulo}
-								</div>
-								<div className="text-xs mt-0.5" style={{ color: t.mutedFg }}>
-									{det}
-								</div>
-							</div>
-							<Link
-								href={href}
-								className="text-xs font-semibold rounded-md"
-								style={{
-									padding: "6px 12px",
-									background: t.card,
-									border: `1px solid ${t.border}`,
-									color: tone[tn],
-									textDecoration: "none",
-									whiteSpace: "nowrap",
-									alignSelf: "flex-start",
-								}}
-							>
-								{acao} →
-							</Link>
-						</div>
-					))}
-				</div>
-				<div className="flex flex-wrap gap-2 mt-3">
-					{emDia.map(([a, b], i) => (
-						<span
-							key={i}
-							className="text-xs rounded-full"
-							style={{
-								padding: "4px 12px",
-								background: t.muted,
-								color: t.mutedFg,
-							}}
-						>
-							<b style={{ color: t.ok }}>{a}</b> · {b}
-						</span>
-					))}
-				</div>
-			</Card>
 		</>
 	);
 }
