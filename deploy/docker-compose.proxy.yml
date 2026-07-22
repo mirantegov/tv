@@ -1,0 +1,27 @@
+# Proxy reverso compartilhado (Caddy) — termina TLS (Let's Encrypt automático)
+# e roteia cada <slug>.tv.mirantegov.cloud para os containers do tenant.
+# Único serviço que publica 80/443. Fica na rede externa `edge`, junto dos
+# web-<slug> / api-<slug>. Caddyfile é gerado por gen-caddyfile.sh.
+name: mirante-proxy
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+
+networks:
+  edge:
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:
