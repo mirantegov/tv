@@ -1,10 +1,11 @@
 import { Delta, Kpi } from "../components";
-import { CON, D, F, FP, LIC, PLAN as P, PA, R, TB } from "../data";
+import { useData } from "../DataProvider";
 import { brl, dP, fmt, fmtInt, pct, vari } from "../format";
 import { Link } from "../router";
 import { useTheme } from "../theme";
 
 export default function VisaoGeralModule() {
+	const { CON, D, F, FP, LIC, PLAN: P, PA, R, TB } = useData();
 	const { t } = useTheme();
 	const L = FP.lrf;
 	const lrfStatus =

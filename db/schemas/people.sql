@@ -68,6 +68,7 @@ CREATE TABLE people.absenteismo (
 -- PA.tempo — distribuição por tempo de serviço
 CREATE TABLE people.tempo_servico (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição (faixa não é ordenável por texto/valor)
 	faixa      text NOT NULL,                 -- ex.: '10–15'
 	servidores integer NOT NULL,
 	PRIMARY KEY (exercicio, faixa)
@@ -90,6 +91,7 @@ CREATE TABLE people.elegiveis_projecao (
 -- PA.quadro — quadro de pessoal por órgão
 CREATE TABLE people.quadro (
 	exercicio     smallint NOT NULL,
+	ord           smallint NOT NULL,          -- ordem de exibição
 	orgao         text NOT NULL,
 	headcount     integer NOT NULL,
 	efetivos      integer NOT NULL,
@@ -103,6 +105,7 @@ CREATE TABLE people.quadro (
 -- PA.sucessao — risco sucessório por carreira
 CREATE TABLE people.sucessao (
 	exercicio       smallint NOT NULL,
+	ord             smallint NOT NULL,        -- ordem de exibição
 	carreira        text NOT NULL,
 	elegiveis_hoje  integer NOT NULL,
 	elegiveis_5anos integer NOT NULL,

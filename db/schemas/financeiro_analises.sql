@@ -26,6 +26,7 @@ CREATE TABLE financeiro_analises.resumo (
 -- FA.fontes — saldo × obrigações por fonte (negativo = alerta)
 CREATE TABLE financeiro_analises.fontes (
 	exercicio  smallint NOT NULL,
+	ord        smallint NOT NULL,             -- ordem de exibição (não é value-sortable)
 	fonte      text NOT NULL,                 -- ex.: 'Royalties / Compensações'
 	saldo      numeric(14,2) NOT NULL,
 	obrigacoes numeric(14,2) NOT NULL,

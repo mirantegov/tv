@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Card, Donut, HBar, Kpi, Title } from "../components";
-import { PLAN } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function PlanejamentoModule() {
+	const { PLAN } = useData();
 	const { t } = useTheme();
 	const [aba, setAba] = useState("integral");
 	const abas = [

@@ -19,11 +19,12 @@ import {
 	Title,
 	TreeReceita,
 } from "../components";
-import { R } from "../data";
+import { useData } from "../DataProvider";
 import { brl, fmt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function ReceitaModule() {
+	const { R } = useData();
 	const { t, cats } = useTheme();
 	const [sub, setSub] = useState("geral");
 	const subs = [

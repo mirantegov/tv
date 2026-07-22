@@ -1,6 +1,6 @@
-// Provedor de dados por tenant. Com API_URL busca do PostgREST; sem ela (dev,
-// testes, ou API fora do ar) cai no fallback embutido de data.ts. Os módulos
-// migrados leem via useData(); os demais seguem importando de data.ts direto.
+// Provedor de dados por tenant. Com API_URL busca do PostgREST (uma chamada por
+// módulo, em paralelo); sem ela (dev/testes) ou se a API cair, cai no fallback
+// embutido de data.ts. Os módulos leem via useData().
 import {
 	createContext,
 	type ReactNode,
@@ -9,18 +9,113 @@ import {
 	useState,
 } from "react";
 import { fetchModule } from "./api";
-import { D as Dseed, PC as PCseed } from "./data";
+import {
+	CD as CDseed,
+	CON as CONseed,
+	CR as CRseed,
+	D as Dseed,
+	FA as FAseed,
+	FP as FPseed,
+	F as Fseed,
+	LIC as LICseed,
+	PAN as PANseed,
+	PA as PAseed,
+	PC as PCseed,
+	PLAN as PLANseed,
+	R as Rseed,
+	TB as TBseed,
+} from "./data";
 import { API_URL } from "./tenant";
-import type { Despesa, PrestacaoContas } from "./types";
+import type {
+	Contratos,
+	Despesa,
+	DespesaComp,
+	Financeiro,
+	FinanceiroAnalises,
+	Folha,
+	Licitacoes,
+	Panorama,
+	People,
+	Planejamento,
+	PrestacaoContas,
+	Receita,
+	ReceitaComp,
+	Tributacao,
+} from "./types";
 
 export interface TenantData {
 	D: Despesa;
+	CD: DespesaComp;
+	R: Receita;
+	CR: ReceitaComp;
+	F: Financeiro;
+	FA: FinanceiroAnalises;
+	TB: Tributacao;
+	FP: Folha;
+	PA: People;
+	LIC: Licitacoes;
+	CON: Contratos;
+	PLAN: Planejamento;
 	PC: PrestacaoContas;
+	PAN: Panorama;
 }
 
-const seed: TenantData = { D: Dseed, PC: PCseed };
+const seed: TenantData = {
+	D: Dseed,
+	CD: CDseed,
+	R: Rseed,
+	CR: CRseed,
+	F: Fseed,
+	FA: FAseed,
+	TB: TBseed,
+	FP: FPseed,
+	PA: PAseed,
+	LIC: LICseed,
+	CON: CONseed,
+	PLAN: PLANseed,
+	PC: PCseed,
+	PAN: PANseed,
+};
+
 const Ctx = createContext<TenantData>(seed);
 export const useData = () => useContext(Ctx);
+
+async function loadTenantData(): Promise<TenantData> {
+	const [D, CD, R, CR, F, FA, TB, FP, PA, LIC, CON, PLAN, PAN, tce, siconfi] =
+		await Promise.all([
+			fetchModule<Despesa>("despesa"),
+			fetchModule<DespesaComp>("despesa_comp"),
+			fetchModule<Receita>("receita"),
+			fetchModule<ReceitaComp>("receita_comp"),
+			fetchModule<Financeiro>("financeiro"),
+			fetchModule<FinanceiroAnalises>("financeiro_analises"),
+			fetchModule<Tributacao>("tributacao"),
+			fetchModule<Folha>("folha"),
+			fetchModule<People>("people"),
+			fetchModule<Licitacoes>("licitacoes"),
+			fetchModule<Contratos>("contratos"),
+			fetchModule<Planejamento>("planejamento"),
+			fetchModule<Panorama>("panorama"),
+			fetchModule<PrestacaoContas["tce"]>("tce"),
+			fetchModule<PrestacaoContas["siconfi"]>("siconfi"),
+		]);
+	return {
+		D,
+		CD,
+		R,
+		CR,
+		F,
+		FA,
+		TB,
+		FP,
+		PA,
+		LIC,
+		CON,
+		PLAN,
+		PAN,
+		PC: { tce, siconfi },
+	};
+}
 
 export function DataProvider({ children }: { children: ReactNode }) {
 	// Sem API_URL já entra com o seed (render síncrono — não quebra testes).
@@ -29,20 +124,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		if (!API_URL) return;
 		let cancel = false;
-		(async () => {
-			try {
-				const [D, tce, siconfi] = await Promise.all([
-					fetchModule<Despesa>("despesa"),
-					fetchModule<PrestacaoContas["tce"]>("tce"),
-					fetchModule<PrestacaoContas["siconfi"]>("siconfi"),
-				]);
-				if (!cancel) setData({ D, PC: { tce, siconfi } });
-			} catch (e) {
+		loadTenantData()
+			.then((d) => {
+				if (!cancel) setData(d);
+			})
+			.catch((e) => {
 				// API indisponível → segue com data.ts para não derrubar o painel.
 				console.error("[DataProvider] API indisponível, usando data.ts:", e);
 				if (!cancel) setData(seed);
-			}
-		})();
+			});
 		return () => {
 			cancel = true;
 		};

@@ -27,6 +27,7 @@ CREATE TABLE planejamento.entidades (
 -- PLAN.intraDet — transferências intraorçamentárias
 CREATE TABLE planejamento.intra (
 	exercicio smallint NOT NULL,
+	ord       smallint NOT NULL,             -- ordem de apresentação (valores empatam)
 	descricao text NOT NULL,                 -- ex.: 'Duodécimo (Pref. → Câmara)'
 	valor     numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, descricao)
@@ -58,6 +59,7 @@ CREATE TABLE planejamento.prefeitura (
 CREATE TABLE planejamento.prefeitura_aberturas (
 	exercicio smallint NOT NULL,
 	dimensao  text NOT NULL CHECK (dimensao IN ('receita_origem','despesa_grupo','funcao','repasses')),
+	ord       smallint NOT NULL,             -- ordem dentro da dimensão (funcao não é ordenável por valor)
 	item      text NOT NULL,
 	valor     numeric(14,2) NOT NULL,
 	PRIMARY KEY (exercicio, dimensao, item)

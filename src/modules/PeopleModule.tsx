@@ -11,11 +11,12 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, Donut, Kpi, LegendDot, TipNum, Title } from "../components";
-import { PA } from "../data";
+import { useData } from "../DataProvider";
 import { fmt, fmtInt, pct } from "../format";
 import { useTheme } from "../theme";
 
 export default function PeopleModule() {
+	const { PA } = useData();
 	const { t, cats, prev } = useTheme();
 	const totDias = PA.absent.reduce((s, a) => s + a[1], 0);
 	return (

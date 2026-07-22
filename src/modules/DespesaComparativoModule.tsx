@@ -8,11 +8,12 @@ import {
 	Title,
 	TreeCmp,
 } from "../components";
-import { CD } from "../data";
+import { useData } from "../DataProvider";
 import { vari } from "../format";
 import { useTheme } from "../theme";
 
 export default function DespesaComparativoModule() {
+	const { CD } = useData();
 	const { t, prev, cur } = useTheme();
 	const fv = CD.func
 		.map(([n, a, b]) => ({ nome: n, ...vari(a, b) }))
