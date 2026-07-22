@@ -581,6 +581,54 @@ export interface PanIndicador {
 	ano: number;
 	ibge?: boolean;
 }
+
+/** Limite fiscal/constitucional (Consulta TCE-PR — consolidado do município). */
+export interface PanLimite {
+	valor: number;
+	pct: number;
+	limite: number; // teto (LRF/Senado) ou mínimo (CF)
+	tipo: "teto" | "minimo";
+	base?: number; // base de cálculo (educação/saúde)
+	parcial?: boolean; // acumulado até o mês consolidado (não é o fechamento do exercício)
+}
+
+/** Bloco fiscal e de acompanhamento do TCE-PR (Consulta da entidade). */
+export interface PanoramaTCE {
+	gestor: string;
+	exercicio: number;
+	referencia: string; // competência dos dados declarados, ex. "5/2026"
+	ultimoEnvio: string; // data do último envio de informações
+	mesConsolidado: number; // mês até o qual o consolidado do município está fechado
+	processos: [orgao: string, qtde: number][];
+	processosTotal: number;
+	certidao: { numero: string; emissao: string; validade: string };
+	obras: [status: string, valor: number, qtde: number, tone: Tone][];
+	previsao: { loa: string; receitaPrevista: number; despesaFixada: number };
+	execucao: {
+		receitaAtualizada: number;
+		receitaArrecadada: number;
+		dotacaoAtualizada: number;
+		despesaEmpenhada: number;
+	};
+	rcl: number;
+	limites: {
+		pessoal: PanLimite;
+		educacao: PanLimite;
+		saude: PanLimite;
+		divida: PanLimite;
+		opCredito: PanLimite;
+	};
+	indicadores: [
+		grupo: string,
+		itens: [
+			nome: string,
+			municipio: number,
+			mediana: number,
+			maiorMelhor: boolean,
+			unidade: string,
+		][],
+	][];
+}
 export interface Panorama {
 	municipio: string;
 	uf: string;
@@ -628,4 +676,5 @@ export interface Panorama {
 		hierarquia: string;
 	};
 	idhm: { v: string; ano: number; ibge?: boolean; faixa: string };
+	tce?: PanoramaTCE;
 }
