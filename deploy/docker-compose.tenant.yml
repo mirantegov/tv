@@ -1,0 +1,74 @@
+# Stack de UM tenant em produção (web + db + api), atrás do proxy Caddy.
+# Sobe com:  docker compose -p <slug> --env-file ../.env.<slug> -f docker-compose.tenant.yml up -d
+# (o deploy.sh faz isso para cada tenant). web/api entram na rede `edge`
+# (compartilhada com o Caddy) com aliases fixos <role>-<slug>; db fica só na
+# rede interna. Sem portas publicadas — quem expõe 80/443 é o Caddy.
+name: mirante-${TENANT_SLUG}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TENANT_ID: ${TENANT_ID}
+      TENANT_SLUG: ${TENANT_SLUG}
+      TENANT_NOME: ${TENANT_NOME}
+      TENANT_UF: ${TENANT_UF}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../db/init:/docker-entrypoint-initdb.d:ro
+      - ../db/schemas:/schemas:ro
+      - ../db/api:/api:ro
+      - ../db/seed:/seed:ro
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    image: postgrest/postgrest:v12.2.3
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      PGRST_DB_SCHEMAS: api
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_SERVER_PORT: 3000
+    networks:
+      internal:
+      edge:
+        aliases:
+          - api-${TENANT_SLUG}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      TENANT_ID: ${TENANT_ID}
+      TENANT_SLUG: ${TENANT_SLUG}
+      TENANT_NOME: ${TENANT_NOME}
+      TENANT_UF: ${TENANT_UF}
+      # Mesmo domínio do front; o Caddy roteia /api -> PostgREST.
+      API_URL: "https://${TENANT_SLUG}.${BASE_DOMAIN}/api"
+    networks:
+      edge:
+        aliases:
+          - web-${TENANT_SLUG}
+    depends_on:
+      - api
+
+networks:
+  internal:
+  edge:
+    external: true
+
+volumes:
+  pgdata:
