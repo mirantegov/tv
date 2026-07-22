@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import { ThemeProvider, useTheme, ThemeConfig } from "./theme";
 import { RouterProvider, useRouter, Link } from "./router";
 import LoginScreen from "./LoginScreen";
-import VisaoGeralModule from "./VisaoGeralModule";
-import PanoramaModule from "./PanoramaModule";
-import PlanejamentoModule from "./PlanejamentoModule";
-import DespesaModule from "./DespesaModule";
-import DespesaComparativoModule from "./DespesaComparativoModule";
-import ReceitaModule from "./ReceitaModule";
-import ReceitaComparativoModule from "./ReceitaComparativoModule";
-import FinanceiroModule from "./FinanceiroModule";
-import TributacaoModule from "./TributacaoModule";
-import FolhaModule from "./FolhaModule";
-import PeopleModule from "./PeopleModule";
-import LicitacoesModule from "./LicitacoesModule";
-import ContratosModule from "./ContratosModule";
-import PrestacaoModule from "./PrestacaoModule";
-import FinanceiroAnalisesModule from "./FinanceiroAnalisesModule";
+import VisaoGeralModule from "./modules/VisaoGeralModule";
+import PanoramaModule from "./modules/PanoramaModule";
+import PlanejamentoModule from "./modules/PlanejamentoModule";
+import DespesaModule from "./modules/DespesaModule";
+import DespesaComparativoModule from "./modules/DespesaComparativoModule";
+import ReceitaModule from "./modules/ReceitaModule";
+import ReceitaComparativoModule from "./modules/ReceitaComparativoModule";
+import FinanceiroModule from "./modules/FinanceiroModule";
+import TributacaoModule from "./modules/TributacaoModule";
+import FolhaModule from "./modules/FolhaModule";
+import PeopleModule from "./modules/PeopleModule";
+import LicitacoesModule from "./modules/LicitacoesModule";
+import ContratosModule from "./modules/ContratosModule";
+import PrestacaoModule from "./modules/PrestacaoModule";
+import FinanceiroAnalisesModule from "./modules/FinanceiroAnalisesModule";
 
 const ROUTES = [
   { path: "/", title: "Visão Geral", el: VisaoGeralModule },

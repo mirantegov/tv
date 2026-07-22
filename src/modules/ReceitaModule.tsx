@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot, TreeReceita } from "./components";
-import { fmt, brl, pct } from "./format";
-import { R } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot, TreeReceita } from "../components";
+import { fmt, brl, pct } from "../format";
+import { R } from "../data";
 
 export default function ReceitaModule() {
   const { t, cats } = useTheme();

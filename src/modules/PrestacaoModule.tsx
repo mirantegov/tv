@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useTheme } from "./theme";
-import { Card, Title, Kpi } from "./components";
-import { fmtInt, sg } from "./format";
-import { PC } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Kpi } from "../components";
+import { fmtInt, sg } from "../format";
+import { PC } from "../data";
 
 export default function PrestacaoModule() {
   const { t } = useTheme();

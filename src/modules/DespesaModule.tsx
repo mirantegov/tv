@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "./components";
-import { fmt, brl, pct } from "./format";
-import { D } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "../components";
+import { fmt, brl, pct } from "../format";
+import { D } from "../data";
 
 export default function DespesaModule() {
   const { t, cats } = useTheme();

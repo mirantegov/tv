@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, TipNum, Kpi, Donut, LegendDot } from "./components";
-import { fmt, pct, fmtInt } from "./format";
-import { PA } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, TipNum, Kpi, Donut, LegendDot } from "../components";
+import { fmt, pct, fmtInt } from "../format";
+import { PA } from "../data";
 
 export default function PeopleModule() {
   const { t, cats, prev, cur } = useTheme();

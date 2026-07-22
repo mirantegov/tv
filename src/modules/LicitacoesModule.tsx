@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "./components";
-import { fmt, brl, pct, fmtInt } from "./format";
-import { LIC } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "../components";
+import { fmt, brl, pct, fmtInt } from "../format";
+import { LIC } from "../data";
 
 export default function LicitacoesModule() {
   const { t, cats } = useTheme();

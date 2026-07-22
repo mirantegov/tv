@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, HBar, LegendDot } from "./components";
-import { fmt, brl, pct, dP } from "./format";
-import { TB } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, HBar, LegendDot } from "../components";
+import { fmt, brl, pct, dP } from "../format";
+import { TB } from "../data";
 
 export default function TributacaoModule() {
   const { t, cats, prev, cur } = useTheme();

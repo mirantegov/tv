@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, LineChart, Line, ComposedChart, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "./components";
-import { fmt, brl, dR } from "./format";
-import { F } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "../components";
+import { fmt, brl, dR } from "../format";
+import { F } from "../data";
 
 export default function FinanceiroModule() {
   const { t, cats, prev, cur } = useTheme();

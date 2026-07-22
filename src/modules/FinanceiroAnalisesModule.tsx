@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, AreaChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, Donut, HBar } from "./components";
-import { fmt, brl, pct, fmtInt } from "./format";
-import { FA } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, Donut, HBar } from "../components";
+import { fmt, brl, pct, fmtInt } from "../format";
+import { FA } from "../data";
 
 export default function FinanceiroAnalisesModule() {
   const { t, cats } = useTheme();

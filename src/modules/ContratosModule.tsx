@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "./components";
-import { fmt, brl, pct, fmtInt } from "./format";
-import { CON } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Tip, Kpi, Donut, HBar, LegendDot } from "../components";
+import { fmt, brl, pct, fmtInt } from "../format";
+import { CON } from "../data";
 
 export default function ContratosModule() {
   const { t, cats } = useTheme();

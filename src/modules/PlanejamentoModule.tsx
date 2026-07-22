@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useTheme } from "./theme";
-import { Card, Title, Kpi, Donut, HBar } from "./components";
-import { fmt, brl, pct, fmtInt } from "./format";
-import { PLAN } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Kpi, Donut, HBar } from "../components";
+import { fmt, brl, pct, fmtInt } from "../format";
+import { PLAN } from "../data";
 
 export default function PlanejamentoModule() {
   const { t, cats } = useTheme();

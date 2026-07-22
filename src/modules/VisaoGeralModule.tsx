@@ -1,9 +1,9 @@
 import React from "react";
-import { useTheme } from "./theme";
-import { Link } from "./router";
-import { Card, Title, Delta, Kpi } from "./components";
-import { fmt, brl, pct, fmtInt, dP, vari } from "./format";
-import { D, R, F, TB, FP, PA, LIC, CON, PLAN as P } from "./data";
+import { useTheme } from "../theme";
+import { Link } from "../router";
+import { Card, Title, Delta, Kpi } from "../components";
+import { fmt, brl, pct, fmtInt, dP, vari } from "../format";
+import { D, R, F, TB, FP, PA, LIC, CON, PLAN as P } from "../data";
 
 export default function VisaoGeralModule() {
   const { t, cats } = useTheme();

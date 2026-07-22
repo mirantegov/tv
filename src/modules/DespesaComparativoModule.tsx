@@ -1,8 +1,8 @@
 import React from "react";
-import { useTheme } from "./theme";
-import { Card, Title, Delta, KpiCmp, GroupedBars, Diverging, LegendDot, TreeCmp } from "./components";
-import { vari } from "./format";
-import { CD } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Delta, KpiCmp, GroupedBars, Diverging, LegendDot, TreeCmp } from "../components";
+import { vari } from "../format";
+import { CD } from "../data";
 
 export default function DespesaComparativoModule() {
   const { t, prev, cur } = useTheme();

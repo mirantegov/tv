@@ -1,7 +1,7 @@
 import React from "react";
-import { useTheme } from "./theme";
-import { Card } from "./components";
-import { PAN } from "./data";
+import { useTheme } from "../theme";
+import { Card } from "../components";
+import { PAN } from "../data";
 
 export default function PanoramaModule() {
   const { t } = useTheme();

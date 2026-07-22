@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Delta, Tip, Kpi, Donut, HBar, LegendDot } from "./components";
-import { fmt, brl, pct, fmtInt, vari } from "./format";
-import { FP } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Delta, Tip, Kpi, Donut, HBar, LegendDot } from "../components";
+import { fmt, brl, pct, fmtInt, vari } from "../format";
+import { FP } from "../data";
 
 export default function FolhaModule() {
   const { t, cats, prev, cur } = useTheme();

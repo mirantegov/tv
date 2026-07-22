@@ -1,9 +1,9 @@
 import React from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
-import { useTheme } from "./theme";
-import { Card, Title, Delta, Tip, KpiCmp, GroupedBars, Diverging, LegendDot, TreeCmp } from "./components";
-import { dP, vari } from "./format";
-import { CR } from "./data";
+import { useTheme } from "../theme";
+import { Card, Title, Delta, Tip, KpiCmp, GroupedBars, Diverging, LegendDot, TreeCmp } from "../components";
+import { dP, vari } from "../format";
+import { CR } from "../data";
 
 export default function ReceitaComparativoModule() {
   const { t, prev, cur } = useTheme();
