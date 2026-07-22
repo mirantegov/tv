@@ -1,0 +1,75 @@
+# Mirante Gov — front-end modular (React + TypeScript + Vite)
+
+Suíte BI municipal. Painel único `PainelOrcamentario.jsx` separado em módulos `.tsx`
+(um arquivo por módulo), com tema, componentes e dados compartilhados, modelo de dados
+tipado e app rodável via Vite. Dados fictícios (seed cent-exato validado contra as 118
+views PostgreSQL do gov-platform, competência 06/2026).
+
+## Rodar
+
+```bash
+npm install
+npm run dev        # http://localhost:5173  (abre no navegador)
+npm run build      # build de produção em dist/
+npm run preview    # serve o build
+npm run typecheck  # tsc --noEmit
+```
+
+Requer Node 18+. Login de demonstração: qualquer **CPF válido** (com dígitos verificadores)
+e **senha de 8 caracteres alfanuméricos** — a validação é só no cliente.
+
+## Estrutura
+
+```
+index.html / index.tsx        Entrada Vite (monta <App/>, importa index.css)
+index.css                     Tailwind (base/components/utilities)
+vite.config.ts                Vite + @vitejs/plugin-react
+tailwind.config.js            content: ./index.html + ./**/*.{ts,tsx}
+postcss.config.js             tailwindcss + autoprefixer
+tsconfig.json                 App (gradual typing); data.ts valida sob --strict
+types.ts                      Modelo de dados (interfaces derivadas do schema `orcamento`)
+
+App.tsx                       Rotas + NAV_GROUPS + Shell + gate de autenticação (login -> painel)
+LoginScreen.tsx               Login: CPF (000.000.000-00, dígitos verificadores) + senha 8 alfanuméricos
+theme.tsx                     THEMES (Ocean Breeze / Monokai · light+dark), ThemeProvider, useTheme, ThemeConfig
+router.tsx                    RouterProvider, useRouter, Link (roteamento em memória)
+format.ts                     Formatação pt-BR: fmt, brl, pct, fmtInt, sg, dR, dP, vari
+components.tsx                 Card, Title, Delta, Tip, TipNum, Kpi, KpiCmp, Donut, HBar, GroupedBars, Diverging, LegendDot, TreeCmp, TreeReceita
+data.ts                       Objetos de dados tipados (D, R, TB, F, FP, PA, LIC, CON, PLAN, PC, FA, PAN, ...)
+
+M�dulos (grupo Movimento na ordem do menu):
+  DespesaModule · ReceitaModule · TributacaoModule · FinanceiroModule
+  PlanejamentoModule · LicitacoesModule · ContratosModule · FolhaModule · PeopleModule
+Outros:
+  VisaoGeralModule (início — alertas + KPIs de todos os módulos do Movimento em seções)
+  PanoramaModule · PrestacaoModule
+  DespesaComparativoModule · ReceitaComparativoModule · FinanceiroAnalisesModule
+```
+
+Cada módulo faz `export default function XxxModule()` e importa apenas o que usa de
+`theme` / `router` / `components` / `format` / `data`.
+
+## Tipagem
+
+`types.ts` descreve o modelo de dados espelhando as colunas das views (`orcamento`),
+com **tuplas nomeadas** para as linhas de gráfico (ex.:
+`[orgao: string, servidores: number, bruta: number, encargos: number, custo: number, he: number, adicionais: number][]`)
+e árvores recursivas (`TreeCmpNode` v25/v26, `TreeReceitaNode` prev/real).
+
+- `data.ts` importa esses tipos e anota cada export (`export const FP: Folha = { ... }`).
+  Verificado com `tsc --noEmit --strict` (zero erros) — o modelo de dados é estritamente válido.
+- O `tsconfig.json` do app usa `strict: false` para permitir tipagem gradual da UI
+  (parâmetros de componentes ainda implícitos). Aperte para `strict: true` conforme
+  for tipando `components.tsx` e os módulos.
+- Ao plugar o backend, `types.ts` é o ponto único para alinhar os contratos das views
+  (e derivar DTOs/validação no NestJS).
+
+## Notas
+
+- `LoginScreen` valida apenas formato/dígitos no cliente; a autenticação real vai para o
+  backend (NestJS + Supabase), respeitando LGPD.
+- Tailwind é o sistema de layout; as cores vêm do tema (OKLCH) via `style` inline, então
+  não há extensão de cores no `tailwind.config.js`.
+- Alguns detalhes em `data.ts` são ilustrativos por inconsistência interna do próprio mock
+  sob `NUMERIC(18,2)` (valores top-5 de fornecedores, `sucessao`/`cargos` por carreira,
+  `idade_media` por órgão). Os KPIs e as marginais principais reproduzem o seed validado.
