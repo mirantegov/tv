@@ -17,8 +17,15 @@ variable "root_volume_gb" {
 }
 
 variable "ssh_public_key" {
-  description = "SSH public key material (contents of your .pub) to install for ec2-user."
+  description = "SSH public key material (contents of your .pub). Cria um key pair novo. Deixe vazio se usar existing_key_name."
   type        = string
+  default     = ""
+}
+
+variable "existing_key_name" {
+  description = "Nome de um key pair JÁ existente na AWS. Se preenchido, não cria chave nova (ssh_public_key é ignorado)."
+  type        = string
+  default     = ""
 }
 
 variable "admin_cidr" {
