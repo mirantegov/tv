@@ -19,7 +19,7 @@ import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
 import { ThemePanel, ThemeProvider, useTheme } from "./theme";
 
-const ROUTES = [
+export const ROUTES = [
 	{ path: "/", title: "Visão Geral", el: VisaoGeralModule },
 	{ path: "/panorama", title: "Panorama Municipal", el: PanoramaModule },
 	{
@@ -62,7 +62,7 @@ const ROUTES = [
 	},
 ];
 
-const NAV_GROUPS = [
+export const NAV_GROUPS = [
 	{
 		label: null,
 		items: [
@@ -165,16 +165,9 @@ const NAV_GROUPS = [
 	},
 ];
 
-// Módulos que não podem ser desativados na sidebar
-const LOCKED_PATHS = new Set([
-	"/",
-	"/panorama",
-	"/despesa",
-	"/receita",
-	"/despesa-comp",
-	"/receita-comp",
-	"/tce",
-]);
+// Módulos que não podem ser desativados na sidebar (Panorama é o fallback
+// quando a Visão Geral está desativada, então fica sempre disponível)
+export const LOCKED_PATHS = new Set(["/panorama"]);
 
 function Shell({ onLogout }: { onLogout: () => void }) {
 	const { t } = useTheme();
@@ -182,7 +175,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 	const [navOpen, setNavOpen] = useState(false);
 	const [cfgOpen, setCfgOpen] = useState(false);
 	const [cfgSection, setCfgSection] = useState<
-		"aparencia" | "modulos" | "extras" | null
+		"display" | "aparencia" | "modulos" | "extras" | null
 	>(null);
 	const [autoScroll, setAutoScroll] = useState(false);
 	// Extras · Análises e Alertas — ligado por padrão (mg_extras === "0" desliga)
@@ -229,6 +222,10 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 		...g,
 		items: g.items.filter((i) => !hidden.has(i.path)),
 	})).filter((g) => g.items.length);
+	// Visão Geral desativada → Panorama vira o módulo padrão
+	useEffect(() => {
+		if (path === "/" && hidden.has("/")) push("/panorama");
+	}, [path, hidden, push]);
 	const pathRef = useRef(path);
 	pathRef.current = path;
 
@@ -339,7 +336,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 		id,
 		label,
 	}: {
-		id: "aparencia" | "modulos" | "extras";
+		id: "display" | "aparencia" | "modulos" | "extras";
 		label: string;
 	}) => (
 		<button
@@ -581,6 +578,29 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 								>
 									Configurações
 								</div>
+								<SectionBtn id="display" label="Display" />
+								{cfgSection === "display" && (
+									<div style={{ padding: "0 0 4px" }}>
+										<button
+											type="button"
+											role="switch"
+											aria-checked={autoScroll}
+											onClick={() => setAutoScroll((v) => !v)}
+											className="w-full rounded-md flex items-center gap-2 text-sm"
+											style={{
+												padding: "6px 10px 6px 18px",
+												background: "transparent",
+												border: "none",
+												color: t.foreground,
+												cursor: "pointer",
+												textAlign: "left",
+											}}
+										>
+											<Sw on={autoScroll} />
+											<span style={{ flex: 1 }}>Scroll Automático</span>
+										</button>
+									</div>
+								)}
 								<SectionBtn id="aparencia" label="Aparência" />
 								{cfgSection === "aparencia" && <ThemePanel />}
 								<SectionBtn id="modulos" label="Módulos" />
@@ -634,24 +654,6 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 										</button>
 									</div>
 								)}
-								<button
-									type="button"
-									role="switch"
-									aria-checked={autoScroll}
-									onClick={() => setAutoScroll((v) => !v)}
-									className="w-full rounded-md flex items-center gap-2 text-sm"
-									style={{
-										padding: "8px 10px",
-										background: "transparent",
-										border: "none",
-										color: t.foreground,
-										cursor: "pointer",
-										textAlign: "left",
-									}}
-								>
-									<Sw on={autoScroll} />
-									<span style={{ flex: 1 }}>Scroll Automático</span>
-								</button>
 								<button
 									type="button"
 									onClick={() => {

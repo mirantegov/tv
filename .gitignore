@@ -3,3 +3,7 @@ dist/
 *.local.md
 .serena/
 .claude/
+
+# Playwright
+test-results/
+playwright-report/

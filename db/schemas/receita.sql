@@ -14,6 +14,8 @@ CREATE TABLE receita.resumo (
 	receita_liquida     numeric(14,2) NOT NULL,
 	receita_propria     numeric(14,2) NOT NULL,
 	transferencias      numeric(14,2) NOT NULL,
+	outras_receitas     numeric(14,2) NOT NULL, -- outras receitas correntes
+	receita_capital     numeric(14,2) NOT NULL,
 	divida_ativa_arrec  numeric(14,2) NOT NULL
 );
 

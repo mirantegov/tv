@@ -16,7 +16,7 @@ type Item = {
 };
 type Bloco = { itens: Item[]; emDia: [string, string][] };
 
-const AA: Record<string, Bloco> = {
+export const AA: Record<string, Bloco> = {
 	"/": {
 		itens: [
 			{

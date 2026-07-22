@@ -22,7 +22,7 @@ export default function DespesaModule() {
 	];
 	return (
 		<>
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mb-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
 				<Kpi
 					label="Dotação Atualizada"
 					value={brl(D.dotacao)}
@@ -51,6 +51,16 @@ export default function DespesaModule() {
 					label="Saldo a Empenhar"
 					value={brl(D.saldo)}
 					sub={`${pct((D.saldo / D.dotacao) * 100)} disponível`}
+				/>
+				<Kpi
+					label="Saldo a Liquidar"
+					value={brl(D.emp - D.liq)}
+					sub={`${pct(((D.emp - D.liq) / D.emp) * 100)} do empenhado`}
+				/>
+				<Kpi
+					label="Saldo a Pagar"
+					value={brl(D.liq - D.pago)}
+					sub={`${pct(((D.liq - D.pago) / D.liq) * 100)} do liquidado`}
 				/>
 				<Kpi
 					label="Restos a Pagar"

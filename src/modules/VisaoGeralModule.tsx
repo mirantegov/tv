@@ -71,7 +71,7 @@ export default function VisaoGeralModule() {
 				desc="Execução orçamentária da despesa — dotação → empenho → pago."
 				rota="/despesa"
 			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 					<Kpi
 						label="Dotação Atualizada"
 						value={brl(D.dotacao)}
@@ -102,6 +102,16 @@ export default function VisaoGeralModule() {
 						sub={`${pct((D.saldo / D.dotacao) * 100)} disponível`}
 					/>
 					<Kpi
+						label="Saldo a Liquidar"
+						value={brl(D.emp - D.liq)}
+						sub={`${pct(((D.emp - D.liq) / D.emp) * 100)} do empenhado`}
+					/>
+					<Kpi
+						label="Saldo a Pagar"
+						value={brl(D.liq - D.pago)}
+						sub={`${pct(((D.liq - D.pago) / D.liq) * 100)} do liquidado`}
+					/>
+					<Kpi
 						label="Restos a Pagar"
 						value={brl(D.restos)}
 						sub="Proc. 41,2 · N/Proc. 54,2"
@@ -115,7 +125,7 @@ export default function VisaoGeralModule() {
 				desc="Previsão e arrecadação — própria, transferências e realização."
 				rota="/receita"
 			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 					<Kpi
 						label="Previsão Atualizada"
 						value={brl(R.prev)}
@@ -137,6 +147,16 @@ export default function VisaoGeralModule() {
 						label="Transferências"
 						value={brl(R.transf)}
 						sub={`${pct((R.transf / R.bruta) * 100)} do total`}
+					/>
+					<Kpi
+						label="Outras Receitas"
+						value={brl(R.outras)}
+						sub={`${pct((R.outras / R.bruta) * 100)} da arrecadação`}
+					/>
+					<Kpi
+						label="Receita Capital"
+						value={brl(R.capital)}
+						sub={`${pct((R.capital / R.bruta) * 100)} da arrecadação`}
 					/>
 					<Kpi
 						label="Receita Líquida"

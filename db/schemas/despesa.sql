@@ -16,7 +16,9 @@ CREATE TABLE despesa.resumo (
 	pago                   numeric(14,2) NOT NULL,
 	restos_processados     numeric(14,2) NOT NULL,
 	restos_nao_processados numeric(14,2) NOT NULL,
-	saldo_a_empenhar       numeric(14,2) NOT NULL
+	saldo_a_empenhar       numeric(14,2) NOT NULL, -- dotação − empenhado
+	saldo_a_liquidar       numeric(14,2) NOT NULL, -- empenhado − liquidado
+	saldo_a_pagar          numeric(14,2) NOT NULL  -- liquidado − pago
 );
 
 -- D.funcoes — execução por função de governo
