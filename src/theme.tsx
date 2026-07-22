@@ -392,9 +392,8 @@ export function ThemeProvider({ children }) {
 }
 export const useTheme = () => useContext(ThemeCtx);
 
-export function ThemeConfig({ collapsed }: { collapsed?: boolean }) {
-	const { t, family, mode, familyLabel, setFamily, setMode } = useTheme();
-	const [open, setOpen] = useState(false);
+export function ThemePanel() {
+	const { t, family, mode, setFamily, setMode } = useTheme();
 	const Opt = ({ active, onClick, children }) => (
 		<button
 			type="button"
@@ -414,109 +413,28 @@ export function ThemeConfig({ collapsed }: { collapsed?: boolean }) {
 		</button>
 	);
 	return (
-		<div style={{ position: "relative" }}>
-			{open && (
-				<div
-					className="rounded-lg"
-					style={{
-						position: "absolute",
-						bottom: "calc(100% + 8px)",
-						left: 0,
-						right: collapsed ? "auto" : 0,
-						minWidth: collapsed ? 220 : undefined,
-						background: t.card,
-						border: `1px solid ${t.border}`,
-						boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
-						padding: 12,
-						zIndex: 30,
-					}}
-				>
-					<div
-						className="text-xs font-semibold mb-2"
-						style={{ color: t.mutedFg }}
-					>
-						Tema
-					</div>
-					<div className="grid grid-cols-2 gap-2 mb-3">
-						{Object.entries(THEMES).map(([key, { label }]) => (
-							<Opt
-								key={key}
-								active={family === key}
-								onClick={() => setFamily(key)}
-							>
-								{label}
-							</Opt>
-						))}
-					</div>
-					<div
-						className="text-xs font-semibold mb-2"
-						style={{ color: t.mutedFg }}
-					>
-						Modo
-					</div>
-					<div className="flex gap-2">
-						<Opt active={mode === "light"} onClick={() => setMode("light")}>
-							☀ Light
-						</Opt>
-						<Opt active={mode === "dark"} onClick={() => setMode("dark")}>
-							☾ Dark
-						</Opt>
-					</div>
-				</div>
-			)}
-			<button
-				type="button"
-				onClick={() => setOpen((o) => !o)}
-				aria-label="Configurar tema"
-				className={`w-full rounded-md flex items-center gap-2 text-xs font-medium ${
-					collapsed ? "justify-center" : ""
-				}`}
-				style={{
-					background: t.muted,
-					border: `1px solid ${t.border}`,
-					color: t.foreground,
-					padding: collapsed ? "9px" : "9px 11px",
-					cursor: "pointer",
-				}}
-			>
-				<svg
-					aria-hidden="true"
-					width="18"
-					height="18"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke={t.foreground}
-					strokeWidth="2"
-					style={{ flexShrink: 0 }}
-				>
-					<circle cx="12" cy="8.5" r="4" />
-					<circle cx="8" cy="15" r="4" />
-					<circle cx="16" cy="15" r="4" />
-				</svg>
-				{!collapsed && (
-					<>
-						<span style={{ flex: 1, textAlign: "left" }}>
-							{familyLabel} · {mode === "dark" ? "Dark" : "Light"}
-						</span>
-						<svg
-							aria-hidden="true"
-							width="13"
-							height="13"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke={t.mutedFg}
-							strokeWidth="2"
-							style={{ transform: open ? "rotate(180deg)" : "none" }}
-						>
-							<path
-								d="m18 15-6-6-6 6"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							/>
-						</svg>
-					</>
-				)}
-			</button>
+		<div style={{ padding: "4px 10px 8px" }}>
+			<div className="text-xs font-semibold mb-2" style={{ color: t.mutedFg }}>
+				Tema
+			</div>
+			<div className="grid grid-cols-2 gap-2 mb-3">
+				{Object.entries(THEMES).map(([key, { label }]) => (
+					<Opt key={key} active={family === key} onClick={() => setFamily(key)}>
+						{label}
+					</Opt>
+				))}
+			</div>
+			<div className="text-xs font-semibold mb-2" style={{ color: t.mutedFg }}>
+				Modo
+			</div>
+			<div className="flex gap-2">
+				<Opt active={mode === "light"} onClick={() => setMode("light")}>
+					☀ Light
+				</Opt>
+				<Opt active={mode === "dark"} onClick={() => setMode("dark")}>
+					☾ Dark
+				</Opt>
+			</div>
 		</div>
 	);
 }

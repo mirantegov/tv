@@ -16,7 +16,7 @@ import ReceitaModule from "./modules/ReceitaModule";
 import TributacaoModule from "./modules/TributacaoModule";
 import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
-import { ThemeConfig, ThemeProvider, useTheme } from "./theme";
+import { ThemePanel, ThemeProvider, useTheme } from "./theme";
 
 const ROUTES = [
 	{ path: "/", title: "Visão Geral", el: VisaoGeralModule },
@@ -164,12 +164,52 @@ const NAV_GROUPS = [
 	},
 ];
 
+// Módulos que não podem ser desativados na sidebar
+const LOCKED_PATHS = new Set([
+	"/",
+	"/panorama",
+	"/despesa",
+	"/receita",
+	"/despesa-comp",
+	"/receita-comp",
+	"/tce",
+]);
+
 function Shell({ onLogout }: { onLogout: () => void }) {
 	const { t, familyLabel } = useTheme();
 	const { path, push } = useRouter();
 	const [navOpen, setNavOpen] = useState(false);
 	const [cfgOpen, setCfgOpen] = useState(false);
+	const [cfgSection, setCfgSection] = useState<"aparencia" | "modulos" | null>(
+		null,
+	);
 	const [autoScroll, setAutoScroll] = useState(false);
+	const [hidden, setHidden] = useState<Set<string>>(() => {
+		try {
+			return new Set(JSON.parse(localStorage.getItem("mg_modules") || "[]"));
+		} catch {
+			return new Set();
+		}
+	});
+	const toggleModule = (p: string) =>
+		setHidden((prev) => {
+			const next = new Set(prev);
+			if (next.has(p)) {
+				next.delete(p);
+			} else {
+				next.add(p);
+			}
+			try {
+				localStorage.setItem("mg_modules", JSON.stringify([...next]));
+			} catch {
+				// localStorage indisponível — segue sem persistir
+			}
+			return next;
+		});
+	const visibleGroups = NAV_GROUPS.map((g) => ({
+		...g,
+		items: g.items.filter((i) => !hidden.has(i.path)),
+	})).filter((g) => g.items.length);
 	const pathRef = useRef(path);
 	pathRef.current = path;
 
@@ -188,7 +228,9 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 				}, ms);
 				timers.add(id);
 			});
-		const ORDER = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.path));
+		const ORDER = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.path)).filter(
+			(p) => !hidden.has(p),
+		);
 		const scrollPage = async () => {
 			window.scrollTo(0, 0);
 			await wait(1200);
@@ -227,7 +269,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 			cancelled = true;
 			for (const id of timers) clearTimeout(id);
 		};
-	}, [autoScroll, push]);
+	}, [autoScroll, push, hidden]);
 	const [collapsed, setCollapsed] = useState(() => {
 		try {
 			return localStorage.getItem("mg_sidebar") === "1";
@@ -247,6 +289,71 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 		});
 	const route = ROUTES.find((r) => r.path === path) || ROUTES[0];
 	const Page = route.el;
+	const Sw = ({ on }: { on: boolean }) => (
+		<span
+			aria-hidden="true"
+			className="rounded-full"
+			style={{
+				width: 34,
+				height: 20,
+				padding: 2,
+				background: on ? t.primary : t.muted,
+				border: `1px solid ${on ? t.primary : t.border}`,
+				display: "inline-flex",
+				flexShrink: 0,
+				transition: "background 0.15s",
+			}}
+		>
+			<span
+				className="rounded-full"
+				style={{
+					width: 14,
+					height: 14,
+					background: on ? t.primaryFg : t.mutedFg,
+					transform: on ? "translateX(14px)" : "translateX(0)",
+					transition: "transform 0.15s",
+				}}
+			/>
+		</span>
+	);
+	const SectionBtn = ({
+		id,
+		label,
+	}: {
+		id: "aparencia" | "modulos";
+		label: string;
+	}) => (
+		<button
+			type="button"
+			onClick={() => setCfgSection((s) => (s === id ? null : id))}
+			className="w-full rounded-md flex items-center gap-2 text-sm"
+			style={{
+				padding: "8px 10px",
+				background: "transparent",
+				border: "none",
+				color: t.foreground,
+				cursor: "pointer",
+				textAlign: "left",
+			}}
+		>
+			<span style={{ flex: 1 }}>{label}</span>
+			<svg
+				aria-hidden="true"
+				width="13"
+				height="13"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke={t.mutedFg}
+				strokeWidth="2"
+				style={{
+					transform: cfgSection === id ? "rotate(180deg)" : "none",
+					transition: "transform 0.15s",
+				}}
+			>
+				<path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+			</svg>
+		</button>
+	);
 	return (
 		<div
 			className="min-h-screen w-full flex"
@@ -343,7 +450,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 					className="p-3 flex flex-col gap-1"
 					style={{ flex: 1, overflowY: "auto" }}
 				>
-					{NAV_GROUPS.map((g, gi) => (
+					{visibleGroups.map((g, gi) => (
 						<div key={gi} className={gi ? "mt-3" : ""}>
 							{g.label && !collapsed && (
 								<div
@@ -396,11 +503,13 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 					className="p-3 flex flex-col gap-2"
 					style={{ borderTop: `1px solid ${t.border}`, flexShrink: 0 }}
 				>
-					<ThemeConfig collapsed={collapsed} />
 					<div style={{ position: "relative" }}>
 						<button
 							type="button"
-							onClick={() => setCfgOpen((o) => !o)}
+							onClick={() => {
+								setCfgOpen((o) => !o);
+								setCfgSection(null);
+							}}
 							aria-label="Configurações"
 							title={collapsed ? "Configurações" : undefined}
 							className={`w-full rounded-md flex items-center gap-2 text-xs font-medium ${
@@ -437,7 +546,9 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 									bottom: "calc(100% + 8px)",
 									left: 0,
 									right: collapsed ? "auto" : 0,
-									minWidth: 210,
+									minWidth: 240,
+									maxHeight: "min(70vh, 520px)",
+									overflowY: "auto",
 									background: t.card,
 									border: `1px solid ${t.border}`,
 									boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
@@ -451,6 +562,36 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 								>
 									Configurações
 								</div>
+								<SectionBtn id="aparencia" label="Aparência" />
+								{cfgSection === "aparencia" && <ThemePanel />}
+								<SectionBtn id="modulos" label="Módulos" />
+								{cfgSection === "modulos" && (
+									<div style={{ padding: "0 0 4px" }}>
+										{NAV_GROUPS.flatMap((g) => g.items)
+											.filter((m) => !LOCKED_PATHS.has(m.path))
+											.map((m) => (
+												<button
+													key={m.path}
+													type="button"
+													role="switch"
+													aria-checked={!hidden.has(m.path)}
+													onClick={() => toggleModule(m.path)}
+													className="w-full rounded-md flex items-center gap-2 text-sm"
+													style={{
+														padding: "6px 10px 6px 18px",
+														background: "transparent",
+														border: "none",
+														color: t.foreground,
+														cursor: "pointer",
+														textAlign: "left",
+													}}
+												>
+													<Sw on={!hidden.has(m.path)} />
+													<span style={{ flex: 1 }}>{m.label}</span>
+												</button>
+											))}
+									</div>
+								)}
 								<button
 									type="button"
 									role="switch"
@@ -466,33 +607,7 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 										textAlign: "left",
 									}}
 								>
-									<span
-										aria-hidden="true"
-										className="rounded-full"
-										style={{
-											width: 34,
-											height: 20,
-											padding: 2,
-											background: autoScroll ? t.primary : t.muted,
-											border: `1px solid ${autoScroll ? t.primary : t.border}`,
-											display: "inline-flex",
-											flexShrink: 0,
-											transition: "background 0.15s",
-										}}
-									>
-										<span
-											className="rounded-full"
-											style={{
-												width: 14,
-												height: 14,
-												background: autoScroll ? t.primaryFg : t.mutedFg,
-												transform: autoScroll
-													? "translateX(14px)"
-													: "translateX(0)",
-												transition: "transform 0.15s",
-											}}
-										/>
-									</span>
+									<Sw on={autoScroll} />
 									<span style={{ flex: 1 }}>Scroll Automático</span>
 								</button>
 								<button
