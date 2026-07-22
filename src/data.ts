@@ -1485,4 +1485,101 @@ export const PAN: Panorama = {
 		hierarquia: "Centro de Zona A",
 	},
 	idhm: { v: "0,768", ano: 2010, ibge: true, faixa: "Alto" },
+	// Consulta TCE-PR (pit.tce.pr.gov.br) — entidade Palotina, exercício 2026,
+	// dados declarados referentes a 5/2026, consolidado do município até o mês 4.
+	tce: {
+		gestor: "Rodrigo Ribeiro",
+		exercicio: 2026,
+		referencia: "5/2026",
+		ultimoEnvio: "02/07/2026",
+		mesConsolidado: 4,
+		processos: [
+			["Unidades Instrutivas", 22],
+			["Ministério Público de Contas", 0],
+			["Gabinetes de Relator", 5],
+			["Diretoria de Execuções", 0],
+		],
+		processosTotal: 27,
+		certidao: {
+			numero: "9938/2025",
+			emissao: "26/05/2026",
+			validade: "25/07/2026",
+		},
+		obras: [
+			["Concluída", 142_117_552.82, 273, "ok"],
+			["Paralisada", 1_124_102.03, 3, "danger"],
+			["Não iniciada", 500_365.0, 2, "warn"],
+			["Em andamento", 0, 0, "info"],
+		],
+		previsao: {
+			loa: "7239/2025 (Aplicação 2026)",
+			receitaPrevista: 297_500_000.0,
+			despesaFixada: 291_858_000.0,
+		},
+		execucao: {
+			receitaAtualizada: 316_772_422.08,
+			receitaArrecadada: 131_564_762.66,
+			dotacaoAtualizada: 359_808_478.51,
+			despesaEmpenhada: 150_819_420.24,
+		},
+		rcl: 286_138_969.42,
+		limites: {
+			// Despesa de pessoal — teto LRF 54% da RCL (Executivo).
+			pessoal: { valor: 118_372_500.94, pct: 41.98, limite: 54, tipo: "teto" },
+			// MDE — mínimo constitucional 25% (CF art. 212); parcial até o mês 4.
+			educacao: {
+				valor: 17_090_576.61,
+				pct: 20.09,
+				limite: 25,
+				tipo: "minimo",
+				base: 85_067_221.84,
+				parcial: true,
+			},
+			// ASPS — mínimo constitucional 15% (EC 29 / LC 141).
+			saude: {
+				valor: 21_788_794.13,
+				pct: 25.62,
+				limite: 15,
+				tipo: "minimo",
+				base: 85_034_480.41,
+			},
+			// Dívida Consolidada Líquida — teto 120% da RCL (Res. Senado 40/2001).
+			divida: { valor: -112_222_288.4, pct: -39.38, limite: 120, tipo: "teto" },
+			// Operações de crédito — teto 16% da RCL (Res. Senado 43/2001).
+			opCredito: { valor: 0, pct: 0, limite: 16, tipo: "teto" },
+		},
+		indicadores: [
+			[
+				"Demográficos",
+				[
+					["População estimada", 30_859, 9_705, true, ""],
+					["População urbana (censo)", 24_646, 5_732, true, ""],
+					["População rural (censo)", 4_037, 2_573, true, ""],
+				],
+			],
+			[
+				"Sociais",
+				[
+					["Taxa de alfabetização", 94.18, 89.73, true, "%"],
+					["Expectativa de vida ao nascer", 76.85, 74.27, true, " anos"],
+					["Índice de Gini", 0.47, 0.47, false, ""],
+					["Taxa de pobreza", 2.85, 8.43, false, "%"],
+				],
+			],
+			[
+				"Econômicos",
+				[
+					["PIB per capita", 45_051, 20_198, true, " R$"],
+					["PIB a preços correntes", 1_366_248, 191_633, true, " R$ mil"],
+				],
+			],
+			[
+				"Resultado do serviço público",
+				[
+					["Índice de eficácia da educação", 0.83, 0.72, true, ""],
+					["Índice de eficiência da despesa em educação", 0.84, 0.63, true, ""],
+				],
+			],
+		],
+	},
 };
