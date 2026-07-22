@@ -124,73 +124,6 @@ export default function VisaoGeralModule() {
 	);
 	return (
 		<>
-			<Card className="p-5 mb-8">
-				<Title
-					right={
-						<span className="text-xs" style={{ color: t.mutedFg }}>
-							3 críticos · 4 atenção
-						</span>
-					}
-				>
-					Alertas do Gestor
-				</Title>
-				<div className="flex flex-col gap-2">
-					{alertas.map(([tn, titulo, det, href, acao], i) => (
-						<div
-							key={i}
-							className="rounded-lg flex flex-col sm:flex-row sm:items-center gap-2"
-							style={{
-								background: t.muted,
-								padding: "11px 13px",
-								borderLeft: `3px solid ${tone[tn]}`,
-							}}
-						>
-							<div style={{ flex: 1 }}>
-								<div
-									className="text-xs font-semibold"
-									style={{ color: t.foreground }}
-								>
-									{titulo}
-								</div>
-								<div className="text-xs mt-0.5" style={{ color: t.mutedFg }}>
-									{det}
-								</div>
-							</div>
-							<Link
-								href={href}
-								className="text-xs font-semibold rounded-md"
-								style={{
-									padding: "6px 12px",
-									background: t.card,
-									border: `1px solid ${t.border}`,
-									color: tone[tn],
-									textDecoration: "none",
-									whiteSpace: "nowrap",
-									alignSelf: "flex-start",
-								}}
-							>
-								{acao} →
-							</Link>
-						</div>
-					))}
-				</div>
-				<div className="flex flex-wrap gap-2 mt-3">
-					{emDia.map(([a, b], i) => (
-						<span
-							key={i}
-							className="text-xs rounded-full"
-							style={{
-								padding: "4px 12px",
-								background: t.muted,
-								color: t.mutedFg,
-							}}
-						>
-							<b style={{ color: t.ok }}>{a}</b> · {b}
-						</span>
-					))}
-				</div>
-			</Card>
-
 			{/* ============ KPIs por módulo do grupo Movimento ============ */}
 			<Section
 				num="1"
@@ -631,6 +564,75 @@ export default function VisaoGeralModule() {
 					/>
 				</div>
 			</Section>
+
+			{/* espaço duplo antes do quadro de alertas */}
+			<div className="h-10" />
+			<Card className="p-5">
+				<Title
+					right={
+						<span className="text-xs" style={{ color: t.mutedFg }}>
+							3 críticos · 4 atenção
+						</span>
+					}
+				>
+					Alertas do Gestor
+				</Title>
+				<div className="flex flex-col gap-2">
+					{alertas.map(([tn, titulo, det, href, acao], i) => (
+						<div
+							key={i}
+							className="rounded-lg flex flex-col sm:flex-row sm:items-center gap-2"
+							style={{
+								background: t.muted,
+								padding: "11px 13px",
+								borderLeft: `3px solid ${tone[tn]}`,
+							}}
+						>
+							<div style={{ flex: 1 }}>
+								<div
+									className="text-xs font-semibold"
+									style={{ color: t.foreground }}
+								>
+									{titulo}
+								</div>
+								<div className="text-xs mt-0.5" style={{ color: t.mutedFg }}>
+									{det}
+								</div>
+							</div>
+							<Link
+								href={href}
+								className="text-xs font-semibold rounded-md"
+								style={{
+									padding: "6px 12px",
+									background: t.card,
+									border: `1px solid ${t.border}`,
+									color: tone[tn],
+									textDecoration: "none",
+									whiteSpace: "nowrap",
+									alignSelf: "flex-start",
+								}}
+							>
+								{acao} →
+							</Link>
+						</div>
+					))}
+				</div>
+				<div className="flex flex-wrap gap-2 mt-3">
+					{emDia.map(([a, b], i) => (
+						<span
+							key={i}
+							className="text-xs rounded-full"
+							style={{
+								padding: "4px 12px",
+								background: t.muted,
+								color: t.mutedFg,
+							}}
+						>
+							<b style={{ color: t.ok }}>{a}</b> · {b}
+						</span>
+					))}
+				</div>
+			</Card>
 		</>
 	);
 }

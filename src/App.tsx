@@ -93,10 +93,11 @@ const NAV_GROUPS = [
 	},
 ];
 
-function Shell() {
+function Shell({ onLogout }: { onLogout: () => void }) {
 	const { t, familyLabel } = useTheme();
 	const { path } = useRouter();
 	const [navOpen, setNavOpen] = useState(false);
+	const [cfgOpen, setCfgOpen] = useState(false);
 	const route = ROUTES.find((r) => r.path === path) || ROUTES[0];
 	const Page = route.el;
 	return (
@@ -281,6 +282,85 @@ function Shell() {
 						>
 							Exercício 2026 · Jun
 						</span>
+						<div style={{ position: "relative" }}>
+							<button
+								type="button"
+								onClick={() => setCfgOpen((o) => !o)}
+								aria-label="Configurações"
+								className="rounded-md flex items-center"
+								style={{
+									padding: "7px 9px",
+									background: t.card,
+									border: `1px solid ${t.border}`,
+									color: t.foreground,
+									cursor: "pointer",
+								}}
+							>
+								<svg
+									aria-hidden="true"
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke={t.foreground}
+									strokeWidth="2"
+								>
+									<circle cx="12" cy="12" r="3" />
+									<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+								</svg>
+							</button>
+							{cfgOpen && (
+								<div
+									className="rounded-lg"
+									style={{
+										position: "absolute",
+										top: "calc(100% + 8px)",
+										right: 0,
+										minWidth: 160,
+										background: t.card,
+										border: `1px solid ${t.border}`,
+										boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+										padding: 6,
+										zIndex: 30,
+									}}
+								>
+									<button
+										type="button"
+										onClick={() => {
+											setCfgOpen(false);
+											onLogout();
+										}}
+										className="w-full rounded-md flex items-center gap-2 text-sm"
+										style={{
+											padding: "8px 10px",
+											background: "transparent",
+											border: "none",
+											color: t.foreground,
+											cursor: "pointer",
+											textAlign: "left",
+										}}
+									>
+										<svg
+											aria-hidden="true"
+											width="15"
+											height="15"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke={t.danger}
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											style={{ flexShrink: 0 }}
+										>
+											<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+											<path d="m16 17 5-5-5-5" />
+											<path d="M21 12H9" />
+										</svg>
+										Sair
+									</button>
+								</div>
+							)}
+						</div>
 					</div>
 				</header>
 				<main className="px-4 sm:px-6 py-5 max-w-7xl mx-auto">
@@ -298,10 +378,36 @@ function Shell() {
 /* ============================================================================
    APP — ThemeProvider + RouterProvider + gate de autenticação (login → Shell)
    ============================================================================ */
+const AUTH_KEY = "mg_auth";
+
 function AuthGate() {
-	const [authed, setAuthed] = useState(false);
-	if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
-	return <Shell />;
+	const [authed, setAuthed] = useState(() => {
+		try {
+			return localStorage.getItem(AUTH_KEY) === "1";
+		} catch {
+			return false;
+		}
+	});
+	const login = (keep: boolean) => {
+		if (keep) {
+			try {
+				localStorage.setItem(AUTH_KEY, "1");
+			} catch {
+				// localStorage indisponível (ex.: modo privado) — segue sem persistir
+			}
+		}
+		setAuthed(true);
+	};
+	const logout = () => {
+		try {
+			localStorage.removeItem(AUTH_KEY);
+		} catch {
+			// localStorage indisponível — nada a limpar
+		}
+		setAuthed(false);
+	};
+	if (!authed) return <LoginScreen onLogin={login} />;
+	return <Shell onLogout={logout} />;
 }
 
 export default function App() {

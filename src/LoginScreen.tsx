@@ -26,11 +26,16 @@ function maskCpf(v: string): string {
 	return out;
 }
 
-export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
+export default function LoginScreen({
+	onLogin,
+}: {
+	onLogin?: (keep: boolean) => void;
+}) {
 	const { t, mode, familyLabel, toggle } = useTheme();
 	const [cpf, setCpf] = useState("");
 	const [senha, setSenha] = useState("");
 	const [showSenha, setShowSenha] = useState(false);
+	const [keep, setKeep] = useState(false);
 	const [erro, setErro] = useState<string | null>(null);
 	const [tentou, setTentou] = useState(false);
 
@@ -39,7 +44,7 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 		setTentou(true);
 		if (!authenticate(cpf, senha)) return setErro("CPF ou senha inválidos.");
 		setErro(null);
-		onLogin?.();
+		onLogin?.(keep);
 	};
 
 	const field = (invalid: boolean) =>
@@ -107,16 +112,11 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 							<path d="M3 20h18v2H3z" fill={t.primaryFg} />
 						</svg>
 					</div>
-					<div>
-						<div
-							className="text-xs uppercase tracking-wider"
-							style={{ color: t.mutedFg }}
-						>
-							Prefeitura
-						</div>
-						<div className="text-lg font-bold" style={{ color: t.foreground }}>
-							Mirante Gov
-						</div>
+					<div
+						className="text-lg font-bold uppercase tracking-wider"
+						style={{ color: t.foreground }}
+					>
+						Mirante Gov
 					</div>
 				</div>
 
@@ -223,6 +223,39 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 						</div>
 					)}
 
+					{/* Manter conectado — sessão persistente neste dispositivo */}
+					<label
+						htmlFor="keep"
+						className="flex items-start gap-2 mt-5"
+						style={{ cursor: "pointer" }}
+					>
+						<input
+							id="keep"
+							type="checkbox"
+							checked={keep}
+							onChange={(e) => setKeep(e.target.checked)}
+							style={{
+								marginTop: 2,
+								width: 15,
+								height: 15,
+								accentColor: t.primary,
+								flexShrink: 0,
+								cursor: "pointer",
+							}}
+						/>
+						<span>
+							<span
+								className="text-xs font-semibold"
+								style={{ color: t.foreground, display: "block" }}
+							>
+								Manter conectado neste dispositivo
+							</span>
+							<span className="text-xs" style={{ color: t.mutedFg }}>
+								Use apenas em equipamentos dedicados (ex.: painel em TV/kiosk).
+							</span>
+						</span>
+					</label>
+
 					{/* Botão */}
 					<button
 						type="button"
@@ -243,12 +276,8 @@ export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 						className="text-xs mt-4 text-center"
 						style={{ color: t.mutedFg }}
 					>
-						Acesso restrito · uso funcional · LGPD
+						Acesso restrito · Uso funcional · LGPD
 					</div>
-				</div>
-
-				<div className="text-xs mt-4 text-center" style={{ color: t.mutedFg }}>
-					Modelo de estrutura · dados fictícios · tema {familyLabel}
 				</div>
 			</div>
 		</div>
