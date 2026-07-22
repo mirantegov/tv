@@ -22,3 +22,6 @@ deploy/Caddyfile
 **/.terraform/
 *.tfstate
 *.tfstate.*
+
+# Scripts locais de diagnóstico (podem conter segredos) — não versionar
+scripts/
