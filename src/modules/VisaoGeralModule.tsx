@@ -1,530 +1,552 @@
-import { Delta, Kpi } from "../components";
+import type React from "react";
+import { Card } from "../components";
 import { useData } from "../DataProvider";
-import { brl, dP, fmt, fmtInt, pct, vari } from "../format";
-import { Link } from "../router";
 import { useTheme } from "../theme";
 
 export default function VisaoGeralModule() {
-	const { CON, D, F, FP, LIC, PLAN: P, PA, R, TB } = useData();
+	const { PAN } = useData();
 	const { t } = useTheme();
-	const L = FP.lrf;
-	const lrfStatus =
-		L.pct >= L.prudencial ? t.danger : L.pct >= L.alerta ? t.warn : t.ok;
-	const lrfLabel =
-		L.pct >= L.prudencial
-			? "ACIMA DO PRUDENCIAL"
-			: L.pct >= L.alerta
-				? "ACIMA DO ALERTA"
-				: "DENTRO DO LIMITE";
-	// Seção por módulo (mesmo formato da Prestação de Contas; espaçamento maior entre blocos)
-	const Section = ({ num, title, desc, rota, children }) => (
-		<div className="mb-10">
-			<div className="flex items-center gap-3 mb-3">
-				<div
-					className="rounded-lg flex items-center justify-center text-xs font-bold"
-					style={{
-						width: 26,
-						height: 26,
-						background: t.primary,
-						color: t.primaryFg,
-						flexShrink: 0,
-					}}
-				>
-					{num}
-				</div>
-				<div style={{ flex: 1, minWidth: 0 }}>
-					<h3 className="text-sm font-semibold" style={{ color: t.foreground }}>
-						{title}
-					</h3>
-					{desc && (
-						<div className="text-xs" style={{ color: t.mutedFg }}>
-							{desc}
-						</div>
-					)}
-				</div>
-				{rota && (
-					<Link
-						href={rota}
-						className="text-xs font-semibold rounded-md"
-						style={{
-							padding: "6px 12px",
-							background: t.card,
-							border: `1px solid ${t.border}`,
-							color: t.primary,
-							textDecoration: "none",
-							whiteSpace: "nowrap",
-							alignSelf: "flex-start",
-						}}
-					>
-						Abrir →
-					</Link>
-				)}
+	const TCE = PAN.tce;
+
+	const nBR = (n: number, dec = 2) =>
+		n.toLocaleString("pt-BR", {
+			minimumFractionDigits: dec,
+			maximumFractionDigits: dec,
+		});
+	const reais = (n: number) => `R$ ${nBR(n)}`;
+	const milhoes = (n: number) => `R$ ${nBR(n / 1e6, 1)} mi`;
+	const pctBR = (n: number) => `${nBR(n)}%`;
+	const tone = (x: string) =>
+		x === "ok"
+			? t.ok
+			: x === "warn"
+				? t.warn
+				: x === "danger"
+					? t.danger
+					: t.primary;
+
+	const Sec = ({ icon, title, children }) => (
+		<Card className="p-5 mb-4">
+			<div className="flex items-center gap-2 mb-4">
+				<span style={{ fontSize: 17 }}>{icon}</span>
+				<h3 className="text-sm font-bold" style={{ color: t.foreground }}>
+					{title}
+				</h3>
 			</div>
 			{children}
+		</Card>
+	);
+
+	const Ind = ({
+		label,
+		value,
+		meta,
+	}: {
+		label?: React.ReactNode;
+		value?: React.ReactNode;
+		meta?: React.ReactNode;
+	}) => (
+		<div
+			className="rounded-lg"
+			style={{ background: t.muted, padding: "13px 14px" }}
+		>
+			<div className="text-xs mb-1" style={{ color: t.mutedFg }}>
+				{label}
+			</div>
+			<div className="flex items-baseline gap-1.5">
+				<span
+					className="text-xl font-bold tabular-nums"
+					style={{ color: t.foreground }}
+				>
+					{value}
+				</span>
+			</div>
+			<div className="text-xs mt-1" style={{ color: t.mutedFg, opacity: 0.75 }}>
+				{meta}
+			</div>
 		</div>
 	);
+
+	// Medidor de limite fiscal/constitucional (teto ou mínimo) com marcador.
+	const LimiteGauge = ({
+		nome,
+		L,
+		nota,
+	}: {
+		nome: string;
+		L: NonNullable<typeof TCE>["limites"]["pessoal"];
+		nota?: React.ReactNode;
+	}) => {
+		const ok = L.tipo === "teto" ? L.pct <= L.limite : L.pct >= L.limite;
+		const col = ok ? t.ok : L.parcial ? t.warn : t.danger;
+		const mk = L.tipo === "teto" ? t.danger : t.ok;
+		const status =
+			L.tipo === "teto"
+				? ok
+					? "dentro do teto"
+					: "acima do teto"
+				: ok
+					? "acima do mínimo"
+					: L.parcial
+						? "em curso"
+						: "abaixo do mínimo";
+		const scale =
+			L.tipo === "teto" ? L.limite * 1.08 : Math.max(L.limite, L.pct) * 1.35;
+		const barPct = Math.max(0, Math.min((L.pct / scale) * 100, 100));
+		const mkPct = Math.min((L.limite / scale) * 100, 100);
+		return (
+			<div className="rounded-lg" style={{ background: t.muted, padding: 14 }}>
+				<div className="flex items-baseline justify-between mb-1 gap-2">
+					<span
+						className="text-xs font-semibold"
+						style={{ color: t.foreground }}
+					>
+						{nome}
+					</span>
+					<span
+						className="text-xs font-bold whitespace-nowrap"
+						style={{ color: col }}
+					>
+						{ok ? "✓" : L.parcial ? "•" : "!"} {status}
+					</span>
+				</div>
+				<div className="flex items-baseline gap-2 mb-2 flex-wrap">
+					<span
+						className="text-2xl font-bold tabular-nums"
+						style={{ color: col }}
+					>
+						{pctBR(L.pct)}
+					</span>
+					<span className="text-xs tabular-nums" style={{ color: t.mutedFg }}>
+						{reais(L.valor)}
+					</span>
+				</div>
+				<div
+					className="relative rounded-full"
+					style={{ height: 9, background: t.secondary }}
+				>
+					<div
+						style={{
+							position: "absolute",
+							inset: 0,
+							width: `${barPct}%`,
+							height: "100%",
+							background: col,
+							borderRadius: 999,
+						}}
+					/>
+					<div
+						style={{
+							position: "absolute",
+							left: `${mkPct}%`,
+							top: -3,
+							height: 15,
+							width: 2,
+							background: mk,
+						}}
+					/>
+				</div>
+				<div
+					className="flex justify-between text-xs mt-1.5"
+					style={{ color: t.mutedFg }}
+				>
+					<span>0%</span>
+					<span style={{ color: mk, fontWeight: 600 }}>
+						{L.tipo === "teto" ? "teto" : "mín."} {nBR(L.limite, 0)}%
+					</span>
+					<span>{nBR(scale, 0)}%</span>
+				</div>
+				{nota && (
+					<div className="text-xs mt-2" style={{ color: t.mutedFg }}>
+						{nota}
+					</div>
+				)}
+			</div>
+		);
+	};
+
+	// Barra de execução: realizado sobre um total (receita/despesa).
+	const ExecBar = ({
+		titulo,
+		realizado,
+		total,
+		rotuloReal,
+		rotuloTotal,
+		cor,
+	}: {
+		titulo: string;
+		realizado: number;
+		total: number;
+		rotuloReal: string;
+		rotuloTotal: string;
+		cor: string;
+	}) => {
+		const p = total > 0 ? (realizado / total) * 100 : 0;
+		return (
+			<div className="rounded-lg" style={{ background: t.muted, padding: 14 }}>
+				<div className="flex items-baseline justify-between mb-1">
+					<span
+						className="text-xs font-semibold"
+						style={{ color: t.foreground }}
+					>
+						{titulo}
+					</span>
+					<span
+						className="text-sm font-bold tabular-nums"
+						style={{ color: cor }}
+					>
+						{pctBR(p)}
+					</span>
+				</div>
+				<div
+					className="relative rounded-full mb-2"
+					style={{ height: 10, background: t.secondary }}
+				>
+					<div
+						style={{
+							width: `${Math.min(p, 100)}%`,
+							height: "100%",
+							background: cor,
+							borderRadius: 999,
+						}}
+					/>
+				</div>
+				<div
+					className="flex justify-between text-xs tabular-nums"
+					style={{ color: t.mutedFg }}
+				>
+					<span>
+						{rotuloReal}: {milhoes(realizado)}
+					</span>
+					<span>
+						{rotuloTotal}: {milhoes(total)}
+					</span>
+				</div>
+			</div>
+		);
+	};
+
+	// Barra comparativa Município vs Mediana estadual.
+	const CmpBar = ({
+		item,
+	}: {
+		item: [string, number, number, boolean, string];
+	}) => {
+		const [nome, mun, med, maior, unidade] = item;
+		const max = Math.max(mun, med) || 1;
+		const better = maior ? mun >= med : mun <= med;
+		const col = better ? t.ok : t.warn;
+		const fmtN = (n: number) =>
+			n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+		const diff = med !== 0 ? ((mun - med) / med) * 100 : 0;
+		return (
+			<div>
+				<div className="flex items-baseline justify-between mb-1 gap-2">
+					<span className="text-xs" style={{ color: t.foreground }}>
+						{nome}
+					</span>
+					<span
+						className="text-xs font-bold tabular-nums whitespace-nowrap"
+						style={{ color: col }}
+					>
+						{fmtN(mun)}
+						{unidade}
+					</span>
+				</div>
+				<div
+					className="relative rounded-full mb-1"
+					style={{ height: 7, background: t.secondary }}
+				>
+					<div
+						style={{
+							position: "absolute",
+							inset: 0,
+							width: `${(mun / max) * 100}%`,
+							height: "100%",
+							background: col,
+							borderRadius: 999,
+						}}
+					/>
+					<div
+						style={{
+							position: "absolute",
+							left: `${(med / max) * 100}%`,
+							top: -2,
+							height: 11,
+							width: 2,
+							background: t.mutedFg,
+						}}
+					/>
+				</div>
+				<div
+					className="flex justify-between text-xs"
+					style={{ color: t.mutedFg }}
+				>
+					<span>
+						mediana {fmtN(med)}
+						{unidade}
+					</span>
+					<span style={{ color: col }}>
+						{mun >= med ? "▲" : "▼"}{" "}
+						{Math.abs(diff).toLocaleString("pt-BR", {
+							maximumFractionDigits: 0,
+						})}
+						% vs mediana
+					</span>
+				</div>
+			</div>
+		);
+	};
+
+	if (!TCE) return null;
+
 	return (
 		<>
-			{/* ============ KPIs por módulo do grupo Movimento ============ */}
-			<Section
-				num="1"
-				title="Despesa"
-				desc="Execução orçamentária da despesa — dotação → empenho → pago."
-				rota="/despesa"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Dotação Atualizada"
-						value={brl(D.dotacao)}
-						sub={`Inicial ${fmt(D.inicial)} · Créditos +${fmt(D.creditos)}`}
-					/>
-					<Kpi
-						label="Empenhado"
-						value={brl(D.emp)}
-						accent={t.primary}
-						progress={(D.emp / D.dotacao) * 100}
-						sub={`${pct((D.emp / D.dotacao) * 100)} da dotação`}
-					/>
-					<Kpi
-						label="Liquidado"
-						value={brl(D.liq)}
-						progress={(D.liq / D.emp) * 100}
-						sub={`${pct((D.liq / D.emp) * 100)} do empenhado`}
-					/>
-					<Kpi
-						label="Pago"
-						value={brl(D.pago)}
-						progress={(D.pago / D.liq) * 100}
-						sub={`${pct((D.pago / D.liq) * 100)} do liquidado`}
-					/>
-					<Kpi
-						label="Saldo a Empenhar"
-						value={brl(D.saldo)}
-						sub={`${pct((D.saldo / D.dotacao) * 100)} disponível`}
-					/>
-					<Kpi
-						label="Saldo a Liquidar"
-						value={brl(D.emp - D.liq)}
-						sub={`${pct(((D.emp - D.liq) / D.emp) * 100)} do empenhado`}
-					/>
-					<Kpi
-						label="Saldo a Pagar"
-						value={brl(D.liq - D.pago)}
-						sub={`${pct(((D.liq - D.pago) / D.liq) * 100)} do liquidado`}
-					/>
-					<Kpi
-						label="Restos a Pagar"
-						value={brl(D.restos)}
-						sub="Proc. 41,2 · N/Proc. 54,2"
-					/>
+			<Card className="p-5 mb-4" style={{ borderColor: t.primary }}>
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+					<div>
+						<div className="flex items-center gap-2">
+							<span style={{ fontSize: 18 }}>🏛️</span>
+							<h3
+								className="text-base font-bold"
+								style={{ color: t.foreground }}
+							>
+								Situação Fiscal — Consulta TCE-PR
+							</h3>
+						</div>
+						<div className="text-xs mt-1" style={{ color: t.mutedFg }}>
+							Gestor: <strong>{TCE.gestor}</strong> · Exercício {TCE.exercicio}{" "}
+							· Dados referentes a {TCE.referencia} · Último envio{" "}
+							{TCE.ultimoEnvio}
+						</div>
+					</div>
+					<div
+						className="rounded-lg"
+						style={{ background: t.muted, padding: "10px 16px" }}
+					>
+						<div className="text-xs" style={{ color: t.mutedFg }}>
+							Certidão Liberatória
+						</div>
+						<div
+							className="text-sm font-bold tabular-nums"
+							style={{ color: t.ok }}
+						>
+							Nº {TCE.certidao.numero}
+						</div>
+						<div className="text-xs" style={{ color: t.mutedFg }}>
+							válida até {TCE.certidao.validade}
+						</div>
+					</div>
 				</div>
-			</Section>
+			</Card>
 
-			<Section
-				num="2"
-				title="Receita"
-				desc="Previsão e arrecadação — própria, transferências e realização."
-				rota="/receita"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Previsão Atualizada"
-						value={brl(R.prev)}
-						sub="LOA + reestimativas"
+			<Sec icon="⚖️" title="Limites Constitucionais">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+					<LimiteGauge
+						nome="Despesa de Pessoal (LRF)"
+						L={TCE.limites.pessoal}
+						nota={`Teto de 54% da RCL · RCL ${milhoes(TCE.rcl)}`}
 					/>
-					<Kpi
-						label="Arrecadada (Bruta)"
-						value={brl(R.bruta)}
-						accent={t.primary}
-						progress={(R.bruta / R.prev) * 100}
-						sub={`${pct((R.bruta / R.prev) * 100)} de realização`}
+					<LimiteGauge
+						nome="Saúde (ASPS)"
+						L={TCE.limites.saude}
+						nota={`Mínimo de 15% · base ${milhoes(
+							TCE.limites.saude.base || 0,
+						)}`}
 					/>
-					<Kpi
-						label="Receita Própria"
-						value={brl(R.propria)}
-						sub={`Autonomia ${pct((R.propria / R.bruta) * 100)}`}
-					/>
-					<Kpi
-						label="Transferências"
-						value={brl(R.transf)}
-						sub={`${pct((R.transf / R.bruta) * 100)} do total`}
-					/>
-					<Kpi
-						label="Outras Receitas"
-						value={brl(R.outras)}
-						sub={`${pct((R.outras / R.bruta) * 100)} da arrecadação`}
-					/>
-					<Kpi
-						label="Receita Capital"
-						value={brl(R.capital)}
-						sub={`${pct((R.capital / R.bruta) * 100)} da arrecadação`}
-					/>
-					<Kpi
-						label="Receita Líquida"
-						value={brl(R.liq)}
-						sub="Após deduções FUNDEB"
-					/>
-					<Kpi
-						label="Saldo a Realizar"
-						value={brl(R.prev - R.bruta)}
-						sub={`${pct(((R.prev - R.bruta) / R.prev) * 100)} da previsão`}
+					<LimiteGauge
+						nome="Educação (MDE)"
+						L={TCE.limites.educacao}
+						nota="Mínimo de 25% · acumulado até o mês 4 (parcial)"
 					/>
 				</div>
-			</Section>
+				<div className="text-xs mt-3" style={{ color: t.mutedFg }}>
+					Marcadores indicam o teto (LRF) ou o mínimo constitucional (CF art.
+					212 · EC 29).
+				</div>
+			</Sec>
 
-			<Section
-				num="3"
-				title="Tributação e Fiscalização"
-				desc="Receita própria, dívida ativa e renúncia."
-				rota="/tributacao"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Receita Própria"
-						value={brl(TB.propria)}
-						accent={t.primary}
-						sub={`${pct(TB.propriaPart)} da receita arrecadada`}
+			<Sec icon="🏦" title="Limites Fiscais">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+					<LimiteGauge
+						nome="Dívida Consolidada Líquida"
+						L={TCE.limites.divida}
+						nota="Teto de 120% da RCL · % negativo = haveres superam a dívida"
 					/>
-					<Kpi
-						label="IPTU"
-						value={brl(TB.iptuArr)}
-						progress={TB.iptuAdimp}
-						sub={`${pct(TB.iptuAdimp)} de adimplência`}
-					/>
-					<Kpi
-						label="ISS"
-						value={brl(TB.issArr)}
-						sub={`${dP(TB.issYoY)} vs 2025 (atividade econ.)`}
-					/>
-					<Kpi
-						label="ITBI"
-						value={brl(TB.itbiArr)}
-						sub={`${TB.itbiTransm.toLocaleString("pt-BR")} transmissões`}
-					/>
-					<Kpi
-						label="Saldo da Dívida Ativa"
-						value={brl(TB.daSaldo)}
-						sub={`${pct(TB.daRecPct)} recuperado no período`}
-					/>
-					<Kpi
-						label="Inadimplência (vencida)"
-						value={brl(TB.inadVencida)}
-						accent={t.warn}
-						sub="Crédito vencido não pago"
-					/>
-					<Kpi
-						label="Renúncia de Receita"
-						value={brl(TB.renuncia)}
-						sub="Isenções, imunidades, anistias"
-					/>
-					<Kpi
-						label="Adesão à Cota Única"
-						value={pct(TB.cotaUnica)}
-						sub="IPTU pago à vista"
+					<LimiteGauge
+						nome="Operações de Crédito"
+						L={TCE.limites.opCredito}
+						nota="Teto de 16% da RCL · nenhuma operação no exercício"
 					/>
 				</div>
-			</Section>
+				<div className="text-xs mt-3" style={{ color: t.mutedFg }}>
+					Consolidado do município fechado até o mês {TCE.mesConsolidado}. Tetos
+					definidos por resoluções do Senado Federal (40/2001 e 43/2001).
+				</div>
+			</Sec>
 
-			<Section
-				num="4"
-				title="Financeiro — Tesouraria"
-				desc="Disponibilidades, fluxo e liquidez do exercício."
-				rota="/financeiro"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Disponibilidade Bruta"
-						value={brl(F.bruta)}
-						sub="Caixa + Bancos + Aplicações"
+			<Sec icon="📊" title={`Execução Orçamentária ${TCE.exercicio}`}>
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+					<ExecBar
+						titulo="Receita arrecadada / prevista atualizada"
+						realizado={TCE.execucao.receitaArrecadada}
+						total={TCE.execucao.receitaAtualizada}
+						rotuloReal="Arrecadada"
+						rotuloTotal="Prevista"
+						cor={t.ok}
 					/>
-					<Kpi
-						label="Disponibilidade Líquida"
-						value={brl(F.liquida)}
-						accent={t.primary}
-						sub="Após obrigações financeiras"
-					/>
-					<Kpi
-						label="Ingressos do período"
-						value={brl(F.ingressos)}
-						sub="Orçamentário + extraorçamentário"
-					/>
-					<Kpi
-						label="Desembolsos do período"
-						value={brl(F.desembolsos)}
-						sub="Orçamentário + extraorçamentário"
-					/>
-					<Kpi
-						label="Resultado Financeiro"
-						value={`+ ${brl(F.resultado)}`}
-						accent={t.ok}
-						sub="Ingressos − Desembolsos"
-					/>
-					<Kpi
-						label="Obrigações a Pagar"
-						value={brl(F.obrig)}
-						sub="RP proc. + consig. + depósitos"
-					/>
-					<Kpi
-						label="Aplicações Financeiras"
-						value={brl(F.aplicacoes)}
-						sub={`Rendimento + ${fmt(F.rendimento)} mi`}
-					/>
-					<Kpi
-						label="Liquidez Imediata"
-						value={fmt(F.liquidez)}
-						accent={t.ok}
-						sub="Disp. bruta / obrigações"
+					<ExecBar
+						titulo="Despesa empenhada / dotação atualizada"
+						realizado={TCE.execucao.despesaEmpenhada}
+						total={TCE.execucao.dotacaoAtualizada}
+						rotuloReal="Empenhada"
+						rotuloTotal="Dotação"
+						cor={t.primary}
 					/>
 				</div>
-			</Section>
+				<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+					<Ind
+						label={`LOA ${TCE.previsao.loa}`}
+						value="Lei Orçamentária"
+						meta="fonte da previsão"
+					/>
+					<Ind
+						label="Receita prevista (LOA)"
+						value={milhoes(TCE.previsao.receitaPrevista)}
+						meta="antes das atualizações"
+					/>
+					<Ind
+						label="Despesa fixada (LOA)"
+						value={milhoes(TCE.previsao.despesaFixada)}
+						meta="antes das atualizações"
+					/>
+				</div>
+			</Sec>
 
-			<Section
-				num="5"
-				title="Planejamento Orçamentário (LOA)"
-				desc="Consolidação da lei orçamentária por entidade."
-				rota="/planejamento"
-			>
+			<Sec icon="🚧" title="Obras Públicas">
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Orçamento Consolidado"
-						value={brl(P.consolidado)}
-						accent={t.primary}
-						sub="LOA municipal (líquida de intra)"
-					/>
-					<Kpi
-						label="Soma das Entidades"
-						value={brl(P.somaEntidades)}
-						sub={`${P.nEntidades} unidades orçamentárias`}
-					/>
-					<Kpi
-						label="Transferências Intra"
-						value={brl(P.intra)}
-						accent={t.warn}
-						sub="eliminadas na consolidação"
-					/>
-					<Kpi
-						label="Equilíbrio da LOA"
-						value="Receita = Despesa"
-						sub="fixada por lei em cada ente"
-					/>
+					{TCE.obras.map(([status, valor, qtde, tn]) => (
+						<div
+							key={status}
+							className="rounded-lg"
+							style={{
+								background: t.muted,
+								padding: "13px 14px",
+								borderLeft: `3px solid ${tone(tn)}`,
+							}}
+						>
+							<div className="text-xs mb-1" style={{ color: t.mutedFg }}>
+								{status}
+							</div>
+							<div
+								className="text-lg font-bold tabular-nums"
+								style={{ color: tone(tn) }}
+							>
+								{milhoes(valor)}
+							</div>
+							<div className="text-xs mt-1" style={{ color: t.mutedFg }}>
+								{qtde} {qtde === 1 ? "obra" : "obras"}
+							</div>
+						</div>
+					))}
 				</div>
-			</Section>
+				{(() => {
+					const par = TCE.obras.find((o) => o[0] === "Paralisada");
+					return (
+						<div className="text-xs mt-3" style={{ color: t.mutedFg }}>
+							Obras não concluídas até dez/2012 e obras iniciadas a partir de
+							2013 (fonte TCE-PR).
+							{par && par[2] > 0 && (
+								<>
+									{" "}
+									Atenção às{" "}
+									<strong style={{ color: t.danger }}>
+										{par[2]} obras paralisadas
+									</strong>{" "}
+									({milhoes(par[1])}).
+								</>
+							)}
+						</div>
+					);
+				})()}
+			</Sec>
 
-			<Section
-				num="6"
-				title="Licitações"
-				desc="Processos, economia e competitividade."
-				rota="/licitacoes"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Valor Homologado"
-						value={brl(LIC.homologado)}
-						accent={t.primary}
-						sub={`${fmtInt(LIC.processos)} processos`}
-					/>
-					<Kpi
-						label="Economia Obtida"
-						value={brl(LIC.economia)}
-						accent={t.ok}
-						sub={`${pct(LIC.economiaPct)} do estimado`}
-					/>
-					<Kpi
-						label="Taxa de Sucesso"
-						value={pct(LIC.taxaSucesso)}
-						sub="homologados / concluídos"
-					/>
-					<Kpi
-						label="Tempo Médio"
-						value={`${LIC.tempoMedio} dias`}
-						sub="abertura → homologação"
-					/>
-					<Kpi
-						label="Em Andamento"
-						value={fmtInt(LIC.andamento)}
-						sub={`${brl(LIC.andamentoValor)} estimado`}
-					/>
-					<Kpi
-						label="Contratação Direta"
-						value={pct(LIC.diretaPct)}
-						accent={t.warn}
-						sub="dispensa + inexigibilidade"
-					/>
-					<Kpi
-						label="Desertos / Fracassados"
-						value={pct(LIC.desertosPct)}
-						sub="revisar especificação/preço"
-					/>
-					<Kpi
-						label="Fornecedores / Certame"
-						value={fmt(LIC.fornMedia)}
-						sub="competitividade média"
-					/>
+			<Sec icon="📁" title="Processos em Trâmite no TCE">
+				<div className="flex flex-col lg:flex-row gap-4 lg:items-center">
+					<div
+						className="rounded-lg text-center"
+						style={{ background: t.muted, padding: "16px 22px" }}
+					>
+						<div className="text-xs" style={{ color: t.mutedFg }}>
+							Total
+						</div>
+						<div
+							className="text-3xl font-bold tabular-nums"
+							style={{ color: t.primary }}
+						>
+							{TCE.processosTotal}
+						</div>
+						<div className="text-xs" style={{ color: t.mutedFg }}>
+							processos
+						</div>
+					</div>
+					<div className="flex-1 flex flex-col gap-2">
+						{TCE.processos.map(([orgao, qtde]) => {
+							const max = Math.max(...TCE.processos.map((p) => p[1]), 1);
+							return (
+								<div key={orgao}>
+									<div className="flex justify-between text-xs mb-1">
+										<span style={{ color: t.foreground }}>{orgao}</span>
+										<span
+											className="tabular-nums font-semibold"
+											style={{ color: t.foreground }}
+										>
+											{qtde}
+										</span>
+									</div>
+									<div
+										className="rounded-full"
+										style={{ height: 6, background: t.secondary }}
+									>
+										<div
+											style={{
+												width: `${(qtde / max) * 100}%`,
+												height: "100%",
+												background: t.primary,
+												borderRadius: 999,
+											}}
+										/>
+									</div>
+								</div>
+							);
+						})}
+					</div>
 				</div>
-			</Section>
+			</Sec>
 
-			<Section
-				num="7"
-				title="Contratos Municipais"
-				desc="Carteira, execução, aditivos e vigências."
-				rota="/contratos"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Valor Contratado"
-						value={brl(CON.contratado)}
-						accent={t.primary}
-						sub={`${fmtInt(CON.vigentes)} contratos vigentes`}
-					/>
-					<Kpi
-						label="Valor Executado"
-						value={brl(CON.executado)}
-						progress={CON.execPct}
-						sub={`${pct(CON.execPct)} da carteira`}
-					/>
-					<Kpi
-						label="Saldo a Executar"
-						value={brl(CON.saldo)}
-						sub="Atualizado − Executado"
-					/>
-					<Kpi
-						label="Aditivos"
-						value={brl(CON.aditivos)}
-						sub={`${pct(CON.aditivosPct)} sobre o original`}
-					/>
-					<Kpi
-						label="A Vencer em 90 dias"
-						value={fmtInt(CON.aVencer90)}
-						accent={t.warn}
-						sub={`${brl(CON.aVencer90Valor)} em valor`}
-					/>
-					<Kpi
-						label="Vencidos c/ Saldo"
-						value={fmtInt(CON.vencidosQtd)}
-						sub={`${brl(CON.vencidosSaldo)} a encerrar`}
-					/>
-					<Kpi
-						label="Concentração Top 5"
-						value={pct(CON.topFornPct)}
-						sub="da carteira (dependência)"
-					/>
-					<Kpi
-						label="Valor Original"
-						value={brl(CON.original)}
-						sub="antes dos aditivos"
-					/>
+			<Sec icon="📈" title="Indicadores — Município vs Mediana Estadual">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5">
+					{TCE.indicadores.map(([grupo, itens]) => (
+						<div key={grupo}>
+							<div
+								className="text-xs font-bold uppercase tracking-wider mb-3"
+								style={{ color: t.mutedFg }}
+							>
+								{grupo}
+							</div>
+							<div className="flex flex-col gap-3">
+								{itens.map((it) => (
+									<CmpBar key={it[0]} item={it} />
+								))}
+							</div>
+						</div>
+					))}
 				</div>
-			</Section>
-
-			<Section
-				num="8"
-				title="Folha de Pagamento"
-				desc="Custo, encargos e limite de pessoal (LRF)."
-				rota="/folha"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Custo Total da Folha"
-						value={brl(FP.custoTotal)}
-						accent={t.primary}
-						sub={
-							<>
-								<Delta {...vari(FP.custoMesAnt, FP.custoTotal)} /> vs mês
-								anterior
-							</>
-						}
-					/>
-					<Kpi
-						label="Folha Bruta"
-						value={brl(FP.bruta)}
-						sub={`Líquida ${brl(FP.liquida)}`}
-					/>
-					<Kpi
-						label="Encargos Patronais"
-						value={brl(FP.encargos)}
-						sub="RPPS / INSS / FGTS"
-					/>
-					<Kpi
-						label="Horas Extras"
-						value={brl(FP.he)}
-						accent={t.warn}
-						sub={`${pct(FP.hePct)} da folha bruta`}
-					/>
-					<Kpi
-						label="Adicionais"
-						value={brl(FP.adicionais)}
-						sub="Insalub., noturno, FG/CC…"
-					/>
-					<Kpi
-						label="Custo Médio / Servidor"
-						value={FP.custoMedio}
-						sub={`${fmtInt(FP.headcount)} servidores ativos`}
-					/>
-					<Kpi
-						label="Despesa Pessoal / RCL"
-						value={pct(L.pct)}
-						accent={lrfStatus}
-						sub={`Limite LRF 54% · ${lrfLabel.toLowerCase()}`}
-					/>
-					<Kpi
-						label="Inativos e Pensionistas"
-						value={brl(FP.inativosCusto)}
-						sub={`${fmtInt(FP.inativos)} beneficiários`}
-					/>
+				<div className="text-xs mt-4" style={{ color: t.mutedFg }}>
+					Barra colorida = município; marcador cinza = mediana dos municípios do
+					Paraná. Verde indica desempenho melhor que a mediana.
 				</div>
-			</Section>
-
-			<Section
-				num="9"
-				title="People Analytics"
-				desc="Quadro de pessoal, movimentação e sucessão."
-				rota="/people"
-			>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-					<Kpi
-						label="Headcount Ativo"
-						value={fmtInt(PA.headcount)}
-						accent={t.primary}
-						sub={`${fmtInt(PA.total)} c/ inativos e pensionistas`}
-					/>
-					<Kpi
-						label="Turnover"
-						value={pct(PA.turnover)}
-						sub="Movimentação no período"
-					/>
-					<Kpi
-						label="Absenteísmo"
-						value={pct(PA.absenteismo)}
-						sub="dias de afastamento"
-					/>
-					<Kpi
-						label="Tempo Médio de Serviço"
-						value={`${fmt(PA.tempoMedio)} anos`}
-						sub={`Idade média ${fmt(PA.idadeMedia)}`}
-					/>
-					<Kpi
-						label="Elegíveis à Aposentadoria"
-						value={fmtInt(PA.elegiveis)}
-						accent={t.warn}
-						sub={`${pct(PA.elegiveisPct)} do quadro (hoje)`}
-					/>
-					<Kpi
-						label="Cobertura de Cargos"
-						value={pct(PA.cobertura)}
-						sub={`${fmtInt(PA.providos)} / ${fmtInt(PA.autorizados)} vagas`}
-					/>
-					<Kpi
-						label="Razão Comiss. / Efetivos"
-						value={pct(PA.razaoCom)}
-						sub="Indicador de profissionalização"
-					/>
-					<Kpi
-						label="Idade Média"
-						value={`${fmt(PA.idadeMedia)} anos`}
-						sub="Quadro maduro"
-					/>
-				</div>
-			</Section>
+			</Sec>
 		</>
 	);
 }

@@ -49,15 +49,6 @@ export interface Despesa {
 		empenhado: number,
 		liquidado: number,
 	][];
-	gov: [
-		nome: string,
-		valor: number,
-		scale: number,
-		limite: number,
-		label: string,
-		alerta: number | null,
-		tone: Tone,
-	][];
 }
 
 export interface DespesaComp {

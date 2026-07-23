@@ -58,11 +58,6 @@ export const D: Despesa = {
 		["Assistência Social", 58, 28.3, 22.9],
 		["Gabinete e Demais", 94, 65.5, 59.4],
 	],
-	gov: [
-		["Saúde (ASPS)", 22.4, 30, 15, "mín. 15%", null, "ok"],
-		["Educação (MDE)", 26.8, 35, 25, "mín. 25%", null, "ok"],
-		["Pessoal / RCL", 49.2, 60, 54, "limite 54%", 48.6, "warn"],
-	],
 };
 export const CD: DespesaComp = {
 	emp25: 439.5,

@@ -15,9 +15,9 @@ describe("AnalisesAlertas", () => {
 	it("renderiza a seção da Visão Geral com contadores", () => {
 		render(wrap(<AnalisesAlertas path="/" />));
 		expect(screen.getByText("Análises e Alertas")).toBeInTheDocument();
-		expect(screen.getByText("3 críticos · 4 atenção")).toBeInTheDocument();
+		expect(screen.getByText("1 crítico · 2 atenção")).toBeInTheDocument();
 		expect(
-			screen.getByText(/CAUC com pendência/, { exact: false }),
+			screen.getByText(/Certidão Liberatória vence/, { exact: false }),
 		).toBeInTheDocument();
 	});
 
