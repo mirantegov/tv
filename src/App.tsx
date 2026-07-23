@@ -16,7 +16,7 @@ import PlanejamentoModule from "./modules/PlanejamentoModule";
 import { SiconfiModule, TcePrModule } from "./modules/PrestacaoModule";
 import ReceitaComparativoModule from "./modules/ReceitaComparativoModule";
 import ReceitaModule from "./modules/ReceitaModule";
-import SecretariaModule from "./modules/SecretariaModule";
+import { SECRETARIA_MODULES } from "./modules/secretarias";
 import TributacaoModule from "./modules/TributacaoModule";
 import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
@@ -27,6 +27,16 @@ import type { Role } from "./users";
 // Uma secretaria = um módulo (só título por enquanto, conteúdo vem depois).
 // Fonte única: alimenta tanto ROUTES quanto o grupo "Secretarias" da sidebar.
 const SECRETARIAS = [
+	{
+		path: "/sec/gabinete",
+		label: "Gabinete",
+		icon: "M4 22h16M6 22V6l6-3 6 3v16M10 22v-5h4v5M9 9h.01M15 9h.01M9 13h.01M15 13h.01",
+	},
+	{
+		path: "/sec/controladoria",
+		label: "Controladoria",
+		icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4",
+	},
 	{
 		path: "/sec/administracao",
 		label: "Administração",
@@ -77,6 +87,31 @@ const SECRETARIAS = [
 		label: "Esportes",
 		icon: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0z",
 	},
+	{
+		path: "/sec/urbanismo",
+		label: "Urbanismo",
+		icon: "M3 21h18M5 21V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v16M13 21v-8a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v8M8 7h.01M8 11h.01M8 15h.01",
+	},
+	{
+		path: "/sec/desenvolvimento-economico",
+		label: "Desenv. Econômico",
+		icon: "M23 6l-9.5 9.5-5-5L1 18M17 6h6v6",
+	},
+	{
+		path: "/sec/transito",
+		label: "Trânsito",
+		icon: "M5 17H3v-5l2-5h14l2 5v5h-2M5 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M15 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M7 12h10",
+	},
+	{
+		path: "/sec/seguranca",
+		label: "Segurança",
+		icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+	},
+	{
+		path: "/sec/meio-ambiente",
+		label: "Meio Ambiente",
+		icon: "M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10zM2 21c0-3 1.85-5.36 5.08-6",
+	},
 ] as const;
 
 export const ROUTES = [
@@ -123,7 +158,7 @@ export const ROUTES = [
 	...SECRETARIAS.map((s) => ({
 		path: s.path,
 		title: s.label,
-		el: SecretariaModule,
+		el: SECRETARIA_MODULES[s.path.replace("/sec/", "")],
 	})),
 ];
 

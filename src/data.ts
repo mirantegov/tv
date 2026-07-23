@@ -13,8 +13,49 @@ import type {
 	PrestacaoContas,
 	Receita,
 	ReceitaComp,
+	Secretarias,
 	Tributacao,
 } from "./types";
+
+// Slugs das secretarias (batem com os paths /sec/<slug> em App.tsx).
+export const SEC_SLUGS = [
+	"administracao",
+	"financas",
+	"planejamento",
+	"obras",
+	"agronegocio",
+	"saude",
+	"assistencia-social",
+	"educacao",
+	"industria",
+	"esportes",
+	"gabinete",
+	"controladoria",
+	"urbanismo",
+	"desenvolvimento-economico",
+	"transito",
+	"seguranca",
+	"meio-ambiente",
+] as const;
+
+// Fallback dos KPIs por secretaria. Por enquanto todas iguais (mesmos números
+// do módulo Despesa); o Warehouse depois sobe os dados oficiais por secretaria.
+export const SEC: Secretarias = Object.fromEntries(
+	SEC_SLUGS.map((s) => [
+		s,
+		{
+			dotacao: 850,
+			inicial: 780,
+			creditos: 70,
+			emp: 470.1,
+			liq: 410.2,
+			pago: 384.3,
+			restos: 95.4,
+			saldo: 379.9,
+		},
+	]),
+);
+
 export const D: Despesa = {
 	dotacao: 850,
 	inicial: 780,

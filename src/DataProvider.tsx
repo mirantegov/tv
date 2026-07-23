@@ -23,6 +23,7 @@ import {
 	PC as PCseed,
 	PLAN as PLANseed,
 	R as Rseed,
+	SEC as SECseed,
 	TB as TBseed,
 } from "./data";
 import { API_URL } from "./tenant";
@@ -40,6 +41,7 @@ import type {
 	PrestacaoContas,
 	Receita,
 	ReceitaComp,
+	Secretarias,
 	Tributacao,
 } from "./types";
 
@@ -58,6 +60,7 @@ export interface TenantData {
 	PLAN: Planejamento;
 	PC: PrestacaoContas;
 	PAN: Panorama;
+	SEC: Secretarias;
 }
 
 const seed: TenantData = {
@@ -75,30 +78,50 @@ const seed: TenantData = {
 	PLAN: PLANseed,
 	PC: PCseed,
 	PAN: PANseed,
+	SEC: SECseed,
 };
 
 const Ctx = createContext<TenantData>(seed);
 export const useData = () => useContext(Ctx);
 
 async function loadTenantData(): Promise<TenantData> {
-	const [D, CD, R, CR, F, FA, TB, FP, PA, LIC, CON, PLAN, PAN, tce, siconfi] =
-		await Promise.all([
-			fetchModule<Despesa>("despesa"),
-			fetchModule<DespesaComp>("despesa_comp"),
-			fetchModule<Receita>("receita"),
-			fetchModule<ReceitaComp>("receita_comp"),
-			fetchModule<Financeiro>("financeiro"),
-			fetchModule<FinanceiroAnalises>("financeiro_analises"),
-			fetchModule<Tributacao>("tributacao"),
-			fetchModule<Folha>("folha"),
-			fetchModule<People>("people"),
-			fetchModule<Licitacoes>("licitacoes"),
-			fetchModule<Contratos>("contratos"),
-			fetchModule<Planejamento>("planejamento"),
-			fetchModule<Panorama>("panorama"),
-			fetchModule<PrestacaoContas["tce"]>("tce"),
-			fetchModule<PrestacaoContas["siconfi"]>("siconfi"),
-		]);
+	const [
+		D,
+		CD,
+		R,
+		CR,
+		F,
+		FA,
+		TB,
+		FP,
+		PA,
+		LIC,
+		CON,
+		PLAN,
+		PAN,
+		tce,
+		siconfi,
+		SEC,
+	] = await Promise.all([
+		fetchModule<Despesa>("despesa"),
+		fetchModule<DespesaComp>("despesa_comp"),
+		fetchModule<Receita>("receita"),
+		fetchModule<ReceitaComp>("receita_comp"),
+		fetchModule<Financeiro>("financeiro"),
+		fetchModule<FinanceiroAnalises>("financeiro_analises"),
+		fetchModule<Tributacao>("tributacao"),
+		fetchModule<Folha>("folha"),
+		fetchModule<People>("people"),
+		fetchModule<Licitacoes>("licitacoes"),
+		fetchModule<Contratos>("contratos"),
+		fetchModule<Planejamento>("planejamento"),
+		fetchModule<Panorama>("panorama"),
+		fetchModule<PrestacaoContas["tce"]>("tce"),
+		fetchModule<PrestacaoContas["siconfi"]>("siconfi"),
+		// Módulo novo: se a view api.secretarias ainda não existir no tenant
+		// (migração não aplicada), cai no seed sem derrubar os demais módulos.
+		fetchModule<Secretarias>("secretarias").catch(() => SECseed),
+	]);
 	return {
 		D,
 		CD,
@@ -114,6 +137,7 @@ async function loadTenantData(): Promise<TenantData> {
 		PLAN,
 		PAN,
 		PC: { tce, siconfi },
+		SEC,
 	};
 }
 
