@@ -16,12 +16,68 @@ import PlanejamentoModule from "./modules/PlanejamentoModule";
 import { SiconfiModule, TcePrModule } from "./modules/PrestacaoModule";
 import ReceitaComparativoModule from "./modules/ReceitaComparativoModule";
 import ReceitaModule from "./modules/ReceitaModule";
+import SecretariaModule from "./modules/SecretariaModule";
 import TributacaoModule from "./modules/TributacaoModule";
 import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
 import { API_URL } from "./tenant";
 import { ThemePanel, ThemeProvider, useTheme } from "./theme";
 import type { Role } from "./users";
+
+// Uma secretaria = um módulo (só título por enquanto, conteúdo vem depois).
+// Fonte única: alimenta tanto ROUTES quanto o grupo "Secretarias" da sidebar.
+const SECRETARIAS = [
+	{
+		path: "/sec/administracao",
+		label: "Administração",
+		icon: "M3 21h18M6 21V7l6-4 6 4v14M10 9h.01M14 9h.01M10 13h.01M14 13h.01M10 17h.01M14 17h.01",
+	},
+	{
+		path: "/sec/financas",
+		label: "Finanças",
+		icon: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
+	},
+	{
+		path: "/sec/planejamento",
+		label: "Planejamento",
+		icon: "M3 3h18v4H3zM3 10h18v11H3zM8 14h8M8 18h5",
+	},
+	{
+		path: "/sec/obras",
+		label: "Obras",
+		icon: "M2 20h20M4 20V10l7-4M11 6l9 5v9M6 20v-6h4v6M2 10l9-5 4 2",
+	},
+	{
+		path: "/sec/agronegocio",
+		label: "Agronegócio",
+		icon: "M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10zM2 21c0-3 1.85-5.36 5.08-6",
+	},
+	{
+		path: "/sec/saude",
+		label: "Saúde",
+		icon: "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z",
+	},
+	{
+		path: "/sec/assistencia-social",
+		label: "Assistência Social",
+		icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+	},
+	{
+		path: "/sec/educacao",
+		label: "Educação",
+		icon: "M22 10 12 5 2 10l10 5 10-5zM6 12v5c0 1 2.5 3 6 3s6-2 6-3v-5",
+	},
+	{
+		path: "/sec/industria",
+		label: "Indústria",
+		icon: "M2 20h20V8l-6 4V8l-6 4V4H4a2 2 0 0 0-2 2zM6 16h.01M10 16h.01M14 16h.01M18 16h.01",
+	},
+	{
+		path: "/sec/esportes",
+		label: "Esportes",
+		icon: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0z",
+	},
+] as const;
 
 export const ROUTES = [
 	{ path: "/", title: "Visão Geral", el: VisaoGeralModule },
@@ -64,6 +120,11 @@ export const ROUTES = [
 		title: "Financeiro — Análises",
 		el: FinanceiroAnalisesModule,
 	},
+	...SECRETARIAS.map((s) => ({
+		path: s.path,
+		title: s.label,
+		el: SecretariaModule,
+	})),
 ];
 
 export const NAV_GROUPS = [
@@ -166,6 +227,14 @@ export const NAV_GROUPS = [
 				icon: "M12 2 3 7v2h18V7zM5 11v7M9.5 11v7M14.5 11v7M19 11v7M3 20h18v2H3z",
 			},
 		],
+	},
+	{
+		label: "Secretarias",
+		items: SECRETARIAS.map((s) => ({
+			path: s.path,
+			label: s.label,
+			icon: s.icon,
+		})),
 	},
 ];
 
