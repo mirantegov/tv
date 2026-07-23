@@ -22,6 +22,7 @@ DDL PostgreSQL de referência para a API que substituirá os dados mockados de
 | TCE/PR (`/tce`)                        | `tce`                  | `PC.tce`                |
 | SICONFI (`/siconfi`)                   | `siconfi`              | `PC.siconfi`            |
 | Panorama Municipal (`/panorama`)       | `panorama`             | `PAN`                   |
+| Secretarias (`/sec/<slug>`)            | `secretarias`          | `SEC`                   |
 
 **Visão Geral** (`/`) e a seção **Análises e Alertas** não têm schema próprio:
 são agregações/derivações dos schemas acima (a API deve expô-las como views ou

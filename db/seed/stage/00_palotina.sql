@@ -18,3 +18,4 @@
 \i /seed/palotina/panorama.sql
 \i /seed/palotina/tce.sql
 \i /seed/palotina/siconfi.sql
+\i /seed/palotina/secretarias.sql

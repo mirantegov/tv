@@ -51,6 +51,23 @@ export interface Despesa {
 	][];
 }
 
+/* ----------------------------- Secretarias ------------------------------ */
+// KPIs de Execução da Despesa por secretaria (mesmos 8 do módulo Despesa).
+// Chave = slug da secretaria (ex.: "saude"). No Warehouse, filtra por secretaria;
+// por enquanto todas compartilham os mesmos valores.
+export type SecretariaExec = Pick<
+	Despesa,
+	| "dotacao"
+	| "inicial"
+	| "creditos"
+	| "emp"
+	| "liq"
+	| "pago"
+	| "restos"
+	| "saldo"
+>;
+export type Secretarias = Record<string, SecretariaExec>;
+
 export interface DespesaComp {
 	emp25: number;
 	emp26: number;
