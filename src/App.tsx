@@ -423,15 +423,27 @@ function Shell({
 		// Alertas) ligados — dá tempo de ler os alertas que o módulo exibe.
 		const dwell = hidden.has(EXTRAS_KEY) ? 4000 : 10000;
 		// Rola suavemente até o fim, 1px a cada 30ms (1/3 mais rápido que os 40ms
-		// originais). O max é relido a cada passo, então acompanha o conteúdo que
-		// cresce enquanto os gráficos animam e para no fundo real. Página que cabe
-		// na viewport (max <= 0) sai do laço na hora — sem travar.
+		// originais). Detecta o fundo pela posição (quanto falta até a base), não
+		// por scrollY >= max: no fundo real o scrollY pode parar alguns px abaixo
+		// (sub-pixel) e travava o laço. Sai quando falta ≤2px, ou quando não dá
+		// mais para avançar já perto do fundo (≤40px). Não usa scrollTo — nada de
+		// salto visível.
 		const scrollToBottom = async () => {
+			let parado = 0;
 			while (!cancelled) {
-				const max = document.documentElement.scrollHeight - window.innerHeight;
-				if (window.scrollY >= max - 1) break;
+				const de = document.documentElement;
+				const antes = window.scrollY;
+				const falta = de.scrollHeight - (antes + window.innerHeight);
+				if (falta <= 2) break;
 				window.scrollBy(0, 1);
 				await wait(30);
+				if (window.scrollY <= antes) {
+					// ponytail: falta ≤40 = fundo real (sub-pixel); parado>200 (~6s)
+					// = layout preso, segue mesmo assim p/ nunca travar no módulo.
+					if (falta <= 40 || ++parado > 200) break;
+				} else {
+					parado = 0;
+				}
 			}
 			await wait(dwell);
 		};

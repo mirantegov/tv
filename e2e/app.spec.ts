@@ -111,12 +111,13 @@ test.describe("autenticado", () => {
 		await expect(sw).toHaveAttribute("aria-checked", "true");
 	});
 
-	test("Scroll Automático rola e chega até o fim exato da página", async ({
+	test("Scroll Automático rola, chega ao fim e avança para o próximo módulo", async ({
 		page,
 	}) => {
-		test.setTimeout(120_000);
+		test.setTimeout(150_000);
 		await page.locator("nav").getByText("SICONFI", { exact: true }).click();
 		await expect(h1(page)).toHaveText("SICONFI");
+		const inicial = await h1(page).textContent();
 		expect(await page.evaluate(() => window.scrollY)).toBe(0);
 
 		await abrirConfig(page);
@@ -128,8 +129,7 @@ test.describe("autenticado", () => {
 			.poll(() => page.evaluate(() => window.scrollY), { timeout: 30_000 })
 			.toBeGreaterThan(0);
 
-		// 2) Chega até o fim exato: o fundo do conteúdo alcança a base da viewport
-		// (sem deixar um pedaço da página de fora).
+		// 2) Chega até o fim exato: o fundo do conteúdo alcança a base da viewport.
 		await expect
 			.poll(
 				() =>
@@ -141,6 +141,11 @@ test.describe("autenticado", () => {
 				{ timeout: 90_000 },
 			)
 			.toBe(true);
+
+		// 3) Não fica travado no fim: após o descanso, avança para OUTRO módulo.
+		await expect
+			.poll(() => h1(page).textContent(), { timeout: 40_000 })
+			.not.toBe(inicial);
 	});
 
 	test("trocar tema pela seção Aparência", async ({ page }) => {
