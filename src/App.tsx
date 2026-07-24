@@ -401,9 +401,9 @@ function Shell({
 	const pathRef = useRef(path);
 	pathRef.current = path;
 
-	// Scroll Automático (modo TV): aguarda 5s, percorre o módulo atual bem
-	// devagar até o fim, avança para o próximo (aba por aba quando houver
-	// [data-autoscroll-tab]) e recomeça pela Visão Geral ao terminar.
+	// Scroll Automático (modo TV): aguarda 5s, rola cada módulo do topo até o
+	// fim, descansa (4s / 10s com Extras ligados) e avança para o próximo — aba
+	// por aba quando houver [data-autoscroll-tab] — recomeçando ao terminar.
 	useEffect(() => {
 		if (!autoScroll) return;
 		let cancelled = false;
@@ -419,23 +419,37 @@ function Shell({
 		const ORDER = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.path)).filter(
 			(p) => !hidden.has(p),
 		);
-		const scrollPage = async () => {
-			window.scrollTo(0, 0);
-			await wait(1200);
+		// Descanso no fim de cada módulo: 4s normal, 10s com os Extras (Análises e
+		// Alertas) ligados — dá tempo de ler os alertas que o módulo exibe.
+		const dwell = hidden.has(EXTRAS_KEY) ? 4000 : 10000;
+		// Rola suavemente até o fim. Para sozinho se o scroll não avança por ~0,5s
+		// (página curta, contêiner não rolável, altura oscilando) — evita travar.
+		const scrollToBottom = async () => {
+			let lastY = -1;
+			let stuck = 0;
 			while (!cancelled) {
 				const max = document.documentElement.scrollHeight - window.innerHeight;
-				if (window.scrollY >= max - 1) break;
-				window.scrollBy(0, 1);
-				await wait(40);
+				if (max <= 0 || window.scrollY >= max - 1) break;
+				window.scrollBy(0, 6);
+				await wait(16);
+				if (window.scrollY <= lastY) {
+					if (++stuck > 30) break;
+				} else {
+					stuck = 0;
+				}
+				lastY = window.scrollY;
 			}
-			await wait(1500);
+			await wait(dwell);
 		};
 		const run = async () => {
 			await wait(5000);
 			let idx = Math.max(0, ORDER.indexOf(pathRef.current));
 			while (!cancelled) {
+				// Troca o módulo e já volta ao topo antes de renderizar: transição
+				// limpa (sem mostrar o fundo do módulo anterior por um instante).
 				push(ORDER[idx]);
-				await wait(800);
+				window.scrollTo(0, 0);
+				await wait(900);
 				const tabs = Array.from(
 					document.querySelectorAll<HTMLElement>("[data-autoscroll-tab]"),
 				);
@@ -443,11 +457,12 @@ function Shell({
 					for (const tab of tabs) {
 						if (cancelled) break;
 						tab.click();
+						window.scrollTo(0, 0);
 						await wait(600);
-						await scrollPage();
+						await scrollToBottom();
 					}
 				} else {
-					await scrollPage();
+					await scrollToBottom();
 				}
 				idx = (idx + 1) % ORDER.length;
 			}

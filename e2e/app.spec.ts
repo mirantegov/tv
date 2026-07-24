@@ -35,7 +35,11 @@ test("login com CPF e senha válidos entra no painel", async ({ page }) => {
 
 test.describe("autenticado", () => {
 	test.beforeEach(async ({ page }) => {
-		await page.addInitScript(() => localStorage.setItem("mg_auth", "1"));
+		await page.addInitScript(() => {
+			localStorage.setItem("mg_auth", "1");
+			// admin: libera Módulos e Extras (gate isAdmin no App).
+			localStorage.setItem("mg_role", "admin");
+		});
 		await page.goto("/");
 		await expect(h1(page)).toHaveText("Visão Geral");
 	});
@@ -44,7 +48,13 @@ test.describe("autenticado", () => {
 		const erros: string[] = [];
 		page.on("pageerror", (e) => erros.push(String(e)));
 		for (const [rotulo, titulo] of MODULOS) {
-			await page.locator("nav").getByText(rotulo, { exact: true }).click();
+			// .first(): alguns rótulos (Planejamento, Finanças) também existem no
+			// grupo Secretarias; o link do grupo principal vem antes no DOM.
+			await page
+				.locator("nav")
+				.getByRole("link", { name: rotulo, exact: true })
+				.first()
+				.click();
 			await expect(h1(page)).toHaveText(titulo);
 			await expect(page.getByText("Análises e Alertas")).toBeVisible();
 		}
@@ -56,6 +66,8 @@ test.describe("autenticado", () => {
 	}) => {
 		await abrirConfig(page);
 		await page.getByText("Módulos", { exact: true }).click();
+		// Módulos agrupa por seção (colapsável); abre a seção do módulo alvo.
+		await page.getByRole("button", { name: "Seção Movimento" }).click();
 		await page.getByRole("switch", { name: "Financeiro", exact: true }).click();
 		await expect(
 			page.locator("nav").getByText("Financeiro", { exact: true }),
@@ -71,6 +83,7 @@ test.describe("autenticado", () => {
 	}) => {
 		await abrirConfig(page);
 		await page.getByText("Módulos", { exact: true }).click();
+		await page.getByRole("button", { name: "Seção Geral" }).click();
 		await page
 			.getByRole("switch", { name: "Visão Geral", exact: true })
 			.click();
@@ -82,7 +95,7 @@ test.describe("autenticado", () => {
 	test("Extras desligado esconde Análises e Alertas", async ({ page }) => {
 		await expect(page.getByText("Análises e Alertas")).toBeVisible();
 		await abrirConfig(page);
-		await page.getByText("Extras", { exact: true }).click();
+		await page.getByRole("button", { name: /Extras/ }).click();
 		await page
 			.getByRole("switch", { name: "Análises e Alertas", exact: true })
 			.click();
@@ -96,6 +109,31 @@ test.describe("autenticado", () => {
 		await expect(sw).toHaveAttribute("aria-checked", "false");
 		await sw.click();
 		await expect(sw).toHaveAttribute("aria-checked", "true");
+	});
+
+	test("Scroll Automático rola até o fim e avança limpo para o próximo módulo", async ({
+		page,
+	}) => {
+		test.setTimeout(60_000);
+		// Começa num módulo curto (SICONFI) p/ o ciclo caber no timeout.
+		await page.locator("nav").getByText("SICONFI", { exact: true }).click();
+		await expect(h1(page)).toHaveText("SICONFI");
+		const inicial = await h1(page).textContent();
+		expect(await page.evaluate(() => window.scrollY)).toBe(0);
+
+		await abrirConfig(page);
+		await page.getByText("Display", { exact: true }).click();
+		await page.getByRole("switch", { name: "Scroll Automático" }).click();
+
+		// 1) Não trava no topo: em algum momento o scroll passa de 0 (rola de fato).
+		await expect
+			.poll(() => page.evaluate(() => window.scrollY), { timeout: 25_000 })
+			.toBeGreaterThan(0);
+
+		// 2) Transição limpa: avança para OUTRO módulo (não fica preso no atual).
+		await expect
+			.poll(() => h1(page).textContent(), { timeout: 30_000 })
+			.not.toBe(inicial);
 	});
 
 	test("trocar tema pela seção Aparência", async ({ page }) => {
