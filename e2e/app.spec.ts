@@ -111,6 +111,49 @@ test.describe("autenticado", () => {
 		await expect(sw).toHaveAttribute("aria-checked", "true");
 	});
 
+	test("Modo TV recolhe a sidebar, liga o Scroll, fecha o menu e vai ao inicial", async ({
+		page,
+	}) => {
+		const aside = page.locator("aside").first();
+		const larguraAside = async () => (await aside.boundingBox())?.width ?? 0;
+
+		// começa num módulo não-inicial p/ provar a navegação ao inicial
+		await page.locator("nav").getByText("SICONFI", { exact: true }).click();
+		await expect(h1(page)).toHaveText("SICONFI");
+		expect(await larguraAside()).toBeGreaterThan(200); // sidebar expandida
+
+		// liga o Modo TV
+		await abrirConfig(page);
+		await page.getByText("Display", { exact: true }).click();
+		const tv = page.getByRole("switch", { name: "Modo TV" });
+		await expect(tv).toHaveAttribute("aria-checked", "false");
+		await tv.click();
+
+		// fecha Configurações (a seção Display some do DOM)
+		await expect(page.getByText("Display", { exact: true })).toHaveCount(0);
+		// recolhe a sidebar (72px << 232px)
+		await expect.poll(larguraAside, { timeout: 5_000 }).toBeLessThan(100);
+		// vai ao item inicial (Visão Geral, pois "/" não está oculto)
+		await expect(h1(page)).toHaveText("Visão Geral");
+
+		// Scroll Automático ligado e Modo TV marcado (reabre p/ conferir)
+		await abrirConfig(page);
+		await page.getByText("Display", { exact: true }).click();
+		await expect(
+			page.getByRole("switch", { name: "Scroll Automático" }),
+		).toHaveAttribute("aria-checked", "true");
+		const tvOn = page.getByRole("switch", { name: "Modo TV" });
+		await expect(tvOn).toHaveAttribute("aria-checked", "true");
+
+		// desliga → reverte tudo (popover segue aberto no desligar)
+		await tvOn.click();
+		await expect(tvOn).toHaveAttribute("aria-checked", "false");
+		await expect(
+			page.getByRole("switch", { name: "Scroll Automático" }),
+		).toHaveAttribute("aria-checked", "false");
+		await expect.poll(larguraAside, { timeout: 5_000 }).toBeGreaterThan(200);
+	});
+
 	test("Scroll Automático rola, chega ao fim e avança para o próximo módulo", async ({
 		page,
 	}) => {

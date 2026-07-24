@@ -479,16 +479,83 @@ function Shell({
 			return false;
 		}
 	});
-	const toggleCollapsed = () =>
-		setCollapsed((c) => {
-			const next = !c;
+	const applyCollapsed = (next: boolean) => {
+		setCollapsed(next);
+		try {
+			localStorage.setItem("mg_sidebar", next ? "1" : "0");
+		} catch {
+			// localStorage indisponível — segue sem persistir
+		}
+	};
+	const toggleCollapsed = () => applyCollapsed(!collapsed);
+	// Modo TV: um interruptor que arma tudo p/ telão. Estado de sessão (não
+	// persiste) porque requestFullscreen só é aceito num gesto do usuário —
+	// restaurar no reload seria bloqueado pelo browser.
+	const [tvMode, setTvMode] = useState(false);
+	const enterFullscreen = () => {
+		const el = document.documentElement as HTMLElement & {
+			webkitRequestFullscreen?: () => Promise<void> | void;
+		};
+		const req = el.requestFullscreen ?? el.webkitRequestFullscreen;
+		try {
+			const r = req?.call(el);
+			if (r && typeof (r as Promise<void>).catch === "function") {
+				(r as Promise<void>).catch(() => {});
+			}
+		} catch {
+			// fullscreen bloqueado/indisponível — segue com o resto do Modo TV
+		}
+	};
+	const exitFullscreen = () => {
+		const d = document as Document & {
+			webkitFullscreenElement?: Element;
+			webkitExitFullscreen?: () => Promise<void> | void;
+		};
+		if (d.fullscreenElement || d.webkitFullscreenElement) {
+			const ex = d.exitFullscreen ?? d.webkitExitFullscreen;
 			try {
-				localStorage.setItem("mg_sidebar", next ? "1" : "0");
+				ex?.call(d);
 			} catch {
-				// localStorage indisponível — segue sem persistir
+				// segue
+			}
+		}
+	};
+	const toggleTvMode = () =>
+		setTvMode((on) => {
+			const next = !on;
+			if (next) {
+				enterFullscreen(); // 1. kiosk (gesto do clique)
+				applyCollapsed(true); // 2. recolhe sidebar
+				setAutoScroll(true); // 3. liga Scroll Automático
+				setCfgOpen(false); // 4. fecha Configurações
+				push(hidden.has("/") ? "/panorama" : "/"); // 5. item inicial
+			} else {
+				exitFullscreen(); // reverter tudo
+				setAutoScroll(false);
+				applyCollapsed(false); // expande sidebar de volta
 			}
 			return next;
 		});
+	// ESC/F11 (saída manual do fullscreen) desliga o Modo TV p/ o toggle refletir
+	// o estado real. Ref evita closure velha de tvMode.
+	const tvRef = useRef(tvMode);
+	tvRef.current = tvMode;
+	useEffect(() => {
+		const onFs = () => {
+			const d = document as Document & { webkitFullscreenElement?: Element };
+			const fs = d.fullscreenElement || d.webkitFullscreenElement;
+			if (!fs && tvRef.current) {
+				setTvMode(false);
+				setAutoScroll(false);
+			}
+		};
+		document.addEventListener("fullscreenchange", onFs);
+		document.addEventListener("webkitfullscreenchange", onFs);
+		return () => {
+			document.removeEventListener("fullscreenchange", onFs);
+			document.removeEventListener("webkitfullscreenchange", onFs);
+		};
+	}, []);
 	const route = ROUTES.find((r) => r.path === path) || ROUTES[0];
 	const Page = route.el;
 	const Sw = ({ on }: { on: boolean }) => (
@@ -856,6 +923,24 @@ function Shell({
 										>
 											<Sw on={autoScroll} />
 											<span style={{ flex: 1 }}>Scroll Automático</span>
+										</button>
+										<button
+											type="button"
+											role="switch"
+											aria-checked={tvMode}
+											onClick={toggleTvMode}
+											className="w-full rounded-md flex items-center gap-2 text-sm"
+											style={{
+												padding: "6px 10px 6px 18px",
+												background: "transparent",
+												border: "none",
+												color: t.foreground,
+												cursor: "pointer",
+												textAlign: "left",
+											}}
+										>
+											<Sw on={tvMode} />
+											<span style={{ flex: 1 }}>Modo TV</span>
 										</button>
 									</div>
 								)}
