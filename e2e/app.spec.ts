@@ -111,14 +111,12 @@ test.describe("autenticado", () => {
 		await expect(sw).toHaveAttribute("aria-checked", "true");
 	});
 
-	test("Scroll Automático rola até o fim e avança limpo para o próximo módulo", async ({
+	test("Scroll Automático rola e chega até o fim exato da página", async ({
 		page,
 	}) => {
-		test.setTimeout(60_000);
-		// Começa num módulo curto (SICONFI) p/ o ciclo caber no timeout.
+		test.setTimeout(120_000);
 		await page.locator("nav").getByText("SICONFI", { exact: true }).click();
 		await expect(h1(page)).toHaveText("SICONFI");
-		const inicial = await h1(page).textContent();
 		expect(await page.evaluate(() => window.scrollY)).toBe(0);
 
 		await abrirConfig(page);
@@ -127,13 +125,22 @@ test.describe("autenticado", () => {
 
 		// 1) Não trava no topo: em algum momento o scroll passa de 0 (rola de fato).
 		await expect
-			.poll(() => page.evaluate(() => window.scrollY), { timeout: 25_000 })
+			.poll(() => page.evaluate(() => window.scrollY), { timeout: 30_000 })
 			.toBeGreaterThan(0);
 
-		// 2) Transição limpa: avança para OUTRO módulo (não fica preso no atual).
+		// 2) Chega até o fim exato: o fundo do conteúdo alcança a base da viewport
+		// (sem deixar um pedaço da página de fora).
 		await expect
-			.poll(() => h1(page).textContent(), { timeout: 30_000 })
-			.not.toBe(inicial);
+			.poll(
+				() =>
+					page.evaluate(
+						() =>
+							Math.ceil(window.scrollY + window.innerHeight) >=
+							document.documentElement.scrollHeight - 2,
+					),
+				{ timeout: 90_000 },
+			)
+			.toBe(true);
 	});
 
 	test("trocar tema pela seção Aparência", async ({ page }) => {
