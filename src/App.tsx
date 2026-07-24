@@ -359,6 +359,37 @@ function Shell({
 	// p/ todos. Ligado por padrão (ausência da chave = on).
 	const extras = !hidden.has(EXTRAS_KEY);
 	const toggleExtras = () => toggleModule(EXTRAS_KEY);
+	// Grupos recolhidos na nav (persiste; conjunto vazio = todos abertos).
+	const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
+		try {
+			return new Set(
+				JSON.parse(localStorage.getItem("mg_nav_collapsed") || "[]"),
+			);
+		} catch {
+			return new Set();
+		}
+	});
+	const toggleGroup = (label: string) =>
+		setCollapsedGroups((prev) => {
+			const next = new Set(prev);
+			if (next.has(label)) next.delete(label);
+			else next.add(label);
+			try {
+				localStorage.setItem("mg_nav_collapsed", JSON.stringify([...next]));
+			} catch {
+				// localStorage indisponível — segue sem persistir
+			}
+			return next;
+		});
+	// Seções abertas no painel Módulos (efêmero; vazio = todas recolhidas).
+	const [openModGroups, setOpenModGroups] = useState<Set<string>>(new Set());
+	const toggleModGroup = (label: string) =>
+		setOpenModGroups((prev) => {
+			const next = new Set(prev);
+			if (next.has(label)) next.delete(label);
+			else next.add(label);
+			return next;
+		});
 	const visibleGroups = NAV_GROUPS.map((g) => ({
 		...g,
 		items: g.items.filter((i) => !hidden.has(i.path)),
@@ -643,54 +674,89 @@ function Shell({
 					className="p-3 flex flex-col gap-1"
 					style={{ flex: 1, overflowY: "auto" }}
 				>
-					{visibleGroups.map((g, gi) => (
-						<div key={gi} className={gi ? "mt-3" : ""}>
-							{g.label && !collapsed && (
-								<div
-									className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider"
-									style={{ color: t.mutedFg, opacity: 0.7 }}
-								>
-									{g.label}
-								</div>
-							)}
-							{g.items.map((n) => {
-								const active = n.path === path;
-								return (
-									<Link
-										key={n.path}
-										href={n.path}
-										title={collapsed ? n.label : undefined}
-										onNav={() => setNavOpen(false)}
-										className="text-sm rounded-md flex items-center gap-3"
+					{visibleGroups.map((g, gi) => {
+						const groupCollapsed = g.label
+							? collapsedGroups.has(g.label)
+							: false;
+						const showItems = collapsed || !groupCollapsed;
+						return (
+							<div key={gi} className={gi ? "mt-3" : ""}>
+								{g.label && !collapsed && (
+									<button
+										type="button"
+										onClick={() => toggleGroup(g.label as string)}
+										aria-expanded={!groupCollapsed}
+										className="w-full px-3 mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider"
 										style={{
-											padding: collapsed ? "10px" : "9px 12px",
-											justifyContent: collapsed ? "center" : "flex-start",
-											textDecoration: "none",
-											fontWeight: active ? 600 : 500,
-											background: active ? t.primary : "transparent",
-											color: active ? t.primaryFg : t.mutedFg,
+											color: t.mutedFg,
+											opacity: 0.7,
+											background: "transparent",
+											border: "none",
+											cursor: "pointer",
+											textAlign: "left",
 										}}
 									>
+										<span style={{ flex: 1 }}>{g.label}</span>
 										<svg
 											aria-hidden="true"
-											width="18"
-											height="18"
+											width="13"
+											height="13"
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
 											strokeWidth="2"
 											strokeLinecap="round"
 											strokeLinejoin="round"
-											style={{ flexShrink: 0 }}
+											style={{
+												flexShrink: 0,
+												transform: groupCollapsed ? "none" : "rotate(180deg)",
+												transition: "transform 0.15s",
+											}}
 										>
-											<path d={n.icon} />
+											<path d="m6 9 6 6 6-6" />
 										</svg>
-										{!collapsed && <span>{n.label}</span>}
-									</Link>
-								);
-							})}
-						</div>
-					))}
+									</button>
+								)}
+								{showItems &&
+									g.items.map((n) => {
+										const active = n.path === path;
+										return (
+											<Link
+												key={n.path}
+												href={n.path}
+												title={collapsed ? n.label : undefined}
+												onNav={() => setNavOpen(false)}
+												className="text-sm rounded-md flex items-center gap-3"
+												style={{
+													padding: collapsed ? "10px" : "9px 12px",
+													justifyContent: collapsed ? "center" : "flex-start",
+													textDecoration: "none",
+													fontWeight: active ? 600 : 500,
+													background: active ? t.primary : "transparent",
+													color: active ? t.primaryFg : t.mutedFg,
+												}}
+											>
+												<svg
+													aria-hidden="true"
+													width="18"
+													height="18"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													strokeWidth="2"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													style={{ flexShrink: 0 }}
+												>
+													<path d={n.icon} />
+												</svg>
+												{!collapsed && <span>{n.label}</span>}
+											</Link>
+										);
+									})}
+							</div>
+						);
+					})}
 				</nav>
 				<div
 					className="p-3 flex flex-col gap-2"
@@ -789,29 +855,81 @@ function Shell({
 								/>
 								{cfgSection === "modulos" && isAdmin && (
 									<div style={{ padding: "0 0 4px" }}>
-										{NAV_GROUPS.flatMap((g) => g.items)
-											.filter((m) => !LOCKED_PATHS.has(m.path))
-											.map((m) => (
-												<button
-													key={m.path}
-													type="button"
-													role="switch"
-													aria-checked={!hidden.has(m.path)}
-													onClick={() => toggleModule(m.path)}
-													className="w-full rounded-md flex items-center gap-2 text-sm"
-													style={{
-														padding: "6px 10px 6px 18px",
-														background: "transparent",
-														border: "none",
-														color: t.foreground,
-														cursor: "pointer",
-														textAlign: "left",
-													}}
-												>
-													<Sw on={!hidden.has(m.path)} />
-													<span style={{ flex: 1 }}>{m.label}</span>
-												</button>
-											))}
+										{NAV_GROUPS.map((g, gi) => {
+											const mods = g.items.filter(
+												(m) => !LOCKED_PATHS.has(m.path),
+											);
+											if (!mods.length) return null;
+											const label = g.label || "Geral";
+											const open = openModGroups.has(label);
+											const onCount = mods.filter(
+												(m) => !hidden.has(m.path),
+											).length;
+											return (
+												<div key={gi}>
+													<button
+														type="button"
+														onClick={() => toggleModGroup(label)}
+														aria-expanded={open}
+														aria-label={`Seção ${label}`}
+														className="w-full rounded-md flex items-center gap-2 text-xs font-semibold uppercase tracking-wider"
+														style={{
+															padding: "7px 10px 7px 18px",
+															background: "transparent",
+															border: "none",
+															color: t.mutedFg,
+															cursor: "pointer",
+															textAlign: "left",
+														}}
+													>
+														<span style={{ flex: 1 }}>{label}</span>
+														<span style={{ opacity: 0.7, fontWeight: 500 }}>
+															{onCount}/{mods.length}
+														</span>
+														<svg
+															aria-hidden="true"
+															width="13"
+															height="13"
+															viewBox="0 0 24 24"
+															fill="none"
+															stroke="currentColor"
+															strokeWidth="2"
+															strokeLinecap="round"
+															strokeLinejoin="round"
+															style={{
+																flexShrink: 0,
+																transform: open ? "rotate(180deg)" : "none",
+																transition: "transform 0.15s",
+															}}
+														>
+															<path d="m6 9 6 6 6-6" />
+														</svg>
+													</button>
+													{open &&
+														mods.map((m) => (
+															<button
+																key={m.path}
+																type="button"
+																role="switch"
+																aria-checked={!hidden.has(m.path)}
+																onClick={() => toggleModule(m.path)}
+																className="w-full rounded-md flex items-center gap-2 text-sm"
+																style={{
+																	padding: "6px 10px 6px 28px",
+																	background: "transparent",
+																	border: "none",
+																	color: t.foreground,
+																	cursor: "pointer",
+																	textAlign: "left",
+																}}
+															>
+																<Sw on={!hidden.has(m.path)} />
+																<span style={{ flex: 1 }}>{m.label}</span>
+															</button>
+														))}
+												</div>
+											);
+										})}
 									</div>
 								)}
 								<SectionBtn

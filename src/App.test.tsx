@@ -77,6 +77,10 @@ describe("menu Configurações", () => {
 		render(<App />);
 		fireEvent.click(screen.getByRole("button", { name: "Configurações" }));
 		fireEvent.click(screen.getByText("Módulos"));
+		// Seções começam recolhidas; expande todas p/ ver os switches.
+		for (const btn of screen.getAllByLabelText(/^Seção /)) {
+			fireEvent.click(btn);
+		}
 		const rotulos = screen
 			.getAllByRole("switch")
 			.map((s) => s.textContent?.trim());
