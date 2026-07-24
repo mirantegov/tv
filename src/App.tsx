@@ -281,6 +281,10 @@ export const LOCKED_PATHS = new Set(["/panorama"]);
 // Alertas). Começa com "#" p/ nunca colidir com um path de navegação real.
 export const EXTRAS_KEY = "#extras";
 
+// Chave sentinela p/ o lock "Modo TV" do Admin em api.modulo_estado. Presença
+// da chave em `hidden` = lock LIGADO (padrão desligado = ausência).
+export const MODOTV_KEY = "#modotv";
+
 // Ícones dos submenus de Configurações (um path por seção, cor herda do botão).
 const SECTION_ICON_PATHS = {
 	display:
@@ -334,6 +338,34 @@ function Shell({
 			cancel = true;
 		};
 	}, []);
+	// Telas de TV ficam dias abertas: re-busca o estado do banco de tempos em
+	// tempos p/ o lock do Admin (e mudanças de módulos) refletirem ao vivo.
+	// Mantém a mesma referência de Set quando nada mudou → não reinicia o
+	// auto-scroll nem re-renderiza à toa.
+	useEffect(() => {
+		if (!API_URL) return;
+		const id = window.setInterval(() => {
+			fetchHiddenModules()
+				.then((paths) => {
+					setHidden((prev) => {
+						const next = new Set(paths);
+						const igual =
+							prev.size === next.size && [...prev].every((p) => next.has(p));
+						if (igual) return prev;
+						try {
+							localStorage.setItem("mg_modules", JSON.stringify(paths));
+						} catch {
+							// localStorage indisponível — segue
+						}
+						return next;
+					});
+				})
+				.catch(() => {
+					// falha de rede no polling — tenta de novo no próximo tick
+				});
+		}, 20000);
+		return () => window.clearInterval(id);
+	}, []);
 	const toggleModule = (p: string) =>
 		setHidden((prev) => {
 			const next = new Set(prev);
@@ -359,6 +391,8 @@ function Shell({
 	// p/ todos. Ligado por padrão (ausência da chave = on).
 	const extras = !hidden.has(EXTRAS_KEY);
 	const toggleExtras = () => toggleModule(EXTRAS_KEY);
+	// Lock do Modo TV controlado pelo Admin (persiste no banco, vale p/ todos).
+	const tvAdminOn = hidden.has(MODOTV_KEY);
 	// Grupos recolhidos na nav (persiste; conjunto vazio = todos abertos).
 	const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
 		try {
@@ -520,22 +554,29 @@ function Shell({
 			}
 		}
 	};
-	const toggleTvMode = () =>
-		setTvMode((on) => {
-			const next = !on;
-			if (next) {
-				enterFullscreen(); // 1. kiosk (gesto do clique)
-				applyCollapsed(true); // 2. recolhe sidebar
-				setAutoScroll(true); // 3. liga Scroll Automático
-				setCfgOpen(false); // 4. fecha Configurações
-				push(hidden.has("/") ? "/panorama" : "/"); // 5. item inicial
-			} else {
-				exitFullscreen(); // reverter tudo
-				setAutoScroll(false);
-				applyCollapsed(false); // expande sidebar de volta
-			}
-			return next;
-		});
+	const applyTvMode = (on: boolean) => {
+		setTvMode(on);
+		if (on) {
+			enterFullscreen(); // 1. kiosk (best-effort; só engata com gesto do usuário)
+			applyCollapsed(true); // 2. recolhe sidebar
+			setAutoScroll(true); // 3. liga Scroll Automático
+			setCfgOpen(false); // 4. fecha Configurações
+			push(hidden.has("/") ? "/panorama" : "/"); // 5. item inicial
+		} else {
+			exitFullscreen(); // reverte tudo
+			setAutoScroll(false);
+			applyCollapsed(false); // expande sidebar de volta
+		}
+	};
+	// O lock do Admin dirige o Modo TV: liga → entra no kiosk; desliga → reverte.
+	// Reage só a MUDANÇAS de tvAdminOn (ref inicia false p/ aplicar se carregar on).
+	const adminRef = useRef(false);
+	useEffect(() => {
+		if (adminRef.current !== tvAdminOn) {
+			adminRef.current = tvAdminOn;
+			applyTvMode(tvAdminOn);
+		}
+	}, [tvAdminOn]);
 	// ESC/F11 (saída manual do fullscreen) desliga o Modo TV p/ o toggle refletir
 	// o estado real. Ref evita closure velha de tvMode.
 	const tvRef = useRef(tvMode);
@@ -927,20 +968,43 @@ function Shell({
 										<button
 											type="button"
 											role="switch"
-											aria-checked={tvMode}
-											onClick={toggleTvMode}
+											aria-checked={tvMode || tvAdminOn}
+											disabled={tvAdminOn}
+											title={
+												tvAdminOn
+													? "Ativado pelo Administrador (Extras) — só o Admin pode desligar."
+													: undefined
+											}
+											onClick={() => {
+												if (!tvAdminOn) applyTvMode(!tvMode);
+											}}
 											className="w-full rounded-md flex items-center gap-2 text-sm"
 											style={{
 												padding: "6px 10px 6px 18px",
 												background: "transparent",
 												border: "none",
 												color: t.foreground,
-												cursor: "pointer",
+												opacity: tvAdminOn ? 0.6 : 1,
+												cursor: tvAdminOn ? "not-allowed" : "pointer",
 												textAlign: "left",
 											}}
 										>
-											<Sw on={tvMode} />
+											<Sw on={tvMode || tvAdminOn} />
 											<span style={{ flex: 1 }}>Modo TV</span>
+											{tvAdminOn && (
+												<svg
+													aria-hidden="true"
+													width="12"
+													height="12"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke={t.mutedFg}
+													strokeWidth="2"
+												>
+													<rect x="3" y="11" width="18" height="11" rx="2" />
+													<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+												</svg>
+											)}
 										</button>
 									</div>
 								)}
@@ -1056,6 +1120,24 @@ function Shell({
 										>
 											<Sw on={extras} />
 											<span style={{ flex: 1 }}>Análises e Alertas</span>
+										</button>
+										<button
+											type="button"
+											role="switch"
+											aria-checked={tvAdminOn}
+											onClick={() => toggleModule(MODOTV_KEY)}
+											className="w-full rounded-md flex items-center gap-2 text-sm"
+											style={{
+												padding: "6px 10px 6px 18px",
+												background: "transparent",
+												border: "none",
+												color: t.foreground,
+												cursor: "pointer",
+												textAlign: "left",
+											}}
+										>
+											<Sw on={tvAdminOn} />
+											<span style={{ flex: 1 }}>Modo TV</span>
 										</button>
 									</div>
 								)}

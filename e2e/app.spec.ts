@@ -154,6 +154,67 @@ test.describe("autenticado", () => {
 		await expect.poll(larguraAside, { timeout: 5_000 }).toBeGreaterThan(200);
 	});
 
+	test("Modo TV no Extras trava o toggle do Display (só admin desliga)", async ({
+		page,
+	}) => {
+		const aside = page.locator("aside").first();
+		const larguraAside = async () => (await aside.boundingBox())?.width ?? 0;
+
+		// admin liga o Modo TV pelo Extras (ligar aplica o kiosk e FECHA o popover)
+		await abrirConfig(page);
+		await page.getByText("Extras", { exact: true }).click();
+		const extrasTv = page.getByRole("switch", { name: "Modo TV" });
+		await expect(extrasTv).toHaveAttribute("aria-checked", "false");
+		await extrasTv.click();
+
+		// efeitos do kiosk aplicados (sidebar recolhida, vai ao inicial)
+		await expect.poll(larguraAside, { timeout: 5_000 }).toBeLessThan(100);
+		await expect(h1(page)).toHaveText("Visão Geral");
+
+		// no Display: Modo TV marcado e TRAVADO (popover foi fechado → reabre)
+		await abrirConfig(page);
+		await page.getByText("Display", { exact: true }).click();
+		const displayTv = page.getByRole("switch", { name: "Modo TV" });
+		await expect(displayTv).toHaveAttribute("aria-checked", "true");
+		await expect(displayTv).toBeDisabled();
+
+		// admin desliga pelo Extras (popover segue aberto → só troca de seção)
+		await page.getByText("Extras", { exact: true }).click();
+		await page.getByRole("switch", { name: "Modo TV" }).click();
+		await expect.poll(larguraAside, { timeout: 5_000 }).toBeGreaterThan(200);
+
+		// Display volta a ficar livre (habilitado e desmarcado)
+		await page.getByText("Display", { exact: true }).click();
+		const displayTv2 = page.getByRole("switch", { name: "Modo TV" });
+		await expect(displayTv2).toBeEnabled();
+		await expect(displayTv2).toHaveAttribute("aria-checked", "false");
+	});
+
+	test("usuário comum não desliga o Modo TV travado pelo admin", async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem("mg_auth", "1");
+			localStorage.setItem("mg_role", "suporte"); // não-admin
+			localStorage.setItem("mg_modules", JSON.stringify(["#modotv"])); // lock on
+		});
+		await page.goto("/");
+		// já entra no kiosk pelo lock (item inicial)
+		await expect(h1(page)).toHaveText("Visão Geral");
+
+		await page
+			.getByRole("button", { name: "Configurações", exact: true })
+			.click();
+		// Extras é admin-only → botão desabilitado p/ suporte
+		await expect(page.getByRole("button", { name: /Extras/ })).toBeDisabled();
+
+		// Display: Modo TV marcado e travado
+		await page.getByText("Display", { exact: true }).click();
+		const displayTv = page.getByRole("switch", { name: "Modo TV" });
+		await expect(displayTv).toHaveAttribute("aria-checked", "true");
+		await expect(displayTv).toBeDisabled();
+	});
+
 	test("Scroll Automático rola, chega ao fim e avança para o próximo módulo", async ({
 		page,
 	}) => {
