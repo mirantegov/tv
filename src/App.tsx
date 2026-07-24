@@ -422,29 +422,17 @@ function Shell({
 		// Descanso no fim de cada módulo: 4s normal, 10s com os Extras (Análises e
 		// Alertas) ligados — dá tempo de ler os alertas que o módulo exibe.
 		const dwell = hidden.has(EXTRAS_KEY) ? 4000 : 10000;
-		// Rola suavemente até o fim, ~1px a cada 30ms (1/3 mais rápido que a
-		// velocidade original de 40ms). Para sozinho se o scroll não avança por
-		// ~1,2s (página curta, contêiner não rolável, altura oscilando) — evita
-		// travar. O max é relido a cada passo, então acompanha o conteúdo que
-		// cresce enquanto os gráficos animam.
+		// Rola suavemente até o fim, 1px a cada 30ms (1/3 mais rápido que os 40ms
+		// originais). O max é relido a cada passo, então acompanha o conteúdo que
+		// cresce enquanto os gráficos animam e para no fundo real. Página que cabe
+		// na viewport (max <= 0) sai do laço na hora — sem travar.
 		const scrollToBottom = async () => {
-			let lastY = -1;
-			let stuck = 0;
 			while (!cancelled) {
 				const max = document.documentElement.scrollHeight - window.innerHeight;
-				if (max <= 0 || window.scrollY >= max - 1) break;
+				if (window.scrollY >= max - 1) break;
 				window.scrollBy(0, 1);
 				await wait(30);
-				if (window.scrollY <= lastY) {
-					if (++stuck > 40) break;
-				} else {
-					stuck = 0;
-				}
-				lastY = window.scrollY;
 			}
-			// Snap ao fim exato: fecha qualquer folga se a página cresceu no último
-			// instante (gráfico terminando a animação) e deixou um pedaço de fora.
-			window.scrollTo(0, document.documentElement.scrollHeight);
 			await wait(dwell);
 		};
 		const run = async () => {
