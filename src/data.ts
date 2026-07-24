@@ -1258,7 +1258,7 @@ export const PC: PrestacaoContas = {
 		certidao: {
 			kpis: {
 				situacao: "Regular",
-				validade: "3 dias",
+				validade: "1 dia",
 				pendencias: 0,
 				tipo: "Liberatória",
 			},
@@ -1321,10 +1321,10 @@ export const PC: PrestacaoContas = {
 		cauc: {
 			kpis: {
 				regulares: 27,
-				total: 29,
+				total: 28,
 				pendentes: 0,
 				situacao: "Regular",
-				verificacao: "22/07/2026",
+				verificacao: "24/07/2026",
 			},
 			// [exigencia, tone: 'ok' (comprovado) | 'off' (desativado) | 'warn' | 'danger']
 			itens: [
@@ -1333,7 +1333,7 @@ export const PC: PrestacaoContas = {
 					"ok",
 				],
 				["Pagamento de precatórios judiciais (Transferegov)", "ok"],
-				["Regularidade com o FGTS (CAIXA)", "off"],
+				["Regularidade com o FGTS (CAIXA)", "ok"],
 				[
 					"Adimplência em empréstimos e financiamentos com a União (SAHEM)",
 					"ok",

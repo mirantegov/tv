@@ -21,7 +21,7 @@ export const AA: Record<string, Bloco> = {
 		itens: [
 			{
 				sev: "crit",
-				titulo: "Certidão Liberatória vence em 2 dias (25/07/2026)",
+				titulo: "Certidão Liberatória vence em 1 dia (25/07/2026)",
 				det: "Certidão nº 9938/2025 do TCE-PR. Sem renovação, o Município fica impedido de receber recursos via convênio, termo de parceria ou contrato de gestão.",
 				href: "/tce",
 				acao: "Ver certidão",
@@ -404,7 +404,7 @@ export const AA: Record<string, Bloco> = {
 		itens: [
 			{
 				sev: "crit",
-				titulo: "Certidão Liberatória vence em 3 dias (25/07/2026)",
+				titulo: "Certidão Liberatória vence em 1 dia (25/07/2026)",
 				det: "Sem renovação, o Município fica impedido de receber recursos públicos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR.",
 				href: "/tce",
 			},
@@ -430,27 +430,27 @@ export const AA: Record<string, Bloco> = {
 		emDia: [
 			["Agenda TCE-PR", "sem itens não atendidos ✓"],
 			["Certidão Liberatória", "situação Regular ✓"],
-			["Contas 2019–2023", "julgadas Regular ✓"],
+			["Contas 2019 e 2021–2023", "julgadas Regular ✓"],
 		],
 	},
 	"/siconfi": {
 		itens: [
 			{
 				sev: "warn",
-				titulo: "MSC temporariamente indisponível",
-				det: "Coleta da Matriz de Saldos Contábeis suspensa por alterações no portal do Tesouro Nacional (SICONFI). Como RREO, RGF e DCA derivam da MSC, retomar a extração assim que o serviço estabilizar.",
+				titulo: "MSC de Jun/2026 ainda pendente",
+				det: "As remessas de Jan–Mai/2026 foram enviadas (consistência 100%, exceto Mar em 98%); a de Jun/2026 segue pendente. Como RREO, RGF e DCA derivam da MSC, concluir o envio.",
 				href: "/siconfi",
 			},
 			{
 				sev: "info",
-				titulo: "Dois itens do CAUC constam como Desativados",
-				det: "FGTS (CAIXA) e Anexo 12 do RREO ao SIOPS estão desativados pelo próprio serviço — não caracterizam inadimplência do ente. Comprovar diretamente ao órgão concedente se exigido em convênio.",
+				titulo: "Um item do CAUC consta como Desativado",
+				det: "Apenas o Anexo 12 do RREO ao SIOPS está desativado pelo próprio serviço — não caracteriza inadimplência do ente. Comprovar diretamente ao órgão concedente se exigido em convênio.",
 				href: "/siconfi",
 			},
 			{
 				sev: "info",
-				titulo: "CAUC regular — 27 de 29 exigências comprovadas",
-				det: "Sem pendências que bloqueiem transferências voluntárias; município apto a celebrar convênios (pesquisa de 22/07/2026).",
+				titulo: "CAUC regular — 27 de 28 exigências comprovadas",
+				det: "Sem pendências que bloqueiem transferências voluntárias; município apto a celebrar convênios (pesquisa de 24/07/2026).",
 				href: "/siconfi",
 			},
 			{
