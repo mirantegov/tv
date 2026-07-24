@@ -1,15 +1,20 @@
--- Seed Secretarias — Município de Palotina (IBGE 4117909), exercício 2026 (Jun).
--- Provisório: mesmos valores do módulo Despesa p/ todas as secretarias. O
--- Warehouse substitui por dados oficiais por secretaria depois. Fonte = data.ts SEC.
-SET search_path TO secretarias;
-
-INSERT INTO resumo (exercicio, secretaria, competencia, dotacao_atualizada,
-	dotacao_inicial, creditos_adicionais, empenhado, liquidado, pago, restos,
-	saldo_a_empenhar)
-SELECT 2026, s, 6, 850, 780, 70, 470.1, 410.2, 384.3, 95.4, 379.9
-FROM unnest(ARRAY[
-	'administracao', 'financas', 'planejamento', 'obras', 'agronegocio',
-	'saude', 'assistencia-social', 'educacao', 'industria', 'esportes',
-	'gabinete', 'controladoria', 'urbanismo', 'desenvolvimento-economico',
-	'transito', 'seguranca', 'meio-ambiente'
-]) AS s;
+-- Índice de seeds das Secretarias — Palotina (IBGE 4117909), exercício 2026.
+-- Uma secretaria por arquivo (secretarias/<slug>.sql) para cada uma poder
+-- divergir com seus próprios dados. Ordem = sidebar em App.tsx. Fonte = data.ts SEC.
+\i /seed/palotina/secretarias/gabinete.sql
+\i /seed/palotina/secretarias/controladoria.sql
+\i /seed/palotina/secretarias/administracao.sql
+\i /seed/palotina/secretarias/financas.sql
+\i /seed/palotina/secretarias/planejamento.sql
+\i /seed/palotina/secretarias/obras.sql
+\i /seed/palotina/secretarias/agronegocio.sql
+\i /seed/palotina/secretarias/saude.sql
+\i /seed/palotina/secretarias/assistencia-social.sql
+\i /seed/palotina/secretarias/educacao.sql
+\i /seed/palotina/secretarias/industria.sql
+\i /seed/palotina/secretarias/esportes.sql
+\i /seed/palotina/secretarias/urbanismo.sql
+\i /seed/palotina/secretarias/desenvolvimento-economico.sql
+\i /seed/palotina/secretarias/transito.sql
+\i /seed/palotina/secretarias/seguranca.sql
+\i /seed/palotina/secretarias/meio-ambiente.sql
