@@ -751,6 +751,10 @@ function Shell({
 					borderRight: `1px solid ${t.border}`,
 					position: "sticky",
 					top: 0,
+					// z-index no próprio aside: cria um stacking context ACIMA do
+					// conteúdo, senão o popover de Configurações (que transborda ~20px
+					// além da sidebar) fica atrás das barras/cards do main.
+					zIndex: 20,
 					height: "100vh",
 					flexDirection: "column",
 					transition: "width 0.15s ease",
