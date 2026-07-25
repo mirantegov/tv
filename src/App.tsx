@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { AnalisesAlertas } from "./AnalisesAlertas";
 import { fetchHiddenModules, saveModuleHidden } from "./api";
 import { DataProvider } from "./DataProvider";
@@ -291,6 +291,11 @@ export const LOCKED_PATHS = new Set(["/panorama"]);
 // Chave sentinela em api.modulo_estado p/ ligar/desligar os Extras (Análises e
 // Alertas). Começa com "#" p/ nunca colidir com um path de navegação real.
 export const EXTRAS_KEY = "#extras";
+
+// Flag global dos Extras (Análises e Alertas) via contexto — o mesmo
+// enable/disable vale p/ módulos e sub-módulos (abas). Default true.
+const ExtrasContext = createContext(true);
+export const useExtras = () => useContext(ExtrasContext);
 
 // Chave sentinela p/ o lock "Modo TV" do Admin em api.modulo_estado. Presença
 // da chave em `hidden` = lock LIGADO (padrão desligado = ausência).
@@ -1291,8 +1296,10 @@ function Shell({
 					</div>
 				</header>
 				<main className="px-4 sm:px-6 py-5 max-w-7xl mx-auto">
-					<Page />
-					{extras && <AnalisesAlertas path={route.path} />}
+					<ExtrasContext.Provider value={extras}>
+						<Page />
+						<AnalisesAlertas path={route.path} />
+					</ExtrasContext.Provider>
 				</main>
 			</div>
 		</div>

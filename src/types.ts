@@ -131,6 +131,18 @@ export type PlanVincComp = {
 	b: number;
 	limite: number;
 };
+// Comparativo A(2025)×B(2026) por entidade orçamentária (pref/camara/prev/san).
+export interface PlanEntComp {
+	recA: number;
+	recB: number;
+	despA: number;
+	despB: number;
+	resA: number;
+	resB: number;
+	evol: LabelValue[];
+	grupo: [nome: string, a: number, b: number][];
+	vinc: PlanVincComp[];
+}
 export interface PlanComp {
 	anoA: number;
 	anoB: number;
@@ -146,6 +158,10 @@ export interface PlanComp {
 	arvore: TreeCmpNode[];
 	totA: number;
 	totB: number;
+	pref: PlanEntComp;
+	camara: PlanEntComp;
+	prev: PlanEntComp;
+	san: PlanEntComp;
 }
 
 /* ----------------------------- Financeiro ------------------------------- */

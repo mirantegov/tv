@@ -3,6 +3,7 @@
    Conteúdo derivado dos KPIs/tabelas/gráficos do módulo (dados de data.ts).
    sev: "crit" (crítico) | "warn" (atenção) | "info" (análise/insight)
    ============================================================================ */
+import { useExtras } from "./App";
 import { Card, Title } from "./components";
 import { Link } from "./router";
 import { useTheme } from "./theme";
@@ -226,22 +227,30 @@ export const AA: Record<string, Bloco> = {
 			["Patrimonial +21,1%", "vs 2025"],
 		],
 	},
-	"/planejamento-comp": {
+	"/planejamento-comp/integral": {
 		itens: [
 			{
 				sev: "warn",
 				titulo: "Equilíbrio da LOA",
-				det: "Despesa fixada acompanha a receita prevista no orçamento de 2026 — manter o equilíbrio na execução ao longo do exercício.",
-			},
-			{
-				sev: "warn",
-				titulo: "Pessoal previsto (LRF)",
-				det: "41,98% do teto de 54% na LOA 2026 — margem confortável, mas exige acompanhamento na execução da folha.",
+				det: "Despesa fixada acompanha a receita prevista no orçamento consolidado de 2026 — manter o equilíbrio na execução ao longo do exercício.",
 			},
 			{
 				sev: "info",
-				titulo: "Educação prevista (MDE)",
-				det: "25,9% ≥ mínimo de 25% — previsão orçamentária atende ao piso constitucional (CF art. 212).",
+				titulo: "Orçamento consolidado 2026",
+				det: "R$ 512 mi · +7,1% vs 2025 — crescimento consistente com a receita prevista das 4 entidades.",
+			},
+		],
+		emDia: [
+			["Prefeitura, Câmara", "RPPS e Saneamento ✓"],
+			["Receita = despesa", "orçamento equilibrado ✓"],
+		],
+	},
+	"/planejamento-comp/prefeitura": {
+		itens: [
+			{
+				sev: "warn",
+				titulo: "Pessoal previsto (LRF)",
+				det: "41,98% do teto de 54% da RCL na LOA 2026 — margem confortável, mas exige acompanhamento na execução da folha.",
 			},
 			{
 				sev: "info",
@@ -250,13 +259,68 @@ export const AA: Record<string, Bloco> = {
 			},
 			{
 				sev: "info",
-				titulo: "Orçamento consolidado 2026",
-				det: "R$ 512 mi · +7,1% vs 2025 — crescimento consistente com a receita prevista.",
+				titulo: "Educação prevista (MDE)",
+				det: "25,9% ≥ mínimo de 25% — previsão orçamentária atende ao piso constitucional (CF art. 212).",
 			},
 		],
 		emDia: [
-			["Câmara (CF art. 29-A)", "dentro do limite"],
-			["RPPS", "taxa de administração ok"],
+			["Pessoal 41,98%", "teto 54% ✓"],
+			["Saúde 25,62%", "mín. 15% ✓"],
+			["Educação 25,9%", "mín. 25% ✓"],
+		],
+	},
+	"/planejamento-comp/camara": {
+		itens: [
+			{
+				sev: "warn",
+				titulo: "Folha da Câmara em 69% do duodécimo",
+				det: "Próxima do teto de 70% (CF art. 29-A, §1º) na previsão de 2026 — acompanhar reajustes do Legislativo.",
+			},
+			{
+				sev: "info",
+				titulo: "Duodécimo previsto em 6,9%",
+				det: "Abaixo do teto de 7% da RLA (CF art. 29-A) — repasse ao Legislativo dentro do limite constitucional.",
+			},
+		],
+		emDia: [
+			["Folha 69%", "teto 70% ✓"],
+			["Duodécimo 6,9%", "teto 7% ✓"],
+		],
+	},
+	"/planejamento-comp/previdencia": {
+		itens: [
+			{
+				sev: "info",
+				titulo: "Resultado previdenciário superavitário",
+				det: "Receitas previstas superam os benefícios em 2026 — RPPS com equilíbrio atuarial e financeiro na previsão.",
+			},
+			{
+				sev: "info",
+				titulo: "Taxa de administração prevista em 1,9%",
+				det: "Abaixo do teto de 2% — custeio administrativo do RPPS dentro do limite legal.",
+			},
+		],
+		emDia: [
+			["Resultado", "superavitário ✓"],
+			["Taxa adm. 1,9%", "teto 2% ✓"],
+		],
+	},
+	"/planejamento-comp/saneamento": {
+		itens: [
+			{
+				sev: "info",
+				titulo: "Investimentos previstos de R$ 8 mi",
+				det: "Aplicação em infraestrutura de saneamento no orçamento de 2026 — expansão da cobertura e universalização.",
+			},
+			{
+				sev: "info",
+				titulo: "Resultado orçamentário positivo",
+				det: "Receita prevista supera a despesa fixada em 2026 — autarquia com equilíbrio tarifário na previsão.",
+			},
+		],
+		emDia: [
+			["Investimentos R$ 8 mi", "em infraestrutura ✓"],
+			["Resultado", "positivo ✓"],
 		],
 	},
 	"/financeiro": {
@@ -531,7 +595,9 @@ export const AA: Record<string, Bloco> = {
 };
 
 export function AnalisesAlertas({ path }: { path: string }) {
+	const extras = useExtras();
 	const { t } = useTheme();
+	if (!extras) return null;
 	const bloco = AA[path];
 	if (!bloco) return null;
 	const tone = { crit: t.danger, warn: t.warn, info: t.primary };

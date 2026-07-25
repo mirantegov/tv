@@ -53,12 +53,20 @@ test.describe("autenticado", () => {
 		// específico do módulo comparativo p/ evitar a colisão de rótulo.
 		await page.locator('nav a[href="/planejamento-comp"]').click();
 		await expect(h1(page)).toHaveText("Planejamento — Comparativo Anual");
-		// KPI comparativo do módulo (o rótulo aparece em vários pontos — pega o 1º)
+		// aba Integral (padrão): KPI + alerta do sub-módulo /integral
 		await expect(
 			page.getByText("Despesa fixada", { exact: true }).first(),
 		).toBeVisible();
-		// painel de alertas injetado pelo App (bloco AA["/planejamento-comp"])
 		await expect(page.getByText("Análises e Alertas")).toBeVisible();
+
+		// percorre as demais abas (cada entidade tem seu comparativo + alerta)
+		for (const aba of ["Prefeitura", "Câmara", "Previdência", "Saneamento"]) {
+			await page.getByRole("button", { name: aba, exact: true }).click();
+			await expect(
+				page.getByText("Receita prevista", { exact: true }).first(),
+			).toBeVisible();
+			await expect(page.getByText("Análises e Alertas")).toBeVisible();
+		}
 		expect(erros).toEqual([]);
 	});
 
