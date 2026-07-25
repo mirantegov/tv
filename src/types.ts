@@ -124,6 +124,30 @@ export interface ReceitaComp {
 	arvore: TreeCmpNode[];
 }
 
+/* ------------------- Planejamento — Comparativo (LOA) ------------------- */
+export type PlanVincComp = {
+	nome: string;
+	a: number;
+	b: number;
+	limite: number;
+};
+export interface PlanComp {
+	anoA: number;
+	anoB: number;
+	orcA: number;
+	orcB: number;
+	recA: number;
+	recB: number;
+	despA: number;
+	despB: number;
+	evol: LabelValue[];
+	vinc: PlanVincComp[];
+	entidades: [nome: string, valorA: number, valorB: number][];
+	arvore: TreeCmpNode[];
+	totA: number;
+	totB: number;
+}
+
 /* ----------------------------- Financeiro ------------------------------- */
 export interface Financeiro {
 	anterior: number;

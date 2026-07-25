@@ -9,6 +9,7 @@ import type {
 	Licitacoes,
 	Panorama,
 	People,
+	PlanComp,
 	Planejamento,
 	PrestacaoContas,
 	Receita,
@@ -375,6 +376,68 @@ export const CR: ReceitaComp = {
 		},
 		{ id: "rcap", nome: "Receitas de Capital", v25: 2.5, v26: 3 },
 	],
+};
+// Comparativo do Planejamento (LOA) — orçamento fixado A(2025)×B(2026).
+// Representativo — ver "Decisão pendente" no plano (trocar por LOA plurianual oficial).
+export const CP: PlanComp = {
+	anoA: 2025,
+	anoB: 2026,
+	orcA: 478,
+	orcB: 512,
+	recA: 478,
+	recB: 512,
+	despA: 478,
+	despB: 512,
+	evol: [
+		["2022", 395],
+		["2023", 420],
+		["2024", 448],
+		["2025", 478],
+		["2026", 512],
+	],
+	vinc: [
+		{ nome: "Pessoal (LRF)", a: 41.2, b: 41.98, limite: 54 },
+		{ nome: "Saúde (ASPS)", a: 24.9, b: 25.62, limite: 15 },
+		{ nome: "Educação (MDE)", a: 25.4, b: 25.9, limite: 25 },
+	],
+	entidades: [
+		["Prefeitura", 440, 470],
+		["Câmara", 13, 14],
+		["RPPS/Previdência", 70, 78],
+		["Saneamento", 22, 24],
+	],
+	// Despesa fixada por função (v25×v26). Soma dos topos = totA/totB.
+	arvore: [
+		{
+			id: "edu",
+			nome: "Educação",
+			v25: 118,
+			v26: 128,
+			children: [
+				{ id: "ef", nome: "Ensino Fundamental (MDE)", v25: 78, v26: 84 },
+				{ id: "ei", nome: "Educação Infantil", v25: 30, v26: 33 },
+				{ id: "es", nome: "Demais (transporte/superior)", v25: 10, v26: 11 },
+			],
+		},
+		{
+			id: "sau",
+			nome: "Saúde",
+			v25: 108,
+			v26: 118,
+			children: [
+				{ id: "ab", nome: "Atenção Básica", v25: 58, v26: 64 },
+				{ id: "ah", nome: "Assistência Hospitalar", v25: 38, v26: 40 },
+				{ id: "vs", nome: "Vigilância em Saúde", v25: 12, v26: 14 },
+			],
+		},
+		{ id: "adm", nome: "Administração", v25: 70, v26: 74 },
+		{ id: "prev", nome: "Previdência Social", v25: 62, v26: 68 },
+		{ id: "urb", nome: "Urbanismo", v25: 48, v26: 50 },
+		{ id: "leg", nome: "Legislativa", v25: 13, v26: 14 },
+		{ id: "enc", nome: "Encargos Especiais + Outras", v25: 59, v26: 60 },
+	],
+	totA: 478,
+	totB: 512,
 };
 export const F: Financeiro = {
 	anterior: 57.9,

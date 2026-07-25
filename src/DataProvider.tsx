@@ -12,6 +12,7 @@ import { fetchModule } from "./api";
 import {
 	CD as CDseed,
 	CON as CONseed,
+	CP as CPseed,
 	CR as CRseed,
 	D as Dseed,
 	FA as FAseed,
@@ -37,6 +38,7 @@ import type {
 	Licitacoes,
 	Panorama,
 	People,
+	PlanComp,
 	Planejamento,
 	PrestacaoContas,
 	Receita,
@@ -50,6 +52,7 @@ export interface TenantData {
 	CD: DespesaComp;
 	R: Receita;
 	CR: ReceitaComp;
+	CP: PlanComp;
 	F: Financeiro;
 	FA: FinanceiroAnalises;
 	TB: Tributacao;
@@ -68,6 +71,7 @@ const seed: TenantData = {
 	CD: CDseed,
 	R: Rseed,
 	CR: CRseed,
+	CP: CPseed,
 	F: Fseed,
 	FA: FAseed,
 	TB: TBseed,
@@ -90,6 +94,7 @@ async function loadTenantData(): Promise<TenantData> {
 		CD,
 		R,
 		CR,
+		CP,
 		F,
 		FA,
 		TB,
@@ -107,6 +112,9 @@ async function loadTenantData(): Promise<TenantData> {
 		fetchModule<DespesaComp>("despesa_comp"),
 		fetchModule<Receita>("receita"),
 		fetchModule<ReceitaComp>("receita_comp"),
+		// Módulo novo: se a view api.planejamento_comp ainda não existir no tenant,
+		// cai no seed sem derrubar os demais módulos.
+		fetchModule<PlanComp>("planejamento_comp").catch(() => CPseed),
 		fetchModule<Financeiro>("financeiro"),
 		fetchModule<FinanceiroAnalises>("financeiro_analises"),
 		fetchModule<Tributacao>("tributacao"),
@@ -127,6 +135,7 @@ async function loadTenantData(): Promise<TenantData> {
 		CD,
 		R,
 		CR,
+		CP,
 		F,
 		FA,
 		TB,

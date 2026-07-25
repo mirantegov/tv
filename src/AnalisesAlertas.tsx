@@ -226,6 +226,39 @@ export const AA: Record<string, Bloco> = {
 			["Patrimonial +21,1%", "vs 2025"],
 		],
 	},
+	"/planejamento-comp": {
+		itens: [
+			{
+				sev: "warn",
+				titulo: "Equilíbrio da LOA",
+				det: "Despesa fixada acompanha a receita prevista no orçamento de 2026 — manter o equilíbrio na execução ao longo do exercício.",
+			},
+			{
+				sev: "warn",
+				titulo: "Pessoal previsto (LRF)",
+				det: "41,98% do teto de 54% na LOA 2026 — margem confortável, mas exige acompanhamento na execução da folha.",
+			},
+			{
+				sev: "info",
+				titulo: "Educação prevista (MDE)",
+				det: "25,9% ≥ mínimo de 25% — previsão orçamentária atende ao piso constitucional (CF art. 212).",
+			},
+			{
+				sev: "info",
+				titulo: "Saúde prevista (ASPS)",
+				det: "25,62% ≥ mínimo de 15% — previsão orçamentária supera com folga o piso das ações e serviços públicos de saúde.",
+			},
+			{
+				sev: "info",
+				titulo: "Orçamento consolidado 2026",
+				det: "R$ 512 mi · +7,1% vs 2025 — crescimento consistente com a receita prevista.",
+			},
+		],
+		emDia: [
+			["Câmara (CF art. 29-A)", "dentro do limite"],
+			["RPPS", "taxa de administração ok"],
+		],
+	},
 	"/financeiro": {
 		itens: [
 			{

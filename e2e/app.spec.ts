@@ -44,6 +44,24 @@ test.describe("autenticado", () => {
 		await expect(h1(page)).toHaveText("Visão Geral");
 	});
 
+	test("Planejamento (Comparativos) renderiza KPIs e Análises e Alertas", async ({
+		page,
+	}) => {
+		const erros: string[] = [];
+		page.on("pageerror", (e) => erros.push(String(e)));
+		// "Planejamento" existe em Movimento e em Comparativos — navega pelo href
+		// específico do módulo comparativo p/ evitar a colisão de rótulo.
+		await page.locator('nav a[href="/planejamento-comp"]').click();
+		await expect(h1(page)).toHaveText("Planejamento — Comparativo Anual");
+		// KPI comparativo do módulo (o rótulo aparece em vários pontos — pega o 1º)
+		await expect(
+			page.getByText("Despesa fixada", { exact: true }).first(),
+		).toBeVisible();
+		// painel de alertas injetado pelo App (bloco AA["/planejamento-comp"])
+		await expect(page.getByText("Análises e Alertas")).toBeVisible();
+		expect(erros).toEqual([]);
+	});
+
 	test("navega por todos os módulos sem erro", async ({ page }) => {
 		const erros: string[] = [];
 		page.on("pageerror", (e) => erros.push(String(e)));

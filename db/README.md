@@ -19,6 +19,7 @@ DDL PostgreSQL de referência para a API que substituirá os dados mockados de
 | Licitações (`/licitacoes`)             | `licitacoes`           | `LIC`                   |
 | Contratos (`/contratos`)               | `contratos`            | `CON`                   |
 | Planejamento — LOA (`/planejamento`)   | `planejamento`         | `PLAN`                  |
+| Planejamento — Comparativo (`/planejamento-comp`) | `planejamento_comparativo` | `CP`         |
 | TCE/PR (`/tce`)                        | `tce`                  | `PC.tce`                |
 | SICONFI (`/siconfi`)                   | `siconfi`              | `PC.siconfi`            |
 | Panorama Municipal (`/panorama`)       | `panorama`             | `PAN`                   |

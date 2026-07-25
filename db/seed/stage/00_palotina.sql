@@ -7,6 +7,7 @@
 \i /seed/palotina/despesa_comparativo.sql
 \i /seed/palotina/receita.sql
 \i /seed/palotina/receita_comparativo.sql
+\i /seed/palotina/planejamento_comparativo.sql
 \i /seed/palotina/financeiro.sql
 \i /seed/palotina/financeiro_analises.sql
 \i /seed/palotina/tributacao.sql

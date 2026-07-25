@@ -12,6 +12,7 @@ import FolhaModule from "./modules/FolhaModule";
 import LicitacoesModule from "./modules/LicitacoesModule";
 import PanoramaModule from "./modules/PanoramaModule";
 import PeopleModule from "./modules/PeopleModule";
+import PlanejamentoComparativoModule from "./modules/PlanejamentoComparativoModule";
 import PlanejamentoModule from "./modules/PlanejamentoModule";
 import { SiconfiModule, TcePrModule } from "./modules/PrestacaoModule";
 import ReceitaComparativoModule from "./modules/ReceitaComparativoModule";
@@ -155,6 +156,11 @@ export const ROUTES = [
 		title: "Financeiro — Análises",
 		el: FinanceiroAnalisesModule,
 	},
+	{
+		path: "/planejamento-comp",
+		title: "Planejamento — Comparativo Anual",
+		el: PlanejamentoComparativoModule,
+	},
 	...SECRETARIAS.map((s) => ({
 		path: s.path,
 		title: s.label,
@@ -229,7 +235,7 @@ export const NAV_GROUPS = [
 		],
 	},
 	{
-		label: "Análises",
+		label: "Comparativos",
 		items: [
 			{
 				path: "/despesa-comp",
@@ -245,6 +251,11 @@ export const NAV_GROUPS = [
 				path: "/financeiro-analises",
 				label: "Finanças",
 				icon: "M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z",
+			},
+			{
+				path: "/planejamento-comp",
+				label: "Planejamento",
+				icon: "M3 4h18v18H3zM16 2v4M8 2v4M3 10h18",
 			},
 		],
 	},
@@ -882,7 +893,12 @@ function Shell({
 				</nav>
 				<div
 					className="p-3 flex flex-col gap-2"
-					style={{ borderTop: `1px solid ${t.border}`, flexShrink: 0 }}
+					style={{
+						borderTop: `1px solid ${t.border}`,
+						flexShrink: 0,
+						position: "relative",
+						zIndex: 40,
+					}}
 				>
 					{/* order: 1 → Configurações fica após Recolher (último item) */}
 					<div style={{ position: "relative", order: 1 }}>
