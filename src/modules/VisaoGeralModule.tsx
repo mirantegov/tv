@@ -2,6 +2,7 @@ import type React from "react";
 import { Card } from "../components";
 import { useData } from "../DataProvider";
 import { useTheme } from "../theme";
+import { certidaoVencida } from "./PrestacaoModule";
 
 export default function VisaoGeralModule() {
 	const { PAN } = useData();
@@ -320,23 +321,43 @@ export default function VisaoGeralModule() {
 							{TCE.ultimoEnvio}
 						</div>
 					</div>
-					<div
-						className="rounded-lg"
-						style={{ background: t.muted, padding: "10px 16px" }}
-					>
-						<div className="text-xs" style={{ color: t.mutedFg }}>
-							Certidão Liberatória
-						</div>
-						<div
-							className="text-sm font-bold tabular-nums"
-							style={{ color: t.ok }}
-						>
-							Nº {TCE.certidao.numero}
-						</div>
-						<div className="text-xs" style={{ color: t.mutedFg }}>
-							válida até {TCE.certidao.validade}
-						</div>
-					</div>
+					{(() => {
+						const vencida = certidaoVencida(TCE.certidao.validade);
+						return (
+							<div
+								className="rounded-lg"
+								style={{
+									background: t.muted,
+									padding: "10px 16px",
+									border: vencida ? `1px solid ${t.danger}` : undefined,
+								}}
+							>
+								<div className="text-xs" style={{ color: t.mutedFg }}>
+									Certidão Liberatória
+								</div>
+								{vencida ? (
+									<div
+										className="text-2xl font-extrabold uppercase tracking-wide"
+										style={{ color: t.danger }}
+									>
+										Irregular
+									</div>
+								) : (
+									<div
+										className="text-sm font-bold tabular-nums"
+										style={{ color: t.ok }}
+									>
+										Nº {TCE.certidao.numero}
+									</div>
+								)}
+								<div className="text-xs" style={{ color: t.mutedFg }}>
+									{vencida
+										? `venceu ${TCE.certidao.validade}`
+										: `válida até ${TCE.certidao.validade}`}
+								</div>
+							</div>
+						);
+					})()}
 				</div>
 			</Card>
 
