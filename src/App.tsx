@@ -309,6 +309,7 @@ const SECTION_ICON_PATHS = {
 	modulos: "M3 3h7v7H3Z M14 3h7v7h-7Z M3 14h7v7H3Z M14 14h7v7h-7Z",
 	extras:
 		"M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0",
+	admin: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z",
 } as const;
 
 function Shell({
@@ -323,7 +324,7 @@ function Shell({
 	const [navOpen, setNavOpen] = useState(false);
 	const [cfgOpen, setCfgOpen] = useState(false);
 	const [cfgSection, setCfgSection] = useState<
-		"display" | "aparencia" | "modulos" | "extras" | null
+		"display" | "aparencia" | "modulos" | "extras" | "admin" | null
 	>(null);
 	const [autoScroll, setAutoScroll] = useState(false);
 	const [hidden, setHidden] = useState<Set<string>>(() => {
@@ -648,7 +649,7 @@ function Shell({
 		disabled = false,
 		hint,
 	}: {
-		id: "display" | "aparencia" | "modulos" | "extras";
+		id: "display" | "aparencia" | "modulos" | "extras" | "admin";
 		label: string;
 		disabled?: boolean;
 		hint?: string;
@@ -1146,6 +1147,16 @@ function Shell({
 											<Sw on={extras} />
 											<span style={{ flex: 1 }}>Análises e Alertas</span>
 										</button>
+									</div>
+								)}
+								<SectionBtn
+									id="admin"
+									label="Admin"
+									disabled={!isAdmin}
+									hint="Apenas o Administrador pode ativar/desativar."
+								/>
+								{cfgSection === "admin" && isAdmin && (
+									<div style={{ padding: "0 0 4px" }}>
 										<button
 											type="button"
 											role="switch"
