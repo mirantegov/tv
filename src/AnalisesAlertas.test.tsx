@@ -17,7 +17,7 @@ describe("AnalisesAlertas", () => {
 		expect(screen.getByText("Análises e Alertas")).toBeInTheDocument();
 		expect(screen.getByText("1 crítico · 2 atenção")).toBeInTheDocument();
 		expect(
-			screen.getByText(/Certidão Liberatória vence/, { exact: false }),
+			screen.getByText(/Certidão Liberatória vencida/, { exact: false }),
 		).toBeInTheDocument();
 	});
 

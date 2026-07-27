@@ -22,8 +22,8 @@ export const AA: Record<string, Bloco> = {
 		itens: [
 			{
 				sev: "crit",
-				titulo: "Certidão Liberatória vence em 1 dia (25/07/2026)",
-				det: "Certidão nº 9938/2025 do TCE-PR. Sem renovação, o Município fica impedido de receber recursos via convênio, termo de parceria ou contrato de gestão.",
+				titulo: "Certidão Liberatória vencida (25/07/2026)",
+				det: "Certidão nº 9938/2025 do TCE-PR venceu — o Município fica impedido de receber recursos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR com urgência.",
 				href: "/tce",
 				acao: "Ver certidão",
 			},
