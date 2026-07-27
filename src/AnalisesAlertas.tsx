@@ -5,8 +5,18 @@
    ============================================================================ */
 import { useExtras } from "./App";
 import { Card, Title } from "./components";
+import { useData } from "./DataProvider";
+import { certidaoVencida } from "./modules/PrestacaoModule";
 import { Link } from "./router";
 import { useTheme } from "./theme";
+
+// Links do TCE-PR p/ a Certidão Liberatória. Válida → emissão/consulta (leva o
+// CNPJ do ente); vencida → página p/ emitir nova certidão.
+// ponytail: CNPJ do ente fixo (Palotina); mover p/ data.ts quando multi-tenant.
+const CNPJ_ENTE = "76208487000164";
+const CERT_VER_URL = `https://servicos.tce.pr.gov.br/TCEPR/Tribunal/CertidaoLiberatoria/srv_certidao_emissao.aspx?nrCNPJ=${CNPJ_ENTE}`;
+const CERT_EMITIR_URL =
+	"https://www.tce.pr.gov.br/para-o-fiscalizado/servicos/certidoes/certidao-liberatoria/";
 
 type Item = {
 	sev: "crit" | "warn" | "info";
@@ -14,17 +24,41 @@ type Item = {
 	det: string;
 	href?: string;
 	acao?: string;
+	cert?: boolean; // alerta da Certidão Liberatória — botão/link montados ao vivo
 };
 type Bloco = { itens: Item[]; emDia: [string, string][] };
+
+// Monta o item da certidão conforme a validade: vencida (crítico, "Emitir
+// certidão") ou válida (atenção, "Ver certidão"), com o link certo do TCE-PR.
+function certAlert(numero: string, dataVenc: string): Item {
+	return certidaoVencida(dataVenc)
+		? {
+				sev: "crit",
+				cert: true,
+				titulo: `Certidão Liberatória vencida (${dataVenc})`,
+				det: `Certidão nº ${numero} do TCE-PR venceu — o Município fica impedido de receber recursos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR com urgência.`,
+				href: CERT_EMITIR_URL,
+				acao: "Emitir certidão",
+			}
+		: {
+				sev: "warn",
+				cert: true,
+				titulo: `Certidão Liberatória válida até ${dataVenc}`,
+				det: `Certidão nº ${numero} do TCE-PR — Município apto a receber recursos via convênio, termo de parceria ou contrato de gestão. Renovar antes do vencimento.`,
+				href: CERT_VER_URL,
+				acao: "Ver certidão",
+			};
+}
 
 export const AA: Record<string, Bloco> = {
 	"/": {
 		itens: [
+			// Substituído ao vivo por certAlert() com a validade real (ver componente).
 			{
 				sev: "crit",
-				titulo: "Certidão Liberatória vencida (25/07/2026)",
-				det: "Certidão nº 9938/2025 do TCE-PR venceu — o Município fica impedido de receber recursos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR com urgência.",
-				href: "/tce",
+				cert: true,
+				titulo: "Certidão Liberatória",
+				det: "",
 				acao: "Ver certidão",
 			},
 			{
@@ -499,11 +533,12 @@ export const AA: Record<string, Bloco> = {
 	},
 	"/tce": {
 		itens: [
+			// Substituído ao vivo por certAlert() com a validade real (ver componente).
 			{
 				sev: "crit",
-				titulo: "Certidão Liberatória vencida (25/07/2026)",
-				det: "Certidão nº 7822.BQQA.1791 do TCE-PR venceu — o Município fica impedido de receber recursos públicos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR com urgência.",
-				href: "/tce",
+				cert: true,
+				titulo: "Certidão Liberatória",
+				det: "",
 				acao: "Emitir certidão",
 			},
 			{
@@ -592,12 +627,24 @@ export const AA: Record<string, Bloco> = {
 export function AnalisesAlertas({ path }: { path: string }) {
 	const extras = useExtras();
 	const { t } = useTheme();
+	const { PC, PAN } = useData();
 	if (!extras) return null;
 	const bloco = AA[path];
 	if (!bloco) return null;
+	// O alerta da certidão é montado ao vivo pela validade real do ente:
+	// TCE/PR usa PC.tce.certidao; Visão Geral usa PAN.tce.certidao.
+	const cert =
+		path === "/tce"
+			? certAlert(PC.tce.certidao.numero, PC.tce.certidao.vencimento)
+			: path === "/"
+				? certAlert(PAN.tce.certidao.numero, PAN.tce.certidao.validade)
+				: null;
+	const itens = cert
+		? bloco.itens.map((i) => (i.cert ? cert : i))
+		: bloco.itens;
 	const tone = { crit: t.danger, warn: t.warn, info: t.primary };
-	const nCrit = bloco.itens.filter((i) => i.sev === "crit").length;
-	const nWarn = bloco.itens.filter((i) => i.sev === "warn").length;
+	const nCrit = itens.filter((i) => i.sev === "crit").length;
+	const nWarn = itens.filter((i) => i.sev === "warn").length;
 	const resumo = [
 		nCrit ? `${nCrit} crítico${nCrit > 1 ? "s" : ""}` : null,
 		nWarn ? `${nWarn} atenção` : null,
@@ -620,7 +667,7 @@ export function AnalisesAlertas({ path }: { path: string }) {
 					Análises e Alertas
 				</Title>
 				<div className="flex flex-col gap-2">
-					{bloco.itens.map((it, i) => (
+					{itens.map((it, i) => (
 						<div
 							key={i}
 							className="rounded-lg flex flex-col sm:flex-row sm:items-center gap-2"
@@ -641,23 +688,38 @@ export function AnalisesAlertas({ path }: { path: string }) {
 									{it.det}
 								</div>
 							</div>
-							{it.href && (
-								<Link
-									href={it.href}
-									className="text-xs font-semibold rounded-md"
-									style={{
+							{it.href &&
+								(() => {
+									const estilo = {
 										padding: "6px 12px",
 										background: t.card,
 										border: `1px solid ${t.border}`,
 										color: tone[it.sev],
 										textDecoration: "none",
-										whiteSpace: "nowrap",
-										alignSelf: "flex-start",
-									}}
-								>
-									{it.acao} →
-								</Link>
-							)}
+										whiteSpace: "nowrap" as const,
+										alignSelf: "flex-start" as const,
+									};
+									// Links externos (TCE-PR) abrem em nova aba; rotas internas usam o router.
+									return it.href.startsWith("http") ? (
+										<a
+											href={it.href}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="text-xs font-semibold rounded-md"
+											style={estilo}
+										>
+											{it.acao} →
+										</a>
+									) : (
+										<Link
+											href={it.href}
+											className="text-xs font-semibold rounded-md"
+											style={estilo}
+										>
+											{it.acao} →
+										</Link>
+									);
+								})()}
 						</div>
 					))}
 				</div>

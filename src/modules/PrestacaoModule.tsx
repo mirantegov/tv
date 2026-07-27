@@ -10,7 +10,7 @@ const MSC_ATIVO = false;
 
 // Certidão vencida = data de vencimento (dd/mm/aaaa) já passou. Sem certidão
 // válida o ente fica irregular perante o TCE — o componente decide sozinho.
-function certidaoVencida(vencimento: string): boolean {
+export function certidaoVencida(vencimento: string): boolean {
 	const [d, m, y] = vencimento.split("/").map(Number);
 	if (!d || !m || !y) return false;
 	const hoje = new Date();
