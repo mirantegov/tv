@@ -501,20 +501,15 @@ export const AA: Record<string, Bloco> = {
 		itens: [
 			{
 				sev: "crit",
-				titulo: "Certidão Liberatória vence em 1 dia (25/07/2026)",
-				det: "Sem renovação, o Município fica impedido de receber recursos públicos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR.",
+				titulo: "Certidão Liberatória vencida (25/07/2026)",
+				det: "Certidão nº 7822.BQQA.1791 do TCE-PR venceu — o Município fica impedido de receber recursos públicos via convênio, termo de parceria ou contrato de gestão. Emitir nova certidão no TCE-PR com urgência.",
 				href: "/tce",
-			},
-			{
-				sev: "warn",
-				titulo: "Contas de 2020 aguardando julgamento da Câmara",
-				det: "Trânsito em julgado no TCE desde 31/03/2022 e parecer encaminhado em 04/04/2022, mas ainda sem decreto legislativo de julgamento — cobrar o Legislativo.",
-				href: "/tce",
+				acao: "Emitir certidão",
 			},
 			{
 				sev: "info",
 				titulo: "Contas de 2024 e 2025 ainda em tramitação",
-				det: "Processos 149083/25 e 148617/26 sem trânsito em julgado nem encaminhamento de parecer — acompanhar a análise no TCE-PR.",
+				det: "Sem trânsito em julgado nem encaminhamento de parecer prévio — acompanhar a análise no TCE-PR. Exercício 2025 é o que está em análise (PCA enviada, parecer em análise).",
 				href: "/tce",
 			},
 			{
@@ -526,16 +521,16 @@ export const AA: Record<string, Bloco> = {
 		],
 		emDia: [
 			["Agenda TCE-PR", "sem itens não atendidos ✓"],
-			["Certidão Liberatória", "situação Regular ✓"],
-			["Contas 2019 e 2021–2023", "julgadas Regular ✓"],
+			["Contas 2022–2023", "julgadas Regular ✓"],
+			["Pendências 0", "nenhuma restrição ✓"],
 		],
 	},
 	"/siconfi": {
 		itens: [
 			{
 				sev: "warn",
-				titulo: "MSC de Jun/2026 ainda pendente",
-				det: "As remessas de Jan–Mai/2026 foram enviadas (consistência 100%, exceto Mar em 98%); a de Jun/2026 segue pendente. Como RREO, RGF e DCA derivam da MSC, concluir o envio.",
+				titulo: "MSC temporariamente indisponível",
+				det: "A Matriz de Saldos Contábeis está suspensa por alterações no portal do Tesouro Nacional (SICONFI) que impedem a extração. Como RREO, RGF e DCA derivam da MSC, retomar a coleta assim que o portal normalizar.",
 				href: "/siconfi",
 			},
 			{

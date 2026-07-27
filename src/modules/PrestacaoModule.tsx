@@ -8,10 +8,21 @@ import { useTheme } from "../theme";
 // coletar as informações novamente; a seção completa continua abaixo intacta.
 const MSC_ATIVO = false;
 
+// Certidão vencida = data de vencimento (dd/mm/aaaa) já passou. Sem certidão
+// válida o ente fica irregular perante o TCE — o componente decide sozinho.
+function certidaoVencida(vencimento: string): boolean {
+	const [d, m, y] = vencimento.split("/").map(Number);
+	if (!d || !m || !y) return false;
+	const hoje = new Date();
+	hoje.setHours(0, 0, 0, 0);
+	return new Date(y, m - 1, d) < hoje;
+}
+
 function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 	const { t } = useTheme();
 	const { PC } = useData();
 	const C = PC;
+	const vencida = certidaoVencida(C.tce.certidao.vencimento);
 	const tones = {
 		ok: t.ok,
 		warn: t.warn,
@@ -308,15 +319,15 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
 							<Kpi
 								label="Situação"
-								value={C.tce.certidao.kpis.situacao}
-								accent={t.ok}
-								sub="apta a transferências"
+								value={vencida ? "Irregular" : C.tce.certidao.kpis.situacao}
+								accent={vencida ? t.danger : t.ok}
+								sub={vencida ? "certidão vencida" : "apta a transferências"}
 							/>
 							<Kpi
 								label="Validade"
-								value={C.tce.certidao.kpis.validade}
-								accent={t.warn}
-								sub={`vence ${C.tce.certidao.vencimento}`}
+								value={vencida ? "Vencida" : C.tce.certidao.kpis.validade}
+								accent={vencida ? t.danger : t.warn}
+								sub={`${vencida ? "venceu" : "vence"} ${C.tce.certidao.vencimento}`}
 							/>
 							<Kpi
 								label="Pendências"
@@ -329,63 +340,65 @@ function Prestacao({ aba }: { aba: "tce" | "siconfi" }) {
 								sub="emissão TCE-PR"
 							/>
 						</div>
-						<Card className="p-5">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-								<div>
-									<div className="flex items-center gap-2 mb-3">
-										<Badge tone="ok">REGULAR</Badge>
-										<span
-											className="text-sm font-bold"
-											style={{ color: t.foreground }}
-										>
-											Certidão {C.tce.certidao.numero}
-										</span>
-									</div>
-									<div
-										className="text-xs leading-relaxed mb-3"
-										style={{ color: t.mutedFg }}
-									>
-										{C.tce.certidao.finalidade}
-									</div>
-									<div className="flex justify-between text-xs mb-1.5">
-										<span style={{ color: t.mutedFg }}>Emissão</span>
-										<span
-											className="tabular-nums"
-											style={{ color: t.foreground }}
-										>
-											{C.tce.certidao.emissao}
-										</span>
-									</div>
-									<div className="flex justify-between text-xs">
-										<span style={{ color: t.mutedFg }}>Vencimento</span>
-										<span
-											className="tabular-nums"
-											style={{ color: t.warn, fontWeight: 600 }}
-										>
-											{C.tce.certidao.vencimento}
-										</span>
-									</div>
-								</div>
-								<div>
-									<div
-										className="text-xs font-semibold mb-2"
-										style={{ color: t.foreground }}
-									>
-										Itens verificados
-									</div>
-									{C.tce.certidao.itens.map(([it], i) => (
-										<div
-											key={i}
-											className="flex items-center gap-2 text-xs"
-											style={{ padding: "4px 0" }}
-										>
-											<span style={{ color: t.ok, fontWeight: 700 }}>✓</span>
-											<span style={{ color: t.mutedFg }}>{it}</span>
+						{!vencida && (
+							<Card className="p-5">
+								<div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+									<div>
+										<div className="flex items-center gap-2 mb-3">
+											<Badge tone="ok">REGULAR</Badge>
+											<span
+												className="text-sm font-bold"
+												style={{ color: t.foreground }}
+											>
+												Certidão {C.tce.certidao.numero}
+											</span>
 										</div>
-									))}
+										<div
+											className="text-xs leading-relaxed mb-3"
+											style={{ color: t.mutedFg }}
+										>
+											{C.tce.certidao.finalidade}
+										</div>
+										<div className="flex justify-between text-xs mb-1.5">
+											<span style={{ color: t.mutedFg }}>Emissão</span>
+											<span
+												className="tabular-nums"
+												style={{ color: t.foreground }}
+											>
+												{C.tce.certidao.emissao}
+											</span>
+										</div>
+										<div className="flex justify-between text-xs">
+											<span style={{ color: t.mutedFg }}>Vencimento</span>
+											<span
+												className="tabular-nums"
+												style={{ color: t.warn, fontWeight: 600 }}
+											>
+												{C.tce.certidao.vencimento}
+											</span>
+										</div>
+									</div>
+									<div>
+										<div
+											className="text-xs font-semibold mb-2"
+											style={{ color: t.foreground }}
+										>
+											Itens verificados
+										</div>
+										{C.tce.certidao.itens.map(([it], i) => (
+											<div
+												key={i}
+												className="flex items-center gap-2 text-xs"
+												style={{ padding: "4px 0" }}
+											>
+												<span style={{ color: t.ok, fontWeight: 700 }}>✓</span>
+												<span style={{ color: t.mutedFg }}>{it}</span>
+											</div>
+										))}
+									</div>
 								</div>
-							</div>
-						</Card>
+							</Card>
+						)}
 					</Section>
 
 					<Section
