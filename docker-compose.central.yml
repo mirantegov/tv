@@ -1,0 +1,26 @@
+# Control plane central (único, não é por tenant). Rodar com:
+#   docker compose -f docker-compose.central.yml up -d --build
+services:
+  central-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: central
+      POSTGRES_PASSWORD: central
+      POSTGRES_DB: central
+    volumes: [ "central-db-data:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U central"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  control-plane:
+    build: ./control-plane
+    env_file: ./control-plane/.env
+    depends_on:
+      central-db:
+        condition: service_healthy
+    ports: [ "8081:8080" ]
+
+volumes:
+  central-db-data: {}

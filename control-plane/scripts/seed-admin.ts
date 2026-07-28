@@ -11,6 +11,9 @@ export async function seedAdmin(pool: Pool, login: string, senha: string, nome: 
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  if (!process.env.ADMIN_LOGIN || !process.env.ADMIN_SENHA) {
+    throw new Error("ADMIN_LOGIN e ADMIN_SENHA são obrigatórios para semear o admin");
+  }
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   await seedAdmin(pool, process.env.ADMIN_LOGIN!, process.env.ADMIN_SENHA!, process.env.ADMIN_NOME ?? "Administrador");
   await pool.end();

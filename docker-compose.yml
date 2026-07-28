@@ -58,20 +58,5 @@ services:
       - db
       - api
 
-  central-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: central
-      POSTGRES_PASSWORD: central
-      POSTGRES_DB: central
-    volumes: [ "central-db-data:/var/lib/postgresql/data" ]
-
-  control-plane:
-    build: ./control-plane
-    env_file: ./control-plane/.env
-    depends_on: [ central-db ]
-    ports: [ "8080:8080" ]
-
 volumes:
   pgdata:
-  central-db-data: {}
