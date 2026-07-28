@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { loginAdmin } from "./login.js";
+import { loginAdmin, loginGestor } from "./login.js";
 
 const TOKEN_OPTS = { expiresIn: "30d" };
 
@@ -11,6 +11,16 @@ export async function authRoutes(app: FastifyInstance) {
       if (!perfil) return reply.code(401).send({ error: "credenciais inválidas" });
       const token = app.jwt.sign(perfil, TOKEN_OPTS);
       return { token, perfil };
+    }
+    if (body.tipo === "gestor") {
+      const b = req.body as { cpf?: string; senha?: string };
+      const r = await loginGestor(app.pool, b.cpf ?? "", b.senha ?? "");
+      if ("erro" in r) {
+        return reply.code(r.erro === "licenca" ? 403 : 401)
+          .send({ error: r.erro === "licenca" ? "licença inativa ou vencida" : "credenciais inválidas" });
+      }
+      const token = app.jwt.sign(r, TOKEN_OPTS);
+      return { token, perfil: r };
     }
     return reply.code(400).send({ error: "tipo inválido" });
   });
