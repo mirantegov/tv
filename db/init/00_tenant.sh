@@ -20,3 +20,7 @@ VALUES (:'id_ibge', :'slug', :'nome', :'uf')
 ON CONFLICT (id_ibge) DO UPDATE
 	SET slug = EXCLUDED.slug, nome = EXCLUDED.nome, uf = EXCLUDED.uf;
 SQL
+
+# id_entidade (código TCE/PR) desta entidade — default nas tabelas de módulo (RLS)
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+	-c "ALTER DATABASE \"$POSTGRES_DB\" SET app.id_entidade = '${TENANT_ENTIDADE:-00000}';"
