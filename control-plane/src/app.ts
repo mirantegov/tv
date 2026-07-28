@@ -11,13 +11,14 @@ import { licencaRoutes } from "./routes/licenca.js";
 import { modulosRoutes } from "./routes/modulos.js";
 import { logsRoutes } from "./routes/logs.js";
 
-export interface Deps { pool: Pool; jwtSecret?: string }
+export interface Deps { pool: Pool; jwtSecret?: string; pgrstSecret?: string }
 
 const CORS_ORIGINS = (process.env.CORS_ORIGIN ?? "http://localhost:5173").split(",");
 
 export function buildApp(deps: Deps): FastifyInstance {
   const app = Fastify({ logger: false });
   app.decorate("pool", deps.pool);
+  app.decorate("pgrstSecret", deps.pgrstSecret ?? process.env.PGRST_JWT_SECRET ?? "");
   app.register(fastifyJwt, { secret: deps.jwtSecret ?? process.env.JWT_SECRET ?? "dev-secret" });
   app.register(cors, {
     origin: CORS_ORIGINS,
@@ -45,6 +46,7 @@ export function buildApp(deps: Deps): FastifyInstance {
 declare module "fastify" {
   interface FastifyInstance {
     pool: Pool;
+    pgrstSecret: string;
     authenticate: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
     authenticateAdmin: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
