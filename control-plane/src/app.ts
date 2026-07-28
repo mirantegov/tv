@@ -6,6 +6,8 @@ import { authRoutes } from "./auth/routes.js";
 import { instalacoesRoutes } from "./routes/instalacoes.js";
 import { entidadesRoutes } from "./routes/entidades.js";
 import { gestoresRoutes } from "./routes/gestores.js";
+import { licencaRoutes } from "./routes/licenca.js";
+import { modulosRoutes } from "./routes/modulos.js";
 
 export interface Deps { pool: Pool; jwtSecret?: string }
 
@@ -21,6 +23,8 @@ export function buildApp(deps: Deps): FastifyInstance {
   app.register(instalacoesRoutes);
   app.register(entidadesRoutes);
   app.register(gestoresRoutes);
+  app.register(licencaRoutes);
+  app.register(modulosRoutes);
   return app;
 }
 
