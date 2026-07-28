@@ -53,7 +53,7 @@ crus** e o `tailwind.config.js` monta a cor com `<alpha-value>`:
   --accent: 0.1928 0.0331 242.5459;
   --border: 0.2674 0.0047 248.0045;
   --destructive: 0.6188 0.2376 25.7658;
-  --radius: 0.625rem;
+  --radius: 0.5rem;   /* obrigatório — ver "Isolamento" abaixo */
 }
 ```
 ```js
@@ -65,8 +65,12 @@ primary: "oklch(var(--primary) / <alpha-value>)"
 
 - `src/admin/admin.css` (com `@tailwind base/components/utilities` + as vars) é importado
   **apenas** por `src/admin/main.tsx`. A TV importa `src/index.css` e não enxerga as vars.
-- O `tailwind.config.js` é compartilhado: acrescentar tokens de cor e `borderRadius`
-  **não altera** as classes que a TV já usa (`rounded-full`, `flex`, `text-xs`…).
+- O `tailwind.config.js` é compartilhado. **Descoberta que restringe o design:** a TV usa
+  `rounded-md` (14×) e `rounded-lg` (5×), então sobrescrever `borderRadius` mudaria o visual
+  dela. Por isso **`--radius` é fixado em `0.5rem`**: assim `rounded-lg` = `var(--radius)` =
+  0.5rem e `rounded-md` = `calc(0.5rem - 2px)` = 0.375rem — **exatamente os defaults do
+  Tailwind**. Só `rounded-sm` divergiria, e a TV não o usa (`rounded`, `rounded-xl`,
+  `rounded-full` não são sobrescritos).
 - Efeito colateral aceito: o CSS da TV cresce com as utilities usadas pelo /admin (bloat,
   sem mudança visual).
 - **Critério:** a TV deve continuar pixel-idêntica — verificação visual antes/depois.
