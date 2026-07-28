@@ -32,7 +32,10 @@ export const tvAuth = {
 		try {
 			res = await fetch(`${CP_URL}/auth/login`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json", Accept: "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
 				body: JSON.stringify({ tipo: "gestor", cpf, senha }),
 			});
 		} catch {

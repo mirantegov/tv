@@ -26,11 +26,7 @@ function maskCpf(v: string): string {
 	return out;
 }
 
-export default function LoginScreen({
-	onLogin,
-}: {
-	onLogin?: () => void;
-}) {
+export default function LoginScreen({ onLogin }: { onLogin?: () => void }) {
 	const { t, mode, familyLabel, toggle } = useTheme();
 	const [cpf, setCpf] = useState("");
 	const [senha, setSenha] = useState("");
@@ -48,7 +44,9 @@ export default function LoginScreen({
 				return setErro("Licença vencida ou inativa — contate o suporte.");
 			if (r.erro === "rede") return setErro("Sem conexão com o servidor.");
 			if (r.erro === "config")
-				return setErro("Configuração do servidor incompleta — contate o suporte.");
+				return setErro(
+					"Configuração do servidor incompleta — contate o suporte.",
+				);
 			return setErro("CPF ou senha inválidos.");
 		}
 		setErro(null);

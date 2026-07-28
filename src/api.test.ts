@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 beforeEach(() => {
 	localStorage.clear();
@@ -10,14 +10,12 @@ beforeEach(() => {
 describe("api com data-token", () => {
 	it("fetchModule manda Bearer do pgrst_token", async () => {
 		localStorage.setItem("pgrst_token", "dados");
-		const spy = vi
-			.spyOn(globalThis, "fetch")
-			.mockResolvedValue(
-				new Response(JSON.stringify([{ data: { x: 1 } }]), {
-					status: 200,
-					headers: { "content-type": "application/json" },
-				}),
-			);
+		const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(JSON.stringify([{ data: { x: 1 } }]), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			}),
+		);
 		const { fetchModule } = await import("./api");
 		await fetchModule("despesa");
 		const init = spy.mock.calls[0][1] as RequestInit;

@@ -53,7 +53,12 @@ describe("tvAuth", () => {
 				JSON.stringify({
 					token: "app",
 					data_token: "",
-					perfil: { nome: "P", role: "prefeito", id_entidade: "1", id_ibge: "1" },
+					perfil: {
+						nome: "P",
+						role: "prefeito",
+						id_entidade: "1",
+						id_ibge: "1",
+					},
 				}),
 				{ status: 200, headers: { "content-type": "application/json" } },
 			),
@@ -77,7 +82,12 @@ describe("tvAuth", () => {
 				JSON.stringify({
 					token: "app",
 					data_token: "dados",
-					perfil: { nome: "P", role: "prefeito", id_entidade: "1", id_ibge: "1" },
+					perfil: {
+						nome: "P",
+						role: "prefeito",
+						id_entidade: "1",
+						id_ibge: "1",
+					},
 				}),
 				{ status: 200 },
 			),
