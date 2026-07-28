@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { AnalisesAlertas } from "./AnalisesAlertas";
-import { fetchHiddenModules, saveModuleHidden } from "./api";
+import { fetchHiddenModules } from "./api";
 import { DataProvider } from "./DataProvider";
 import LoginScreen from "./LoginScreen";
 import ContratosModule from "./modules/ContratosModule";
@@ -288,8 +288,12 @@ export const NAV_GROUPS = [
 // quando a Visão Geral está desativada, então fica sempre disponível)
 export const LOCKED_PATHS = new Set(["/panorama"]);
 
-// Chave sentinela em api.modulo_estado p/ ligar/desligar os Extras (Análises e
-// Alertas). Começa com "#" p/ nunca colidir com um path de navegação real.
+// Chave sentinela p/ ligar/desligar os Extras (Análises e Alertas). Começa
+// com "#" p/ nunca colidir com um path de navegação real.
+// ponytail: desde a migração p/ módulos read-only (central via /me/modulos),
+// esta chave só persiste no cache local (mg_modules) desta aba/sessão — o
+// central não conhece "#extras", então não sobrevive a outra TV/reload em
+// outro device. Se isso virar requisito, precisa de endpoint próprio no /admin.
 export const EXTRAS_KEY = "#extras";
 
 // Flag global dos Extras (Análises e Alertas) via contexto — o mesmo
@@ -297,8 +301,9 @@ export const EXTRAS_KEY = "#extras";
 const ExtrasContext = createContext(true);
 export const useExtras = () => useContext(ExtrasContext);
 
-// Chave sentinela p/ o lock "Modo TV" do Admin em api.modulo_estado. Presença
-// da chave em `hidden` = lock LIGADO (padrão desligado = ausência).
+// Chave sentinela p/ o lock "Modo TV" do Admin. Presença da chave em `hidden`
+// = lock LIGADO (padrão desligado = ausência).
+// ponytail: mesma limitação da EXTRAS_KEY acima — só cache local por aba.
 export const MODOTV_KEY = "#modotv";
 
 // Ícones dos submenus de Configurações (um path por seção, cor herda do botão).
@@ -397,15 +402,13 @@ function Shell({
 			} catch {
 				// localStorage indisponível — segue sem persistir o cache
 			}
-			// Persiste no banco do tenant (upsert idempotente); no-op sem API_URL.
-			saveModuleHidden(p, ocultar).catch((e) =>
-				console.error("[modulos] falha ao salvar no banco:", e),
-			);
+			// ponytail: módulos são read-only na TV (só o /admin altera e persiste
+			// no central); isto só atualiza o cache local desta aba/sessão.
 			return next;
 		});
-	// Extras (Análises e Alertas) reusa o mecanismo dos módulos: estado no banco
-	// do tenant (api.modulo_estado, chave EXTRAS_KEY), só o admin altera e vale
-	// p/ todos. Ligado por padrão (ausência da chave = on).
+	// Extras (Análises e Alertas) reusa o mecanismo dos módulos (chave
+	// EXTRAS_KEY em `hidden`), agora só cache local (ver nota na EXTRAS_KEY
+	// acima). Ligado por padrão (ausência da chave = on).
 	const extras = !hidden.has(EXTRAS_KEY);
 	const toggleExtras = () => toggleModule(EXTRAS_KEY);
 	// Lock do Modo TV controlado pelo Admin (persiste no banco, vale p/ todos).
