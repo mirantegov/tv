@@ -7,8 +7,16 @@ beforeEach(() => {
 });
 
 const login = (role = "admin") => {
-	localStorage.setItem("mg_auth", "1");
-	localStorage.setItem("mg_role", role);
+	localStorage.setItem("cp_token", "app-token");
+	localStorage.setItem(
+		"mg_perfil",
+		JSON.stringify({
+			nome: "Teste",
+			role,
+			id_entidade: "1",
+			id_ibge: "1",
+		}),
+	);
 };
 
 describe("invariantes de rotas e sidebar", () => {
@@ -30,12 +38,12 @@ describe("invariantes de rotas e sidebar", () => {
 });
 
 describe("autenticação", () => {
-	it("sem mg_auth mostra a tela de login", () => {
+	it("sem cp_token mostra a tela de login", () => {
 		render(<App />);
 		expect(screen.getByLabelText(/CPF/i)).toBeInTheDocument();
 	});
 
-	it("com mg_auth carrega o shell na Visão Geral", () => {
+	it("com cp_token carrega o shell na Visão Geral", () => {
 		login();
 		render(<App />);
 		expect(

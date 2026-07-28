@@ -23,7 +23,7 @@ import VisaoGeralModule from "./modules/VisaoGeralModule";
 import { Link, RouterProvider, useRouter } from "./router";
 import { API_URL } from "./tenant";
 import { ThemePanel, ThemeProvider, useTheme } from "./theme";
-import type { Role } from "./users";
+import { tvAuth } from "./tvAuth";
 
 // Uma secretaria = um módulo (só título por enquanto, conteúdo vem depois).
 // Fonte única: alimenta tanto ROUTES quanto o grupo "Secretarias" da sidebar.
@@ -1324,45 +1324,17 @@ function Shell({
 /* ============================================================================
    APP — ThemeProvider + RouterProvider + gate de autenticação (login → Shell)
    ============================================================================ */
-const AUTH_KEY = "mg_auth";
-
-const ROLE_KEY = "mg_role";
-
 function AuthGate() {
-	const [authed, setAuthed] = useState(() => {
-		try {
-			return localStorage.getItem(AUTH_KEY) === "1";
-		} catch {
-			return false;
-		}
-	});
-	// Papel persistido apenas para sessões "manter conectado". Sem valor → não-admin.
-	const [role, setRole] = useState<Role | null>(() => {
-		try {
-			return (localStorage.getItem(ROLE_KEY) as Role | null) ?? null;
-		} catch {
-			return null;
-		}
-	});
-	const login = (keep: boolean, r: Role) => {
-		setRole(r);
-		if (keep) {
-			try {
-				localStorage.setItem(AUTH_KEY, "1");
-				localStorage.setItem(ROLE_KEY, r);
-			} catch {
-				// localStorage indisponível (ex.: modo privado) — segue sem persistir
-			}
-		}
+	const [authed, setAuthed] = useState(() => !!tvAuth.getToken());
+	const [role, setRole] = useState<string | null>(
+		() => tvAuth.getPerfil()?.role ?? null,
+	);
+	const login = () => {
+		setRole(tvAuth.getPerfil()?.role ?? null);
 		setAuthed(true);
 	};
 	const logout = () => {
-		try {
-			localStorage.removeItem(AUTH_KEY);
-			localStorage.removeItem(ROLE_KEY);
-		} catch {
-			// localStorage indisponível — nada a limpar
-		}
+		tvAuth.logout();
 		setRole(null);
 		setAuthed(false);
 	};

@@ -1,7 +1,7 @@
 import type React from "react";
 import { useState } from "react";
 import { useTheme } from "./theme";
-import { authenticate, type Role } from "./users";
+import { tvAuth } from "./tvAuth";
 
 /* ============================================================================
    LOGIN — mesma identidade visual (Ocean Breeze / Monokai)
@@ -29,7 +29,7 @@ function maskCpf(v: string): string {
 export default function LoginScreen({
 	onLogin,
 }: {
-	onLogin?: (keep: boolean, role: Role) => void;
+	onLogin?: () => void;
 }) {
 	const { t, mode, familyLabel, toggle } = useTheme();
 	const [cpf, setCpf] = useState("");
@@ -39,13 +39,18 @@ export default function LoginScreen({
 	const [erro, setErro] = useState<string | null>(null);
 	const [tentou, setTentou] = useState(false);
 
-	// Portão real: autentica contra o cadastro (users.ts). Formato do CPF é só UX.
-	const entrar = () => {
+	// Portão real: autentica contra o control-plane central (gestor login).
+	const entrar = async () => {
 		setTentou(true);
-		const user = authenticate(cpf, senha);
-		if (!user) return setErro("CPF ou senha inválidos.");
+		const r = await tvAuth.login(cpf, senha);
+		if ("erro" in r) {
+			if (r.erro === "licenca")
+				return setErro("Licença vencida ou inativa — contate o suporte.");
+			if (r.erro === "rede") return setErro("Sem conexão com o servidor.");
+			return setErro("CPF ou senha inválidos.");
+		}
 		setErro(null);
-		onLogin?.(keep, user.role);
+		onLogin?.();
 	};
 
 	const field = (invalid: boolean) =>
