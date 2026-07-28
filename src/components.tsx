@@ -497,6 +497,34 @@ export function Diverging({
 		</div>
 	);
 }
+export function Sw({ on, t }: { on: boolean; t: any }) {
+	return (
+		<span
+			style={{
+				width: 34,
+				height: 20,
+				borderRadius: 999,
+				background: on ? t.primary : t.muted,
+				position: "relative",
+				transition: "background .15s",
+				display: "inline-block",
+			}}
+		>
+			<span
+				style={{
+					position: "absolute",
+					top: 2,
+					left: on ? 16 : 2,
+					width: 16,
+					height: 16,
+					borderRadius: "50%",
+					background: "#fff",
+					transition: "left .15s",
+				}}
+			/>
+		</span>
+	);
+}
 export function LegendDot({
 	color,
 	children,
