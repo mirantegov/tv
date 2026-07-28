@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { AppShell } from "@/admin/components/layout/app-shell";
 import { cpApi } from "@/admin/cpApi";
+import { InstalacoesPage } from "@/admin/routes/instalacoes";
 import { LoginPage } from "@/admin/routes/login";
 
 const rootRoute = createRootRoute({
@@ -42,7 +43,7 @@ const instalacoesRoute = createRoute({
 	beforeLoad: requireAuth,
 	component: () => (
 		<AppShell titulo="Instalações">
-			<p className="text-muted-foreground">Em construção</p>
+			<InstalacoesPage />
 		</AppShell>
 	),
 });
