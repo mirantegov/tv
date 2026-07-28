@@ -4,7 +4,7 @@ import { cpApi } from "./cpApi";
 
 type Instalacao = { id_ibge: string; slug: string; nome: string; uf: string; status: string };
 
-export function InstalacoesDashboard({ onAbrir }: { onAbrir: (id: string) => void }) {
+export function InstalacoesDashboard({ onAbrir, onLogs }: { onAbrir: (id: string) => void; onLogs?: () => void }) {
   const { t } = useTheme();
   const [itens, setItens] = useState<Instalacao[]>([]);
   const [form, setForm] = useState({ id_ibge: "", slug: "", nome: "", uf: "" });
@@ -29,7 +29,12 @@ export function InstalacoesDashboard({ onAbrir }: { onAbrir: (id: string) => voi
 
   return (
     <div style={{ padding: 24, color: t.foreground }}>
-      <h1 style={{ fontSize: 20, marginBottom: 16 }}>Instalações</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h1 style={{ fontSize: 20 }}>Instalações</h1>
+        {onLogs && (
+          <button onClick={onLogs} style={{ padding: "8px 16px", background: t.card, color: t.foreground, border: `1px solid ${t.border}`, borderRadius: 8, cursor: "pointer" }}>Logs</button>
+        )}
+      </div>
       <form onSubmit={criar} style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
         <input aria-label="id_ibge" placeholder="IBGE" value={form.id_ibge} onChange={(e) => setForm({ ...form, id_ibge: e.target.value })} style={inp} />
         <input aria-label="slug" placeholder="slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} style={inp} />
