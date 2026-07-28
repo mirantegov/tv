@@ -14,11 +14,17 @@ export function LicencaTab({ id }: { id: string }) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: carrega só quando id muda
 	useEffect(() => {
 		(async () => {
-			const inst = await cpApi.cpFetch(`/instalacoes/${id}`);
-			setAtivo(!!inst.licenca_ativo);
-			setValidade(
-				inst.licenca_validade ? String(inst.licenca_validade).slice(0, 10) : "",
-			);
+			try {
+				const inst = await cpApi.cpFetch(`/instalacoes/${id}`);
+				setAtivo(!!inst.licenca_ativo);
+				setValidade(
+					inst.licenca_validade
+						? String(inst.licenca_validade).slice(0, 10)
+						: "",
+				);
+			} catch {
+				toast.error("Falha ao carregar licença");
+			}
 		})();
 	}, [id]);
 

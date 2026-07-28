@@ -59,8 +59,12 @@ export function InstalacoesPage({
 	const [enviando, setEnviando] = useState(false);
 
 	async function carregar() {
-		const dados = await cpApi.cpFetch("/instalacoes");
-		setItens(dados);
+		try {
+			const dados = await cpApi.cpFetch("/instalacoes");
+			setItens(dados);
+		} catch {
+			toast.error("Falha ao carregar instalações");
+		}
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: carregar só deve rodar no mount

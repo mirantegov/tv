@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { Button } from "@/admin/components/ui/button";
 import {
 	Sheet,
@@ -17,6 +18,8 @@ export function AppShell({
 	titulo: string;
 	children: ReactNode;
 }) {
+	const [menuAberto, setMenuAberto] = useState(false);
+
 	return (
 		<div className="flex min-h-svh">
 			<aside className="hidden w-60 shrink-0 flex-col border-r bg-card/40 md:flex">
@@ -24,15 +27,20 @@ export function AppShell({
 			</aside>
 			<div className="flex min-w-0 flex-1 flex-col">
 				<header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
-					<Sheet>
+					<Sheet open={menuAberto} onOpenChange={setMenuAberto}>
 						<SheetTrigger asChild>
-							<Button variant="ghost" size="icon" className="md:hidden">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="md:hidden"
+								aria-label="Abrir menu"
+							>
 								<Menu className="h-5 w-5" />
 							</Button>
 						</SheetTrigger>
 						<SheetContent side="left" className="w-60 p-0">
 							<SheetTitle className="sr-only">Menu</SheetTitle>
-							<SidebarNav />
+							<SidebarNav onNavigate={() => setMenuAberto(false)} />
 						</SheetContent>
 					</Sheet>
 					<h1 className="text-sm font-medium">{titulo}</h1>

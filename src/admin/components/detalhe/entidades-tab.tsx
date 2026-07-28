@@ -43,7 +43,11 @@ export function EntidadesTab({ id }: { id: string }) {
 	const [enviando, setEnviando] = useState(false);
 
 	async function carregar() {
-		setEntidades(await cpApi.cpFetch(`/instalacoes/${id}/entidades`));
+		try {
+			setEntidades(await cpApi.cpFetch(`/instalacoes/${id}/entidades`));
+		} catch {
+			toast.error("Falha ao carregar entidades");
+		}
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: carregar só deve rodar quando id muda

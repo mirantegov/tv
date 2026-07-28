@@ -56,12 +56,16 @@ export function GestoresTab({ id }: { id: string }) {
 	const [novaSenha, setNovaSenha] = useState("");
 
 	async function carregar() {
-		const [g, e] = await Promise.all([
-			cpApi.cpFetch(`/instalacoes/${id}/gestores`),
-			cpApi.cpFetch(`/instalacoes/${id}/entidades`),
-		]);
-		setGestores(g);
-		setEntidades(e);
+		try {
+			const [g, e] = await Promise.all([
+				cpApi.cpFetch(`/instalacoes/${id}/gestores`),
+				cpApi.cpFetch(`/instalacoes/${id}/entidades`),
+			]);
+			setGestores(g);
+			setEntidades(e);
+		} catch {
+			toast.error("Falha ao carregar gestores");
+		}
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: carregar só deve rodar quando id muda

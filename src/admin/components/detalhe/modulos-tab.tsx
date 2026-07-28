@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { NAV_GROUPS } from "@/App";
 import { Button } from "@/admin/components/ui/button";
 import { Label } from "@/admin/components/ui/label";
+import { Skeleton } from "@/admin/components/ui/skeleton";
 import { Switch } from "@/admin/components/ui/switch";
 import { cpApi } from "@/admin/cpApi";
 
@@ -12,15 +13,25 @@ const CATALOGO: string[] = NAV_GROUPS.flatMap((g: any) => g.items).map(
 
 export function ModulosTab({ id }: { id: string }) {
 	const [modulos, setModulos] = useState<Map<string, boolean>>(new Map());
+	const [carregado, setCarregado] = useState(false);
+	const [erro, setErro] = useState(false);
 	const [salvando, setSalvando] = useState(false);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: carrega só quando id muda
 	useEffect(() => {
+		setCarregado(false);
+		setErro(false);
 		(async () => {
-			const rows: { path: string; oculto: boolean }[] = await cpApi.cpFetch(
-				`/instalacoes/${id}/modulos`,
-			);
-			setModulos(new Map(rows.map((r) => [r.path, r.oculto])));
+			try {
+				const rows: { path: string; oculto: boolean }[] = await cpApi.cpFetch(
+					`/instalacoes/${id}/modulos`,
+				);
+				setModulos(new Map(rows.map((r) => [r.path, r.oculto])));
+				setCarregado(true);
+			} catch {
+				setErro(true);
+				toast.error("Falha ao carregar módulos");
+			}
 		})();
 	}, [id]);
 
@@ -52,6 +63,25 @@ export function ModulosTab({ id }: { id: string }) {
 		}
 	}
 
+	if (!carregado) {
+		return (
+			<div className="space-y-4">
+				<div className="space-y-2">
+					{erro ? (
+						<p className="py-10 text-center text-muted-foreground">
+							Falha ao carregar módulos.
+						</p>
+					) : (
+						CATALOGO.map((path) => (
+							<Skeleton key={path} className="h-11 w-full" />
+						))
+					)}
+				</div>
+				<Button disabled>Salvar</Button>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-4">
 			<div className="space-y-2">
@@ -71,7 +101,7 @@ export function ModulosTab({ id }: { id: string }) {
 					</div>
 				))}
 			</div>
-			<Button onClick={salvar} disabled={salvando}>
+			<Button onClick={salvar} disabled={salvando || !carregado}>
 				Salvar
 			</Button>
 		</div>
