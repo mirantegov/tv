@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { AppShell } from "@/admin/components/layout/app-shell";
 import { cpApi } from "@/admin/cpApi";
+import { InstalacaoDetalhePage } from "@/admin/routes/instalacao-detalhe";
 import { InstalacoesPage } from "@/admin/routes/instalacoes";
 import { LoginPage } from "@/admin/routes/login";
 
@@ -52,11 +53,14 @@ const instalacaoDetalheRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/instalacoes/$id",
 	beforeLoad: requireAuth,
-	component: () => (
-		<AppShell titulo="Instalação">
-			<p className="text-muted-foreground">Em construção</p>
-		</AppShell>
-	),
+	component: () => {
+		const { id } = instalacaoDetalheRoute.useParams();
+		return (
+			<AppShell titulo="Instalação">
+				<InstalacaoDetalhePage id={id} />
+			</AppShell>
+		);
+	},
 });
 
 const logsRoute = createRoute({
