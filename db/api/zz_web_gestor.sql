@@ -23,6 +23,10 @@ BEGIN
   LOOP
     EXECUTE format('GRANT USAGE ON SCHEMA %I TO web_gestor', r.schemaname);
     EXECUTE format('GRANT SELECT ON %I.%I TO web_gestor', r.schemaname, r.tablename);
+    -- web_anon precisa do mesmo acesso: sem ele, security_invoker faz a leitura
+    -- anônima (sem claim) estourar "permission denied" em vez de RLS devolver vazio.
+    EXECUTE format('GRANT USAGE ON SCHEMA %I TO web_anon', r.schemaname);
+    EXECUTE format('GRANT SELECT ON %I.%I TO web_anon', r.schemaname, r.tablename);
   END LOOP;
   FOR r IN SELECT table_name FROM information_schema.views WHERE table_schema='api'
   LOOP
