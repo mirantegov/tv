@@ -11,6 +11,7 @@ import { cpApi } from "@/admin/cpApi";
 import { InstalacaoDetalhePage } from "@/admin/routes/instalacao-detalhe";
 import { InstalacoesPage } from "@/admin/routes/instalacoes";
 import { LoginPage } from "@/admin/routes/login";
+import { LogsPage } from "@/admin/routes/logs";
 
 const rootRoute = createRootRoute({
 	component: () => <Outlet />,
@@ -69,7 +70,7 @@ const logsRoute = createRoute({
 	beforeLoad: requireAuth,
 	component: () => (
 		<AppShell titulo="Logs">
-			<p className="text-muted-foreground">Em construção</p>
+			<LogsPage />
 		</AppShell>
 	),
 });
