@@ -6,6 +6,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
 	plugins: [react()],
 	server: { port: 5173, open: true },
+	resolve: { alias: { "@": resolve(__dirname, "./src") } },
 	build: {
 		rollupOptions: {
 			input: {

@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tema Twitter (dark) — valores de src/theme.tsx:435-451.
+   Componentes OKLCH crus: o Tailwind injeta o alpha via <alpha-value>. */
+:root {
+	color-scheme: dark;
+	--background: 0 0 0;
+	--foreground: 0.9328 0.0025 228.7857;
+	--card: 0.2097 0.0080 274.5332;
+	--card-foreground: 0.9328 0.0025 228.7857;
+	--popover: 0.2097 0.0080 274.5332;
+	--popover-foreground: 0.9328 0.0025 228.7857;
+	--primary: 0.6692 0.1607 245.0110;
+	--primary-foreground: 1 0 0;
+	--secondary: 0.2674 0.0047 248.0045;
+	--secondary-foreground: 0.9328 0.0025 228.7857;
+	--muted: 0.2090 0 0;
+	--muted-foreground: 0.5637 0.0078 247.9662;
+	--accent: 0.1928 0.0331 242.5459;
+	--accent-foreground: 0.9328 0.0025 228.7857;
+	--destructive: 0.6188 0.2376 25.7658;
+	--destructive-foreground: 1 0 0;
+	--border: 0.2674 0.0047 248.0045;
+	--input: 0.2674 0.0047 248.0045;
+	--ring: 0.6692 0.1607 245.0110;
+	--radius: 0.5rem;
+}
+
+@layer base {
+	* { @apply border-border; }
+	body { @apply bg-background text-foreground antialiased; }
+}

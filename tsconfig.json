@@ -16,7 +16,9 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": false,
 		"noUnusedLocals": false,
-		"noUnusedParameters": false
+		"noUnusedParameters": false,
+		"baseUrl": ".",
+		"paths": { "@/*": ["./src/*"] }
 	},
 	"include": ["src", "vite.config.ts"]
 }
