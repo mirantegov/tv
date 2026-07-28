@@ -25,6 +25,7 @@ deploy/Caddyfile
 
 # Scripts locais de diagnóstico (podem conter segredos) — não versionar
 scripts/
+!control-plane/scripts/
 
 # Terraform/OpenTofu tfvars (contêm segredos) — versionar só os .example
 *.tfvars
