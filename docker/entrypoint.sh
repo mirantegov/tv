@@ -6,7 +6,8 @@ set -eu
 : "${TENANT_NOME:=}"
 : "${TENANT_UF:=}"
 : "${API_URL:=}"
-export TENANT_ID TENANT_SLUG TENANT_NOME TENANT_UF API_URL
-envsubst '${TENANT_ID} ${TENANT_SLUG} ${TENANT_NOME} ${TENANT_UF} ${API_URL}' \
+: "${CP_URL:=}"
+export TENANT_ID TENANT_SLUG TENANT_NOME TENANT_UF API_URL CP_URL
+envsubst '${TENANT_ID} ${TENANT_SLUG} ${TENANT_NOME} ${TENANT_UF} ${API_URL} ${CP_URL}' \
 	< /etc/mirante/config.template.js \
 	> /usr/share/nginx/html/config.js

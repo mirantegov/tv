@@ -6,3 +6,4 @@ window.__TENANT__ = {
 	uf: "${TENANT_UF}",
 };
 window.__API_URL__ = "${API_URL}";
+window.__CP_URL__ = "${CP_URL}";

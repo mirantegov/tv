@@ -47,6 +47,24 @@ describe("tvAuth", () => {
 		expect(r).toMatchObject({ erro: "credencial" });
 	});
 
+	it("200 sem data_token vira erro de config e não guarda nada", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					token: "app",
+					data_token: "",
+					perfil: { nome: "P", role: "prefeito", id_entidade: "1", id_ibge: "1" },
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			),
+		);
+		const r = await tvAuth.login("07320700905", "x");
+		expect(r).toMatchObject({ erro: "config" });
+		expect(tvAuth.getToken()).toBeNull();
+		expect(tvAuth.getDataToken()).toBeNull();
+		expect(tvAuth.getPerfil()).toBeNull();
+	});
+
 	it("falha de rede vira erro de rede", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
 		const r = await tvAuth.login("07320700905", "x");

@@ -54,6 +54,8 @@ services:
       TENANT_UF: ${TENANT_UF}
       # URL do PostgREST acessível pelo navegador. Vazio → fallback data.ts.
       API_URL: ${API_URL:-}
+      # URL do control-plane (central) acessível pelo navegador (login da TV).
+      CP_URL: ${CP_URL:-}
     ports:
       - "${WEB_PORT:-8080}:80"
     depends_on:

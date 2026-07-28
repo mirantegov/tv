@@ -47,6 +47,8 @@ export default function LoginScreen({
 			if (r.erro === "licenca")
 				return setErro("Licença vencida ou inativa — contate o suporte.");
 			if (r.erro === "rede") return setErro("Sem conexão com o servidor.");
+			if (r.erro === "config")
+				return setErro("Configuração do servidor incompleta — contate o suporte.");
 			return setErro("CPF ou senha inválidos.");
 		}
 		setErro(null);

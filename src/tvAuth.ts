@@ -12,7 +12,7 @@ export type Perfil = {
 	id_ibge: string;
 };
 type LoginOk = { token: string; data_token: string; perfil: Perfil };
-type LoginErr = { erro: "credencial" | "licenca" | "rede" };
+type LoginErr = { erro: "credencial" | "licenca" | "rede" | "config" };
 
 export const tvAuth = {
 	getToken: () => localStorage.getItem(TOKEN_KEY),
@@ -41,6 +41,7 @@ export const tvAuth = {
 		if (res.status === 403) return { erro: "licenca" };
 		if (!res.ok) return { erro: "credencial" };
 		const body = (await res.json()) as LoginOk;
+		if (!body.data_token) return { erro: "config" };
 		localStorage.setItem(TOKEN_KEY, body.token);
 		localStorage.setItem(DATA_TOKEN_KEY, body.data_token ?? "");
 		localStorage.setItem(PERFIL_KEY, JSON.stringify(body.perfil));
