@@ -3,6 +3,7 @@ import fastifyJwt from "@fastify/jwt";
 import type { Pool } from "pg";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./auth/routes.js";
+import { instalacoesRoutes } from "./routes/instalacoes.js";
 
 export interface Deps { pool: Pool; jwtSecret?: string }
 
@@ -15,6 +16,7 @@ export function buildApp(deps: Deps): FastifyInstance {
   });
   app.register(healthRoutes);
   app.register(authRoutes);
+  app.register(instalacoesRoutes);
   return app;
 }
 
