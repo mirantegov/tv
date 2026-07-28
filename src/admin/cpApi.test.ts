@@ -15,14 +15,12 @@ describe("cpApi", () => {
 	});
 	it("cpFetch envia Bearer e faz throw em !ok", async () => {
 		cpApi.setToken("tok");
-		const fetchMock = vi
-			.spyOn(globalThis, "fetch")
-			.mockResolvedValue(
-				new Response(JSON.stringify({ ok: true }), {
-					status: 200,
-					headers: { "content-type": "application/json" },
-				}),
-			);
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(JSON.stringify({ ok: true }), {
+				status: 200,
+				headers: { "content-type": "application/json" },
+			}),
+		);
 		await cpApi.cpFetch("/instalacoes");
 		const [, init] = fetchMock.mock.calls[0];
 		expect((init!.headers as Record<string, string>).authorization).toBe(

@@ -1,5 +1,8 @@
+import { RouterProvider } from "@tanstack/react-router";
 import "./admin.css";
 import { createRoot } from "react-dom/client";
-import { AdminApp } from "./AdminApp";
+import { router } from "./router";
 
-createRoot(document.getElementById("root")!).render(<AdminApp />);
+createRoot(document.getElementById("root")!).render(
+	<RouterProvider router={router} />,
+);
