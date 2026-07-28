@@ -4,6 +4,8 @@ import type { Pool } from "pg";
 import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./auth/routes.js";
 import { instalacoesRoutes } from "./routes/instalacoes.js";
+import { entidadesRoutes } from "./routes/entidades.js";
+import { gestoresRoutes } from "./routes/gestores.js";
 
 export interface Deps { pool: Pool; jwtSecret?: string }
 
@@ -17,6 +19,8 @@ export function buildApp(deps: Deps): FastifyInstance {
   app.register(healthRoutes);
   app.register(authRoutes);
   app.register(instalacoesRoutes);
+  app.register(entidadesRoutes);
+  app.register(gestoresRoutes);
   return app;
 }
 
