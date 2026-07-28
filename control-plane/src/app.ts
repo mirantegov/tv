@@ -9,6 +9,7 @@ import { entidadesRoutes } from "./routes/entidades.js";
 import { gestoresRoutes } from "./routes/gestores.js";
 import { licencaRoutes } from "./routes/licenca.js";
 import { modulosRoutes } from "./routes/modulos.js";
+import { logsRoutes } from "./routes/logs.js";
 
 export interface Deps { pool: Pool; jwtSecret?: string }
 
@@ -37,6 +38,7 @@ export function buildApp(deps: Deps): FastifyInstance {
   app.register(gestoresRoutes);
   app.register(licencaRoutes);
   app.register(modulosRoutes);
+  app.register(logsRoutes);
   return app;
 }
 
