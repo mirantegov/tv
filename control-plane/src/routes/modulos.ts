@@ -7,7 +7,7 @@ const ator = (req: FastifyRequest) => {
 };
 
 export async function modulosRoutes(app: FastifyInstance) {
-  app.addHook("preHandler", app.authenticate);
+  app.addHook("preHandler", app.authenticateAdmin);
 
   app.get("/instalacoes/:id/modulos", async (req) => {
     const { id } = req.params as { id: string };

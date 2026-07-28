@@ -9,7 +9,7 @@ const ator = (req: FastifyRequest) => {
 const soDigitos = (cpf: string) => cpf.replace(/\D/g, "");
 
 export async function gestoresRoutes(app: FastifyInstance) {
-  app.addHook("preHandler", app.authenticate);
+  app.addHook("preHandler", app.authenticateAdmin);
 
   app.get("/instalacoes/:id/gestores", async (req) => {
     const { id } = req.params as { id: string };

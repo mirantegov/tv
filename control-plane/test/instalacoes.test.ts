@@ -20,6 +20,12 @@ describe("instalacoes CRUD", () => {
     const res = await app.inject({ method: "GET", url: "/instalacoes" });
     expect(res.statusCode).toBe(401);
   });
+  it("403 com token de gestor", async () => {
+    const { app } = await setup();
+    const gestorToken = app.jwt.sign({ sub: "x", tipo: "gestor", nome: "G", role: "prefeito", id_entidade: "e", id_ibge: "i" });
+    const res = await app.inject({ method: "GET", url: "/instalacoes", headers: auth(gestorToken) });
+    expect(res.statusCode).toBe(403);
+  });
   it("cria, lista, edita, remove e grava audit_log", async () => {
     const { app, pool, token } = await setup();
     const post = await app.inject({ method: "POST", url: "/instalacoes", headers: auth(token),

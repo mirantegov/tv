@@ -7,7 +7,7 @@ const ator = (req: FastifyRequest) => {
 };
 
 export async function instalacoesRoutes(app: FastifyInstance) {
-  app.addHook("preHandler", app.authenticate);
+  app.addHook("preHandler", app.authenticateAdmin);
 
   app.get("/instalacoes", async () => {
     const { rows } = await app.pool.query(

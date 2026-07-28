@@ -7,7 +7,7 @@ const ator = (req: FastifyRequest) => {
 };
 
 export async function entidadesRoutes(app: FastifyInstance) {
-  app.addHook("preHandler", app.authenticate);
+  app.addHook("preHandler", app.authenticateAdmin);
 
   app.get("/instalacoes/:id/entidades", async (req) => {
     const { id } = req.params as { id: string };

@@ -7,7 +7,7 @@ const ator = (req: FastifyRequest) => {
 };
 
 export async function licencaRoutes(app: FastifyInstance) {
-  app.addHook("preHandler", app.authenticate);
+  app.addHook("preHandler", app.authenticateAdmin);
 
   app.put("/instalacoes/:id/licenca", async (req) => {
     const { id } = req.params as { id: string };
