@@ -65,7 +65,7 @@ def die(msg):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--csv", required=True)
+    p.add_argument("--csv")
     p.add_argument("--slug", required=True)
     p.add_argument("--out-dir", required=True)
     p.add_argument("--cert-numero")
@@ -76,6 +76,8 @@ def main():
     cert = [a.cert_numero, a.cert_emissao, a.cert_vencimento]
     if any(cert) and not all(cert):
         die("--cert-numero/--cert-emissao/--cert-vencimento vão juntos")
+    if not a.csv and not all(cert):
+        die("nada a gerar: passe --csv e/ou --cert-*")
     if a.cert_numero and not re.fullmatch(r"[A-Z0-9./-]{4,30}", a.cert_numero):
         die(f"cert-numero suspeito: {a.cert_numero!r}")
     for d in (a.cert_emissao, a.cert_vencimento):
@@ -87,43 +89,46 @@ def main():
     if not tenant:
         die(f"slug {a.slug!r} não está em tenants.json")
 
-    lines = Path(a.csv).read_bytes().decode("latin-1").splitlines()
-    m = re.search(r"Data da Pesquisa:\s*(\d{2}/\d{2}/\d{4})", lines[0] if lines else "")
-    if not m:
-        die("layout inesperado: 'Data da Pesquisa' ausente na linha 1 — CSV mudou, abortando")
-    pesquisa = datetime.strptime(m.group(1), "%d/%m/%Y").date()
+    ex = tenant["exercicio"]
+    sql = "-- Patch diário gerado por deploy/daily-sync/gen_daily_patch.py — NÃO editar à mão.\n"
+    sql += f"-- Tenant: {tenant['nome']} ({a.slug}, IBGE {tenant['codigo_ibge']}).\n"
 
-    rdr = csv.DictReader(lines[3:], delimiter=";")
-    if not rdr.fieldnames or any(c not in rdr.fieldnames for c in COLS + ["Código IBGE"]):
-        die("layout inesperado: colunas 1.1..5.7 / 'Código IBGE' ausentes — CSV mudou, abortando")
-    row = next((r for r in rdr if r["Código IBGE"] == tenant["codigo_ibge"]), None)
-    if not row:
-        die(f"IBGE {tenant['codigo_ibge']} ({a.slug}) não encontrado no CSV")
+    if a.csv:
+        lines = Path(a.csv).read_bytes().decode("latin-1").splitlines()
+        m = re.search(r"Data da Pesquisa:\s*(\d{2}/\d{2}/\d{4})", lines[0] if lines else "")
+        if not m:
+            die("layout inesperado: 'Data da Pesquisa' ausente na linha 1 — CSV mudou, abortando")
+        pesquisa = datetime.strptime(m.group(1), "%d/%m/%Y").date()
 
-    def status(v):
-        v = (v or "").strip()
-        if v == "Desabilitado":
-            return "off"
-        if v == "!":
-            return "warn"
-        try:
-            d = datetime.strptime(v, "%d/%m/%y").date()
-        except ValueError:
-            die(f"valor inesperado no CSV: {v!r} — abortando")
-        return "ok" if d >= pesquisa else "warn"
+        rdr = csv.DictReader(lines[3:], delimiter=";")
+        if not rdr.fieldnames or any(c not in rdr.fieldnames for c in COLS + ["Código IBGE"]):
+            die("layout inesperado: colunas 1.1..5.7 / 'Código IBGE' ausentes — CSV mudou, abortando")
+        row = next((r for r in rdr if r["Código IBGE"] == tenant["codigo_ibge"]), None)
+        if not row:
+            die(f"IBGE {tenant['codigo_ibge']} ({a.slug}) não encontrado no CSV")
 
-    itens = [(i + 1, ITENS[i], status(row[c])) for i, c in enumerate(COLS)]
-    ok = sum(1 for _, _, s in itens if s == "ok")
-    off = sum(1 for _, _, s in itens if s == "off")
-    warn = sum(1 for _, _, s in itens if s == "warn")
-    total, situacao = 28 - off, ("Regular" if warn == 0 else "Pendente")
-    dt, ex = pesquisa.isoformat(), tenant["exercicio"]
+        def status(v):
+            v = (v or "").strip()
+            if v == "Desabilitado":
+                return "off"
+            if v == "!":
+                return "warn"
+            try:
+                d = datetime.strptime(v, "%d/%m/%y").date()
+            except ValueError:
+                die(f"valor inesperado no CSV: {v!r} — abortando")
+            return "ok" if d >= pesquisa else "warn"
 
-    linhas = ",\n".join(
-        f"\t({ex}, DATE '{dt}', {o:2d}, '{txt}', '{s}')" for o, txt, s in itens)
-    sql = f"""-- Patch diário gerado por deploy/daily-sync/gen_daily_patch.py — NÃO editar à mão.
--- Tenant: {tenant['nome']} ({a.slug}, IBGE {tenant['codigo_ibge']}).
--- Fonte CAUC: CSV Tesouro Transparente, pesquisa de {pesquisa.strftime('%d/%m/%Y')}.
+        itens = [(i + 1, ITENS[i], status(row[c])) for i, c in enumerate(COLS)]
+        ok = sum(1 for _, _, s in itens if s == "ok")
+        off = sum(1 for _, _, s in itens if s == "off")
+        warn = sum(1 for _, _, s in itens if s == "warn")
+        total, situacao = 28 - off, ("Regular" if warn == 0 else "Pendente")
+        dt = pesquisa.isoformat()
+
+        linhas = ",\n".join(
+            f"\t({ex}, DATE '{dt}', {o:2d}, '{txt}', '{s}')" for o, txt, s in itens)
+        sql += f"""-- Fonte CAUC: CSV Tesouro Transparente, pesquisa de {pesquisa.strftime('%d/%m/%Y')}.
 BEGIN;
 SET search_path TO siconfi;
 
@@ -138,6 +143,10 @@ INSERT INTO cauc_itens (exercicio, verificacao, ord, exigencia, status) VALUES
 ON CONFLICT (exercicio, verificacao, exigencia) DO UPDATE SET
 \tord = EXCLUDED.ord, status = EXCLUDED.status;
 """
+    else:
+        dt = datetime.now().date().isoformat()
+        sql += "BEGIN;\n"
+
     if a.cert_numero:
         cert_linhas = ",\n".join(
             f"\t('{a.cert_numero}', {i + 1}, '{txt}', 'ok')" for i, txt in enumerate(CERT_ITENS))
@@ -159,14 +168,12 @@ UPDATE panorama.tce_resumo
 \t\tcert_validade = DATE '{a.cert_vencimento}'
 \tWHERE exercicio = {ex};
 """
-    sql += f"""
-COMMIT;
-
--- Verificação
-SELECT (data->'cauc'->'kpis') AS cauc_kpis FROM api.siconfi;
-SELECT (data->'certidao'->>'numero') AS certidao_tce FROM api.tce;
-SELECT (data->'tce'->'certidao'->>'numero') AS certidao_visao_geral FROM api.panorama;
-"""
+    sql += "\nCOMMIT;\n\n-- Verificação\n"
+    if a.csv:
+        sql += "SELECT (data->'cauc'->'kpis') AS cauc_kpis FROM api.siconfi;\n"
+    if a.cert_numero:
+        sql += "SELECT (data->'certidao'->>'numero') AS certidao_tce FROM api.tce;\n"
+        sql += "SELECT (data->'tce'->'certidao'->>'numero') AS certidao_visao_geral FROM api.panorama;\n"
     out = Path(a.out_dir) / dt / f"{a.slug}.sql"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(sql)

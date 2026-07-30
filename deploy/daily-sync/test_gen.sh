@@ -28,4 +28,17 @@ grep -qF "panorama.tce_resumo" "$SQL" && { echo "FAIL: patch sem certidão não 
 if ./gen_daily_patch.py --csv fixtures/cauc-sample.csv --slug nao-existe --out-dir "$OUT" 2>/dev/null; then
 	echo "FAIL: slug inexistente deveria falhar"; exit 1
 fi
+# cert-only (sem --csv, CSV do CAUC indisponível) -> patch só de certidão
+OUT2="$(mktemp -d)"
+./gen_daily_patch.py --slug palotina --out-dir "$OUT2" \
+	--cert-numero 5551.ZMES.2910 --cert-emissao 2026-07-29 --cert-vencimento 2026-09-27
+SQL2="$OUT2/$(date +%F)/palotina.sql"
+[ -f "$SQL2" ] || { echo "FAIL: $SQL2 não gerado (modo cert-only)"; rm -rf "$OUT2"; exit 1; }
+grep -qF "DELETE FROM certidao" "$SQL2" || { echo "FAIL: cert-only sem seção de certidão"; rm -rf "$OUT2"; exit 1; }
+grep -qF "cauc_resumo" "$SQL2" && { echo "FAIL: cert-only não deveria conter cauc_resumo"; rm -rf "$OUT2"; exit 1; }
+rm -rf "$OUT2"
+# sem nenhum arg -> exit 1
+if ./gen_daily_patch.py --slug palotina --out-dir "$OUT" 2>/dev/null; then
+	echo "FAIL: sem --csv e sem --cert-* deveria falhar"; exit 1
+fi
 echo "PASS"

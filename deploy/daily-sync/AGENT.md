@@ -10,8 +10,12 @@ a aplicação nos tenants é feita por um cron na VPS, fora do seu alcance.
 
 2. Baixe o CSV do CAUC (municípios) para um diretório temporário:
 
-   curl -sL --max-time 120 -o /tmp/cauc.csv \
+   curl -sfL --max-time 120 -o /tmp/cauc.csv \
      "https://www.tesourotransparente.gov.br/ckan/dataset/72b5f371-0c35-4613-8076-c99c821a6410/resource/07af297a-5e59-494a-a88a-55ddfd2f4b01/download/relatorio-situacao-de-varios-entes---municipios---uf-todas---abrangencia-1.csv"
+
+   Se o curl falhar (exit != 0), NÃO passe `--csv` no passo 3b — gere só os
+   patches de certidão (apenas os argumentos `--cert-*`) e reporte que o CAUC
+   foi pulado ("CSV indisponível").
 
 3. Para CADA tenant em `deploy/daily-sync/tenants.json`:
 
