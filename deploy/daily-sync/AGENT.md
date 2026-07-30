@@ -24,6 +24,13 @@ a aplicação nos tenants é feita por um cron na VPS, fora do seu alcance.
       Extraia: número (formato `9999.XXXX.9999`), data de emissão e data de
       vencimento. Converta as datas para `YYYY-MM-DD`.
 
+      Se a página mostrar o ente como NÃO regular (irregular/impedimento/
+      pendências), NÃO gere a seção de certidão (omita os argumentos
+      `--cert-*` — a certidão anterior permanece no banco) E torne isso a
+      PRIMEIRA linha do relatório final, marcada `⚠️ ATENÇÃO`, citando o
+      tenant e reproduzindo o texto de situação da própria página. É
+      exatamente o dia em que o cliente mais precisa que um humano olhe.
+
    b. Gere o patch:
 
       ./deploy/daily-sync/gen_daily_patch.py --csv /tmp/cauc.csv \

@@ -89,6 +89,11 @@ def main():
     if not tenant:
         die(f"slug {a.slug!r} não está em tenants.json")
 
+    # Pasta de saída SEMPRE pela data de execução, nunca pela data do CSV (que pode
+    # estar atrasada) — senão um CSV publicado tarde sobrescreve o patch de ontem
+    # já aplicado, e o applier pula o arquivo (perda silenciosa de dado).
+    run_date = datetime.now().date().isoformat()
+
     ex = tenant["exercicio"]
     sql = "-- Patch diário gerado por deploy/daily-sync/gen_daily_patch.py — NÃO editar à mão.\n"
     sql += f"-- Tenant: {tenant['nome']} ({a.slug}, IBGE {tenant['codigo_ibge']}).\n"
@@ -124,7 +129,7 @@ def main():
         off = sum(1 for _, _, s in itens if s == "off")
         warn = sum(1 for _, _, s in itens if s == "warn")
         total, situacao = 28 - off, ("Regular" if warn == 0 else "Pendente")
-        dt = pesquisa.isoformat()
+        dt = pesquisa.isoformat()  # verificacao/SQL usa a data do CSV
 
         linhas = ",\n".join(
             f"\t({ex}, DATE '{dt}', {o:2d}, '{txt}', '{s}')" for o, txt, s in itens)
@@ -144,7 +149,6 @@ ON CONFLICT (exercicio, verificacao, exigencia) DO UPDATE SET
 \tord = EXCLUDED.ord, status = EXCLUDED.status;
 """
     else:
-        dt = datetime.now().date().isoformat()
         sql += "BEGIN;\n"
 
     if a.cert_numero:
@@ -174,7 +178,7 @@ UPDATE panorama.tce_resumo
     if a.cert_numero:
         sql += "SELECT (data->'certidao'->>'numero') AS certidao_tce FROM api.tce;\n"
         sql += "SELECT (data->'tce'->'certidao'->>'numero') AS certidao_visao_geral FROM api.panorama;\n"
-    out = Path(a.out_dir) / dt / f"{a.slug}.sql"
+    out = Path(a.out_dir) / run_date / f"{a.slug}.sql"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(sql)
     print(out)

@@ -8,7 +8,7 @@ trap 'rm -rf "$OUT"' EXIT
 ./gen_daily_patch.py --csv fixtures/cauc-sample.csv --slug palotina --out-dir "$OUT" \
 	--cert-numero 5551.ZMES.2910 --cert-emissao 2026-07-29 --cert-vencimento 2026-09-27
 
-SQL="$OUT/2026-07-30/palotina.sql"
+SQL="$OUT/$(date +%F)/palotina.sql"
 [ -f "$SQL" ] || { echo "FAIL: $SQL não gerado"; exit 1; }
 
 assert() { grep -qF "$1" "$SQL" || { echo "FAIL: não achou: $1"; exit 1; }; }

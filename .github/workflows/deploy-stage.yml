@@ -5,6 +5,8 @@ name: deploy-stage
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'db/patches/daily/**'
   workflow_dispatch:
 
 concurrency:

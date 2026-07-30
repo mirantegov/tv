@@ -7,7 +7,12 @@ cd "$(dirname "$0")"                     # deploy/
 REPO_ROOT="$(cd .. && pwd)"
 APPLIED_LOG="${APPLIED_LOG:-$REPO_ROOT/.daily-patches-applied}"
 
-git -C "$REPO_ROOT" pull --ff-only
+# /opt/mirante pode estar no branch production (workflows de deploy trocam de
+# branch) — nunca confie no working tree. Busca os patches direto do
+# origin/main via archive, num diretório temporário.
+git -C "$REPO_ROOT" fetch origin main
+TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+git -C "$REPO_ROOT" archive origin/main db/patches/daily | tar -x -C "$TMP" 2>/dev/null || true
 
 touch "$APPLIED_LOG"
 shopt -s nullglob
@@ -22,10 +27,23 @@ apply_to() {  # $1 = slug alvo, $2 = arquivo .sql
 }
 
 rc=0
-for sql in "$REPO_ROOT"/db/patches/daily/*/*.sql; do
-	rel="${sql#"$REPO_ROOT"/}"
+for sql in "$TMP"/db/patches/daily/*/*.sql; do
+	rel="${sql#"$TMP"/}"
 	grep -qxF "$rel" "$APPLIED_LOG" && continue
 	slug="$(basename "$sql" .sql)"
+
+	# C1 mitigation: o gerador/agente escreve o patch, mas o applier não deve
+	# confiar cegamente no conteúdo do arquivo. Definitivo: role de DB de baixo
+	# privilégio (backlog) — aqui só validações mínimas antes de aplicar.
+	if ! grep -q "\"slug\": \"$slug\"" "$REPO_ROOT/deploy/daily-sync/tenants.json"; then
+		echo "[daily] ERRO: slug '$slug' desconhecido (fora de tenants.json) — pulando $rel" >&2
+		rc=1; continue
+	fi
+	if grep -qE '^[[:space:]]*\\' "$sql"; then
+		echo "[daily] ERRO: $rel contém metacomando psql ('\\...') — pulando" >&2
+		rc=1; continue
+	fi
+
 	echo "[daily] aplicando $rel"
 	ok=1
 	apply_to "$slug" "$sql" || ok=0
