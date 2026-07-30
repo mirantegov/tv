@@ -1,0 +1,11 @@
+{
+	"tenants": [
+		{
+			"slug": "palotina",
+			"nome": "Município de Palotina",
+			"codigo_ibge": "4117909",
+			"cnpj": "76208487000164",
+			"exercicio": 2026
+		}
+	]
+}
