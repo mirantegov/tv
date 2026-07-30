@@ -94,6 +94,32 @@ Preencha `CLICKHOUSE_*` no `.env.<slug>` e a extração real no `TODO` do script
 0 3 * * * ec2-user cd /opt/mirante/deploy && ./ingest/ingest.sh >> /var/log/mirante-ingest.log 2>&1
 ```
 
+## Sincronização diária CAUC + Certidão (patch-first)
+
+Fluxo: um agente externo (Hermes/Claude Work — runbook em
+[`daily-sync/AGENT.md`](daily-sync/AGENT.md)) roda às **9h00** (dias úteis),
+baixa o CSV oficial do CAUC, raspa a certidão do TCE-PR por CNPJ e commita
+patches em `db/patches/daily/<data>/<slug>.sql` via
+[`daily-sync/gen_daily_patch.py`](daily-sync/gen_daily_patch.py). O agente só
+tem permissão de git — nunca SSH/senha de banco.
+
+Na VPS, [`apply-daily-patches.sh`](apply-daily-patches.sh) roda às **9h30**
+via cron, aplica os patches pendentes em cada tenant (o de `palotina` também
+vai para `stage`) e registra em `/opt/mirante/.daily-patches-applied`.
+
+Instalar o cron no host (atenção: horário do host é UTC — 9h30 BRT = 12h30 UTC):
+
+    # /etc/cron.d/mirante-daily-patches
+    30 12 * * 1-5 ec2-user cd /opt/mirante/deploy && ./apply-daily-patches.sh >> /var/log/mirante-daily-patches.log 2>&1
+
+Tenant novo no fluxo = uma entrada em [`daily-sync/tenants.json`](daily-sync/tenants.json).
+Teste manual do aplicador: gere um patch, rode `./apply-daily-patches.sh` e
+confira os `SELECT`s de verificação impressos no fim do patch.
+
+> Backlog: quando o warehouse (ClickHouse) subir para os outros módulos, esta
+> ingestão migra para `ingest/ingest.sh` (TRUNCATE+COPY) e o patch-first é
+> aposentado — ver spec 2026-07-30.
+
 ## Notas
 
 - Enquanto a ingestão não estiver ligada, cada tenant usa o **seed de `data.ts`**
