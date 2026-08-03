@@ -5,4 +5,5 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
-CMD ["sh","-c","npm run migrate && npm run seed:admin && node dist/server.js"]
+# tsconfig inclui src+scripts → o tsc emite em dist/src (rootDir comum).
+CMD ["sh","-c","npm run migrate && npm run seed:admin && node dist/src/server.js"]

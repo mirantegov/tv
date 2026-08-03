@@ -16,6 +16,7 @@ https://<slug>.tv.mirantegov.cloud/api/*  -> api-<slug>   (PostgREST)
 |---|---|
 | `docker-compose.proxy.yml` | Caddy (80/443, TLS automático) na rede `edge` |
 | `docker-compose.tenant.yml` | stack de 1 tenant (web/db/api), parametrizado por `.env.<slug>` |
+| `docker-compose.central.yml` | control-plane central (auth dos gestores), parametrizado por `.env.central` |
 | `tenants.stage.txt` | grupo **stage** (recebe deploy da `main`) |
 | `tenants.production.txt` | grupo **production** (recebe deploy da branch `production`) |
 | `gen-caddyfile.sh` | gera o `Caddyfile` com **todos** os grupos (`tenants.*.txt`) |
@@ -38,6 +39,37 @@ usam imagens públicas e montam `../db` (schemas + seed + views) do checkout.
 4. Rode `./deploy.sh`.
 
 O DNS já resolve porque o OpenTofu cria o wildcard `*.tv.mirantegov.cloud`.
+
+## Control-plane central (auth da TV)
+
+Desde a migração do login (`8a9fce1`), a TV autentica os gestores no
+**control-plane central** — sem ele no ar, o login falha em qualquer tenant
+com o código novo. Um único central serve todos os tenants
+(`https://cp.<BASE_DOMAIN>`; o wildcard DNS já cobre).
+
+1. Crie `/opt/mirante/.env.central` a partir de `.env.central.example` (raiz):
+   `CENTRAL_DB_PASSWORD`, `JWT_SECRET`, `PGRST_JWT_SECRET` (≥32 bytes),
+   `CORS_ORIGIN` com **todos** os domínios de tenant e `ADMIN_*`.
+2. Copie o **mesmo** `PGRST_JWT_SECRET` para cada `.env.<slug>` — o PostgREST
+   do tenant valida o data-token emitido pelo central.
+3. `./deploy.sh <grupo>` — sobe/atualiza o central (build local), injeta
+   `CP_URL` nos webs e regenera o Caddyfile com a rota `cp.<BASE_DOMAIN>`.
+4. Semeie instalação e gestores (uma vez; o `admin_user` do console /admin é
+   semeado no start a partir de `ADMIN_*`):
+
+   ```sh
+   cd /opt/mirante/deploy
+   docker compose --env-file ../.env.central -f docker-compose.central.yml \
+     exec control-plane npm run seed:palotina
+   docker compose --env-file ../.env.central -f docker-compose.central.yml \
+     exec -e GESTOR_CPF=00000000000 -e GESTOR_SENHA='<senha>' \
+          -e GESTOR_NOME=Administrador -e GESTOR_ROLE=admin \
+     control-plane npm run seed:gestor
+   ```
+
+   `seed:gestor` aceita `GESTOR_ID_IBGE`/`GESTOR_ID_ENTIDADE` (padrão:
+   Palotina `4117909`/`12426` — vale também para o stage, que espelha
+   Palotina). Demais gestores: console `/admin` ou repetir o comando.
 
 ## Ambientes: stage → production
 

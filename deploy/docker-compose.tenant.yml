@@ -17,6 +17,10 @@ services:
       TENANT_SLUG: ${TENANT_SLUG}
       TENANT_NOME: ${TENANT_NOME}
       TENANT_UF: ${TENANT_UF}
+      # Código TCE/PR da entidade — vira o id_entidade default do RLS
+      # (db/init/00_tenant.sh). Sem ele, linhas nascem com '00000' e o
+      # data-token do central não casa.
+      TENANT_ENTIDADE: ${TENANT_ENTIDADE:-}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ../db/init:/docker-entrypoint-initdb.d:ro
@@ -39,6 +43,9 @@ services:
       PGRST_DB_SCHEMAS: api
       PGRST_DB_ANON_ROLE: web_anon
       PGRST_SERVER_PORT: 3000
+      # Valida o data-token emitido pelo central (mesmo segredo do .env.central).
+      # Vazio → sem JWT: só web_anon (RLS devolve vazio p/ dados por entidade).
+      PGRST_JWT_SECRET: ${PGRST_JWT_SECRET:-}
     networks:
       internal:
       edge:
@@ -58,6 +65,8 @@ services:
       TENANT_UF: ${TENANT_UF}
       # Mesmo domínio do front; o Caddy roteia /api -> PostgREST.
       API_URL: "https://${TENANT_SLUG}.${BASE_DOMAIN}/api"
+      # Control-plane central (login dos gestores) — rota do gen-caddyfile.sh.
+      CP_URL: "https://cp.${BASE_DOMAIN}"
     networks:
       edge:
         aliases:

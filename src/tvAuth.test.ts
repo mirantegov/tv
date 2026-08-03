@@ -16,7 +16,7 @@ describe("tvAuth", () => {
 					perfil: {
 						nome: "Prefeito",
 						role: "prefeito",
-						id_entidade: "12195",
+						id_entidade: "12426",
 						id_ibge: "4117909",
 					},
 				}),
@@ -24,7 +24,7 @@ describe("tvAuth", () => {
 			),
 		);
 		const r = await tvAuth.login("073.207.009-05", "segredo");
-		expect("perfil" in r && r.perfil.id_entidade).toBe("12195");
+		expect("perfil" in r && r.perfil.id_entidade).toBe("12426");
 		expect(tvAuth.getDataToken()).toBe("dados");
 		expect(tvAuth.getPerfil()?.nome).toBe("Prefeito");
 		expect(tvAuth.getToken()).toBe("app");

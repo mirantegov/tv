@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
-import { USERS } from "../src/users";
+
+// Perfil devolvido pelo control-plane mockado (o e2e não sobe o central; o
+// login real é coberto pelos testes do control-plane).
+const PERFIL = {
+	nome: "Administrador",
+	role: "admin",
+	id_entidade: "12426",
+	id_ibge: "4117909",
+};
 
 // Rótulo na sidebar → título esperado no header (h1)
 const MODULOS: [string, string][] = [
@@ -26,20 +34,38 @@ const abrirConfig = (page) =>
 	page.getByRole("button", { name: "Configurações", exact: true }).click();
 
 test("login com CPF e senha válidos entra no painel", async ({ page }) => {
+	// Mocka o POST /auth/login do control-plane (dev usa localhost:8080)
+	await page.route("**/auth/login", (route) =>
+		route.fulfill({
+			json: { token: "e2e-token", data_token: "e2e-data", perfil: PERFIL },
+		}),
+	);
 	await page.goto("/");
-	await page.locator("#cpf").fill(USERS[0].cpf);
-	await page.locator("#senha").fill(USERS[0].senha);
+	await page.locator("#cpf").fill("000.000.000-00");
+	await page.locator("#senha").fill("R1JmYp5U");
 	await page.getByRole("button", { name: "Entrar" }).click();
 	await expect(h1(page)).toHaveText("Visão Geral");
 });
 
+test("credencial rejeitada pelo central mostra erro", async ({ page }) => {
+	await page.route("**/auth/login", (route) =>
+		route.fulfill({ status: 401, json: { error: "credenciais inválidas" } }),
+	);
+	await page.goto("/");
+	await page.locator("#cpf").fill("000.000.000-00");
+	await page.locator("#senha").fill("senhaerr");
+	await page.getByRole("button", { name: "Entrar" }).click();
+	await expect(page.getByText("CPF ou senha inválidos.")).toBeVisible();
+});
+
 test.describe("autenticado", () => {
 	test.beforeEach(async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem("mg_auth", "1");
+		await page.addInitScript((perfil) => {
+			// Sessão do central já estabelecida (tvAuth: cp_token + mg_perfil).
+			localStorage.setItem("cp_token", "e2e-token");
 			// admin: libera Módulos e Extras (gate isAdmin no App).
-			localStorage.setItem("mg_role", "admin");
-		});
+			localStorage.setItem("mg_perfil", JSON.stringify(perfil));
+		}, PERFIL);
 		await page.goto("/");
 		await expect(h1(page)).toHaveText("Visão Geral");
 	});
@@ -180,18 +206,18 @@ test.describe("autenticado", () => {
 		await expect.poll(larguraAside, { timeout: 5_000 }).toBeGreaterThan(200);
 	});
 
-	test("Modo TV no Extras trava o toggle do Display (só admin desliga)", async ({
+	test("Modo TV no Admin trava o toggle do Display (só admin desliga)", async ({
 		page,
 	}) => {
 		const aside = page.locator("aside").first();
 		const larguraAside = async () => (await aside.boundingBox())?.width ?? 0;
 
-		// admin liga o Modo TV pelo Extras (ligar aplica o kiosk e FECHA o popover)
+		// admin liga o Modo TV pela seção Admin (ligar aplica o kiosk e FECHA o popover)
 		await abrirConfig(page);
-		await page.getByText("Extras", { exact: true }).click();
-		const extrasTv = page.getByRole("switch", { name: "Modo TV" });
-		await expect(extrasTv).toHaveAttribute("aria-checked", "false");
-		await extrasTv.click();
+		await page.getByText("Admin", { exact: true }).click();
+		const adminTv = page.getByRole("switch", { name: "Modo TV" });
+		await expect(adminTv).toHaveAttribute("aria-checked", "false");
+		await adminTv.click();
 
 		// efeitos do kiosk aplicados (sidebar recolhida, vai ao inicial)
 		await expect.poll(larguraAside, { timeout: 5_000 }).toBeLessThan(100);
@@ -204,8 +230,8 @@ test.describe("autenticado", () => {
 		await expect(displayTv).toHaveAttribute("aria-checked", "true");
 		await expect(displayTv).toBeDisabled();
 
-		// admin desliga pelo Extras (popover segue aberto → só troca de seção)
-		await page.getByText("Extras", { exact: true }).click();
+		// admin desliga pela seção Admin (popover segue aberto → só troca de seção)
+		await page.getByText("Admin", { exact: true }).click();
 		await page.getByRole("switch", { name: "Modo TV" }).click();
 		await expect.poll(larguraAside, { timeout: 5_000 }).toBeGreaterThan(200);
 
@@ -219,11 +245,14 @@ test.describe("autenticado", () => {
 	test("usuário comum não desliga o Modo TV travado pelo admin", async ({
 		page,
 	}) => {
-		await page.addInitScript(() => {
-			localStorage.setItem("mg_auth", "1");
-			localStorage.setItem("mg_role", "suporte"); // não-admin
+		await page.addInitScript((perfil) => {
+			localStorage.setItem("cp_token", "e2e-token");
+			localStorage.setItem(
+				"mg_perfil",
+				JSON.stringify({ ...perfil, role: "suporte" }), // não-admin
+			);
 			localStorage.setItem("mg_modules", JSON.stringify(["#modotv"])); // lock on
-		});
+		}, PERFIL);
 		await page.goto("/");
 		// já entra no kiosk pelo lock (item inicial)
 		await expect(h1(page)).toHaveText("Visão Geral");

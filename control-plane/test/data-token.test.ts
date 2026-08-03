@@ -11,8 +11,8 @@ async function setup() {
   await runMigrations(pool);
   await pool.query("insert into instalacao (id_ibge, slug, nome, uf, status) values ('4117909','palotina','Palotina','PR','ativa')");
   await pool.query("insert into licenca (id_ibge, ativo, validade) values ('4117909', true, '2999-01-01')");
-  await pool.query("insert into entidade (id_entidade, id_ibge, nome, tipo) values ('12195','4117909','Prefeitura','prefeitura')");
-  await pool.query("insert into gestor (cpf, id_ibge, id_entidade, nome, senha_hash, role) values ('07320700905','4117909','12195','Prefeito',$1,'prefeito')", [await hashSenha("segredo")]);
+  await pool.query("insert into entidade (id_entidade, id_ibge, nome, tipo) values ('12426','4117909','Prefeitura','prefeitura')");
+  await pool.query("insert into gestor (cpf, id_ibge, id_entidade, nome, senha_hash, role) values ('07320700905','4117909','12426','Prefeito',$1,'prefeito')", [await hashSenha("segredo")]);
   await pool.query("insert into modulo_estado (id_ibge, path, oculto) values ('4117909','/despesa', true)");
   const app = buildApp({ pool, jwtSecret: "app-secret", pgrstSecret: "pgrst-secret" });
   await app.ready();
@@ -28,7 +28,7 @@ describe("data-token + /me/modulos", () => {
     const body = res.json();
     expect(body.data_token).toBeTruthy();
     const claims = jwt.verify(body.data_token, "pgrst-secret") as any;
-    expect(claims).toMatchObject({ role: "web_gestor", id_entidade: "12195" });
+    expect(claims).toMatchObject({ role: "web_gestor", id_entidade: "12426" });
   });
   it("GET /me/modulos devolve módulos da instalação do gestor", async () => {
     const { app } = await setup();

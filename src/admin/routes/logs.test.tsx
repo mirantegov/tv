@@ -40,7 +40,7 @@ describe("LogsPage", () => {
 						cpf: "***.207.***-**",
 						nome: "Prefeito",
 						id_ibge: "4117909",
-						id_entidade: "12195",
+						id_entidade: "12426",
 						criado_em: "2026-07-28T10:00:00Z",
 					},
 				],

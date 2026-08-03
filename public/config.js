@@ -7,3 +7,5 @@ window.__TENANT__ = {
 	uf: "PR",
 };
 window.__API_URL__ = "";
+// Control-plane central em dev (docker-compose.central.yml publica 8081->8080).
+window.__CP_URL__ = "http://localhost:8081";

@@ -1,0 +1,47 @@
+# Control-plane central na VPS (um só, serve todos os tenants). Auth dos
+# gestores da TV e console /admin. O deploy.sh sobe este stack quando
+# /opt/mirante/.env.central existe:
+#   docker compose --env-file ../.env.central -f docker-compose.central.yml up -d --build
+# O Caddy roteia https://cp.<BASE_DOMAIN> -> control-plane:8080 (gen-caddyfile.sh).
+name: mirante-central
+
+services:
+  central-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: central
+      POSTGRES_PASSWORD: ${CENTRAL_DB_PASSWORD}
+      POSTGRES_DB: central
+    volumes:
+      - central-db-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U central"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  control-plane:
+    build: ../control-plane
+    restart: unless-stopped
+    env_file: ../.env.central
+    environment:
+      DATABASE_URL: postgres://central:${CENTRAL_DB_PASSWORD}@central-db:5432/central
+    depends_on:
+      central-db:
+        condition: service_healthy
+    networks:
+      internal:
+      edge:
+        aliases:
+          - control-plane
+
+networks:
+  internal:
+  edge:
+    external: true
+
+volumes:
+  central-db-data: {}

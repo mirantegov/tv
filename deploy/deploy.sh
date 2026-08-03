@@ -24,6 +24,14 @@ esac
 echo "==> garantindo a rede compartilhada 'edge'"
 docker network inspect edge >/dev/null 2>&1 || docker network create edge
 
+# Control-plane central (auth dos gestores) — um só p/ todos os tenants.
+if [ -f ../.env.central ]; then
+	echo "==> control-plane central: subindo/atualizando"
+	docker compose --env-file ../.env.central -f docker-compose.central.yml up -d --build
+else
+	echo "==> AVISO: ../.env.central ausente — o login da TV (auth central) não vai funcionar" >&2
+fi
+
 deploy_tenant() {
 	local slug="$1" envfile="../.env.$1"
 	[ -f "$envfile" ] || { echo "ERRO: $envfile ausente" >&2; exit 1; }

@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { AppShell } from "@/admin/components/layout/app-shell";
 import { cpApi } from "@/admin/cpApi";
+import { ConfiguracoesPage } from "@/admin/routes/configuracoes";
 import { InstalacaoDetalhePage } from "@/admin/routes/instalacao-detalhe";
 import { InstalacoesPage } from "@/admin/routes/instalacoes";
 import { LoginPage } from "@/admin/routes/login";
@@ -75,12 +76,24 @@ const logsRoute = createRoute({
 	),
 });
 
+const configuracoesRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/configuracoes",
+	beforeLoad: requireAuth,
+	component: () => (
+		<AppShell titulo="Configurações">
+			<ConfiguracoesPage />
+		</AppShell>
+	),
+});
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	loginRoute,
 	instalacoesRoute,
 	instalacaoDetalheRoute,
 	logsRoute,
+	configuracoesRoute,
 ]);
 
 // ponytail: TanStack Router's types require tsconfig strictNullChecks; o repo

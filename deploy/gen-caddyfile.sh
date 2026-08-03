@@ -39,6 +39,15 @@ for tf in tenants.*.txt; do
 	done < "$tf"
 done
 
+# Control-plane central (auth dos gestores): https://cp.<BASE_DOMAIN>
+if [ -f ../.env.central ]; then
+	cp_base="$(grep -E '^BASE_DOMAIN=' ../.env.central | tail -1 | cut -d= -f2- |
+		sed 's/[[:space:]]*#.*//; s/"//g' | xargs)"
+	blocks+="cp.${cp_base:-tv.mirantegov.cloud} {
+	reverse_proxy control-plane:8080
+}"$'\n\n'
+fi
+
 if [ -n "$acme_email" ]; then
 	printf '{\n\temail %s\n}\n\n' "$acme_email"
 fi

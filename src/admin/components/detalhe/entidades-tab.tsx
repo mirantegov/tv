@@ -106,7 +106,7 @@ export function EntidadesTab({ id }: { id: string }) {
 									}
 								/>
 								<p className="text-xs text-muted-foreground">
-									código do TCE/PR (ex.: 12195)
+									código do TCE/PR (ex.: 12426)
 								</p>
 							</div>
 							<div className="space-y-1.5">

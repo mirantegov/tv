@@ -1,11 +1,18 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Building2, Landmark, LogOut, ScrollText } from "lucide-react";
+import {
+	Building2,
+	Landmark,
+	LogOut,
+	ScrollText,
+	Settings,
+} from "lucide-react";
 import { cpApi } from "@/admin/cpApi";
 import { cn } from "@/admin/lib/utils";
 
 const navItems = [
 	{ to: "/instalacoes", label: "Instalações", icon: Building2 },
 	{ to: "/logs", label: "Logs", icon: ScrollText },
+	{ to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
@@ -23,7 +30,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 				<Landmark className="h-5 w-5 text-primary" />
 				<div className="leading-tight">
 					<div className="text-sm font-semibold">Mirante</div>
-					<div className="text-xs text-muted-foreground">Control Plane</div>
+					<div className="text-xs text-muted-foreground">Control Panel</div>
 				</div>
 			</div>
 			<nav className="flex-1 space-y-1 p-2">
