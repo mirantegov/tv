@@ -31,3 +31,6 @@ scripts/
 # Terraform/OpenTofu tfvars (contêm segredos) — versionar só os .example
 *.tfvars
 !*.tfvars.example
+
+# Bancos de memória do headroom (locais, por máquina)
+.headroom/
